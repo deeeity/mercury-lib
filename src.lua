@@ -1,4 +1,15 @@
--- last edit 1/14
+--[[
+  __  __                                
+ |  \/  |                               
+ | \  / | ___ _ __ ___ _   _ _ __ _   _ 
+ | |\/| |/ _ \ '__/ __| | | | '__| | | |
+ | |  | |  __/ | | (__| |_| | |  | |_| |
+ |_|  |_|\___|_|  \___|\__,_|_|   \__, |
+                                   __/ |
+                                  |___/ 
+edited: 1/14
+
+]]
 
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
