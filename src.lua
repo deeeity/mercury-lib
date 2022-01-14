@@ -8,6 +8,8 @@
                                    __/ |
                                   |___/ 
 edited: 1/14
+developers:
+v3rm AbstractPoo discord Abstract#8007
 
 ]]
 
