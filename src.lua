@@ -9,7 +9,8 @@
                                   |___/ 
 edited: 1/14
 developers:
-v3rm AbstractPoo discord Abstract#8007
+v3rm AbstractPoo	discord Abstract#8007
+v3rm 0xDEITY		discord Deity#0228
 
 ]]
 
