@@ -1,4 +1,5 @@
 --[[
+
   __  __                                
  |  \/  |                               
  | \  / | ___ _ __ ___ _   _ _ __ _   _ 
@@ -7,7 +8,8 @@
  |_|  |_|\___|_|  \___|\__,_|_|   \__, |
                                    __/ |
                                   |___/ 
-edited: 1/14
+
+edited: 1/15
 developers:
 v3rm AbstractPoo	discord Abstract#8007
 v3rm 0xDEITY		discord Deity#0228
@@ -182,9 +184,11 @@ function Library:create(options: table)
 
 	tabButtons:object("UIListLayout", {
 		FillDirection = Enum.FillDirection.Horizontal,
-		HorizontalAlignment = Enum.HorizontalAlignment.Left
+		HorizontalAlignment = Enum.HorizontalAlignment.Left,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 4)
 	})
-
+	
 	local closeButton = core:object("ImageButton", {
 		BackgroundTransparency = 1,
 		Size = UDim2.fromOffset(14, 14),
@@ -292,62 +296,45 @@ function Library:create(options: table)
 
 	local tabs = {}
 	selectedTab = homeButton
-	
+
 	table.insert(tabs, {homePage, homeButton})
 
 	do
 		local down = false
 		local hovered = false
-		
-		homeButton.MouseEnter:Connect(function()
+
+		homeButton.MouseEnter:connect(function()
 			hovered = true
-			if not selectedTab == homeButton then
-				homeButton:tween{
-					Style = Enum.EasingStyle.Quint,
-					BackgroundTransparency = 0
-				}
-			end
+			homeButton:tween{BackgroundTransparency = ((selectedTab == homeButton) and 0.15) or 0.3}
 		end)
 
-		homeButton.MouseLeave:Connect(function()
+		homeButton.MouseLeave:connect(function()
 			hovered = false
-			if not (down or (selectedTab == homeButton)) then
-				homeButton:tween{
-					Style = Enum.EasingStyle.Quint,
-					BackgroundTransparency = 1
-				}
-			end
+			homeButton:tween{BackgroundTransparency = ((selectedTab == homeButton) and 0.15) or 1}
 		end)
 
-		homeButton.MouseButton1Down:Connect(function()
+		homeButton.MouseButton1Down:connect(function()
 			down = true
-			homeButton:tween{
-				Style = Enum.EasingStyle.Quint,
-				BackgroundColor3 = self:lighten(options.Theme.Secondary, 10)
-			}
+			homeButton:tween{BackgroundTransparency = 0}
 		end)
 
-		UserInputService.InputEnded:Connect(function(key)
-			down = false
-			if key.UserInputType == Enum.UserInputType.MouseButton1 and selectedTab == homeButton then
-				homeButton:tween{
-					Style = Enum.EasingStyle.Quint,
-					BackgroundColor3 = options.Theme.Secondary,
-					BackgroundTransparency = ((hovered or (selectedTab == homeButton)) and 0) or 1
-				}
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				down = false
+				homeButton:tween{BackgroundTransparency = ((selectedTab == homeButton) and 0.15) or (hovered and 0.3) or 1}
 			end
+
 		end)
 
 		homeButton.MouseButton1Click:Connect(function()
-			for i, tabInfo in next, tabs do
+			for _, tabInfo in next, tabs do
 				local page = tabInfo[1]
 				local button = tabInfo[2]
 				page.Visible = false
 			end
-
-			selectedTab:tween{BackgroundTransparency = 1}
-			homePage.Visible = true
+			selectedTab:tween{BackgroundTransparency = ((selectedTab == homeButton) and 0.15) or 1}
 			selectedTab = homeButton
+			homePage.Visible = true
 			homeButton.BackgroundTransparency = 0
 		end)
 	end
@@ -437,7 +424,7 @@ function Library:create(options: table)
 end
 
 function Library:tab(options)
-	local options = self:set_defaults({
+	options = self:set_defaults({
 		Name = "New Tab",
 		Icon = "http://www.roblox.com/asset/?id=8497544895"
 
@@ -453,6 +440,15 @@ function Library:tab(options)
 		ScrollBarThickness = 0,
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
+	
+	tab:object("UIListLayout", {
+		Padding = UDim.new(0, 10),
+		HorizontalAlignment = Enum.HorizontalAlignment.Center
+	})
+	
+	tab:object("UIPadding", {
+		PaddingTop = UDim.new(0, 10)
+	})
 
 	local tabButton = self.navigation:object("TextButton", {
 		BackgroundTransparency = 1,
@@ -465,44 +461,28 @@ function Library:tab(options)
 	do
 		local down = false
 		local hovered = false
-		tabButton.MouseEnter:Connect(function()
+		
+		tabButton.MouseEnter:connect(function()
 			hovered = true
-			if not self.SelectedTab == tabButton then
-				tabButton:tween{
-					Style = Enum.EasingStyle.Quint,
-					BackgroundTransparency = 0
-				}
-			end
+			tabButton:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or 0.3}
 		end)
-
-		tabButton.MouseLeave:Connect(function()
+		
+		tabButton.MouseLeave:connect(function()
 			hovered = false
-			if not (down or (selectedTab == tabButton)) then
-				tabButton:tween{
-					Style = Enum.EasingStyle.Quint,
-					BackgroundTransparency = 1
-				}
-			end
+			tabButton:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or 1}
 		end)
-
-		tabButton.MouseButton1Down:Connect(function()
+		
+		tabButton.MouseButton1Down:connect(function()
 			down = true
-			tabButton:tween{
-				Style = Enum.EasingStyle.Quint,
-				BackgroundColor3 = self:lighten(self.Theme.Secondary, 10),
-				BackgroundTransparency = 0
-			}
+			tabButton:tween{BackgroundTransparency = 0}
 		end)
-
-		UserInputService.InputEnded:Connect(function(key)
-			down = false
-			if key.UserInputType == Enum.UserInputType.MouseButton1 and selectedTab == tabButton then
-				tabButton:tween{
-					Style = Enum.EasingStyle.Quint,
-					BackgroundColor3 = self.Theme.Secondary,
-					BackgroundTransparency = (hovered and 0) or 1
-				}
+		
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				down = false
+				tabButton:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or (hovered and 0.3) or 1}
 			end
+			
 		end)
 
 		tabButton.MouseButton1Click:Connect(function()
@@ -511,13 +491,13 @@ function Library:tab(options)
 				local button = tabInfo[2]
 				page.Visible = false
 			end
-			selectedTab:tween{BackgroundTransparency = 1}
-			tab.Visible = true
+			selectedTab:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or 1}
 			selectedTab = tabButton
+			tab.Visible = true
 			tabButton.BackgroundTransparency = 0
 		end)
 	end
-	
+
 	local tabButtonText = tabButton:object("TextLabel", {
 		TextColor3 = self.Theme.StrongText,
 		AnchorPoint = Vector2.new(0, .5),
@@ -537,10 +517,72 @@ function Library:tab(options)
 		Size = UDim2.new(0, 15, 0, 15),
 		Image = options.Icon
 	})
+	
+	local tabButtonClose = tabButton:object("ImageButton", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -5, 0.5, 0),
+		Size = UDim2.fromOffset(14, 14),
+		Image = "rbxassetid://8497487650"
+	})
+	
+	tabButtonClose.MouseButton1Click:connect(function()
+		tabButton.Visible = false
+	end)
 
 	return setmetatable({
-		statusText = self.statusText
+		statusText = self.statusText,
+		container = tab,
+		Theme = self.Theme
 	}, Library)
+end
+
+function Library:button(options)
+	options = self:set_defaults({
+		Name = "Button",
+		Description = nil,
+		Callback = function() end
+	}, options)
+	
+	local buttonContainer = self.container:object("TextButton", {
+		BackgroundColor3 = self.Theme.Secondary,
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+	
+	local text = buttonContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, 5),
+		Size = UDim2.new(0.5, -10, 0, 22),
+		Text = options.Name,
+		TextSize = 22,
+		TextColor3 = self.Theme.StrongText,
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+	
+	if options.Description then
+		local description = buttonContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			TextColor3 = self.Theme.WeakText,
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+	
+	local icon = buttonContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11, 0.5, 0),
+		Size = UDim2.fromOffset(26, 26),
+		Image = "rbxassetid://8498776661",
+		ImageColor3 = self.Theme.WeakText
+	})
+	
+	buttonContainer.MouseButton1Click:connect(function()
+		options.Callback()
+	end)
 end
 
 return setmetatable(Library, {
