@@ -146,6 +146,22 @@ function Library:object(class: string, properties: table)
 		properties.Parent = localObject
 		return Library:object(class, properties)
 	end
+	
+	function methods:fade(state: bool, length: number)
+		length = length or 0.2
+		if not rawget(self, "fadeFrame") then
+			local frame = self:object("Frame", {
+				BackgroundColor3 = self.BackgroundColor3,
+				BackgroundTransparency = (state and 1) or 0,
+				Size = UDim2.fromScale(1, 1),
+				Centered = true,
+				ZIndex = 999
+			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
+			rawset(self, "fadeFrame", frame)
+		end
+
+		self.fadeFrame:tween{BackgroundTransparency = (state and 0) or 1, Length = length}
+	end
 
 
 	-- idk how lmao
