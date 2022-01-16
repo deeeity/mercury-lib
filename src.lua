@@ -21,6 +21,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
 local Library = {
 	Themes = {
@@ -122,10 +123,10 @@ function Library:object(class: string, properties: table)
 
 
 		local ti = TweenInfo.new(options.Length, options.Style, options.Direction)
-		options.Direction = nil
-		options.Style = nil 
 		options.Length = nil
-
+		options.Style = nil 
+		options.Direction = nil
+		
 		local tween = TweenService:Create(localObject, ti, options); tween:Play()
 		tween.Completed:Connect(function()
 			callback()
@@ -269,6 +270,38 @@ function Library:create(options: table)
 		BackgroundColor3 = options.Theme.Main,
 		Centered = true
 	}):round(10)
+	
+	do
+		local S, Event = pcall(function()
+			return core.MouseEnter
+		end)
+
+		if S then
+			core.Active = true;
+
+			Event:connect(function()
+				local Input = core.InputBegan:connect(function(Key)
+					if Key.UserInputType == Enum.UserInputType.MouseButton1 then
+						local ObjectPosition = Vector2.new(Mouse.X - core.AbsolutePosition.X, Mouse.Y - core.AbsolutePosition.Y)
+						while RunService.RenderStepped:wait() and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+							core:tween{
+								Position = UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),
+								Direction = Enum.EasingDirection.Out,
+								Style = Enum.EasingStyle.Quad,
+								Length = 0.06
+							}
+						end
+					end
+				end)
+
+				local Leave
+				Leave = core.MouseLeave:connect(function()
+					Input:disconnect()
+					Leave:disconnect()
+				end)
+			end)
+		end
+	end
 	
 	rawset(core, "oldSize", options.Size)
 	
