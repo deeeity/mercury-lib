@@ -31,6 +31,14 @@ local Library = {
 
 			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
+		},
+		Serika = {
+			Main = Color3.fromRGB(50, 52, 55),
+			Secondary = Color3.fromRGB(80, 82, 85),
+			Tertiary = Color3.fromRGB(226, 183, 20),
+
+			StrongText = Color3.fromHSV(0, 0, 1),		
+			WeakText = Color3.fromHSV(0, 0, 172/255)
 		}
 	},
 	Theme = nil
@@ -368,17 +376,23 @@ function Library:create(options: table)
     --[[
         os.date("%X")
     ]]
-
-	local displayName = profile:object("TextLabel", {
-		RichText = true,
-		Text = "Welcome, <font color='#efe4ff'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>",
-		TextScaled = true,
-		Position = UDim2.new(0, 105,0, 10),
-		TextColor3 = self:lighten(options.Theme.Tertiary, 30),
-		Size = UDim2.new(0, 400,0, 40),
-		BackgroundTransparency = 1,
-		TextXAlignment = Enum.TextXAlignment.Left
-	})
+	
+	local displayName; do
+		local h, s, v = Color3.toHSV(options.Theme.Tertiary)
+		local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
+		-- was using #efe4ff but for themes sake am using the above
+		
+		local displayName = profile:object("TextLabel", {
+			RichText = true,
+			Text = "Welcome, <font color='rgb(" ..  math.floor(c.R*255) .. "," .. math.floor(c.G*255) .. "," .. math.floor(c.B*255) .. ")'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>",
+			TextScaled = true,
+			Position = UDim2.new(0, 105,0, 10),
+			TextColor3 = self:lighten(options.Theme.Tertiary, 30),
+			Size = UDim2.new(0, 400,0, 40),
+			BackgroundTransparency = 1,
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
 
 	local profileName = profile:object("TextLabel", {
 		Text = "@" .. LocalPlayer.Name,
