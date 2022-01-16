@@ -38,7 +38,7 @@ local Library = {
 			Secondary = Color3.fromRGB(80, 82, 85),
 			Tertiary = Color3.fromRGB(226, 183, 20),
 
-			StrongText = Color3.fromHSV(0, 0, 1),		
+			StrongText = Color3.fromHSV(0, 0.0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
 		},
 		Cyan = {
@@ -917,6 +917,96 @@ function Library:toggle(options)
 				onIcon:crossfade(offIcon, 0.1)
 			end
 			options.Callback(toggled)
+		end)
+	end
+end
+
+function Library:keybind(options)
+	options = self:set_defaults({
+		Name = "Keybind",
+		Keybind = nil,
+		Description = nil
+	}, options)
+
+	local keybindContainer = self.container:object("TextButton", {
+		BackgroundColor3 = self.Theme.Secondary,
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = keybindContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		TextColor3 = self.Theme.StrongText,
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = keybindContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			TextColor3 = self.Theme.WeakText,
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+
+	local keybindDisplay = keybindContainer:object("TextLabel", {
+		AnchorPoint = Vector2.new(1, 0),
+		BackgroundColor3 = self:lighten(self.Theme.Main, 15),
+		Position = UDim2.new(1, -20,0, 16),
+		Size = UDim2.new(0, 50,0, 20),
+		TextSize = 12,
+		Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?",
+		TextColor3 = self.Theme.Tertiary
+	}):round(5):stroke(self.Theme.Tertiary)
+
+	do
+		local hovered = false
+		local down = false
+		local listening = false
+
+		keybindContainer.MouseEnter:connect(function()
+			hovered = true
+			keybindContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
+		end)
+
+		keybindContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				keybindContainer:tween{BackgroundColor3 = self.Theme.Secondary}
+			end
+		end)
+
+		keybindContainer.MouseButton1Down:connect(function()
+			keybindContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				keybindContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
+			end
+		end)
+
+		UserInputService.InputBegan:Connect(function(key)
+			if listening then
+				if key.UserInputType == Enum.UserInputType.Keyboard then
+					if key.KeyCode ~= Enum.KeyCode.Escape then
+						options.Keybind = key.KeyCode
+					end
+					keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
+					listening = false
+				end
+			end
+		end)
+
+		keybindContainer.MouseButton1Click:connect(function()
+			if not listening then listening = true; keybindDisplay.Text = "..." end
 		end)
 	end
 end
