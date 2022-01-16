@@ -58,7 +58,8 @@ local Library = {
 			Light = true
 		}
 	},
-	Theme = nil
+	Theme = nil,
+	Toggled = true
 
 }
 Library.__index = Library
@@ -193,6 +194,23 @@ function Library:object(class: string, properties: table)
 	})
 end
 
+function Library:toggle(state)
+	self.Toggled = state
+	self.mainFrame.ClipsDescendants = true
+	if state then
+		self.mainFrame:tween({Size = self.mainFrame.oldSize, Length = 0.25}, function()
+			rawset(self.mainFrame, "oldSize", (state and self.mainFrame.oldSize) or self.mainFrame.Size)
+			self.mainFrame.ClipsDescendants = false
+		end)
+		wait(0.15)
+		self.mainFrame:fade(not state, self.mainFrame.BackgroundColor3, 0.15)
+	else		
+		self.mainFrame:fade(not state, self.mainFrame.BackgroundColor3, 0.15)
+		wait(0.1)
+		self.mainFrame:tween{Size = UDim2.new(), Length = 0.25}
+	end
+end
+
 function Library:darken(color: Color3, f: number)
 	local h, s, v = Color3.toHSV(color)
 	f = 1 - ((f or 15) / 80)
@@ -251,7 +269,18 @@ function Library:create(options: table)
 		BackgroundColor3 = options.Theme.Main,
 		Centered = true
 	}):round(10)
-
+	
+	rawset(core, "oldSize", options.Size)
+	
+	self.mainFrame = core
+	
+	UserInputService.InputEnded:connect(function(key)
+		if key.KeyCode == Enum.KeyCode.Home then
+			self.Toggled = not self.Toggled
+			Library:toggle(self.Toggled)
+		end
+	end)
+	
 	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
 		Position = UDim2.fromOffset(5, 5),
