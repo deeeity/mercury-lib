@@ -159,8 +159,16 @@ function Library:object(class: string, properties: table)
 			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
 			rawset(self, "fadeFrame", frame)
 		end
-
-		self.fadeFrame:tween{BackgroundTransparency = (state and 0) or 1, Length = length}
+		
+		if state then
+			self.fadeFrame.Visible = true
+			self.fadeFrame:tween{BackgroundTransparency = 0, Length = length}
+		else
+			self.fadeFrame:tween({BackgroundTransparency = 1, Length = length}, function()
+				self.fadeFrame.Visible = false
+			end)
+		end
+		
 	end
 
 
@@ -252,6 +260,8 @@ function Library:create(options: table)
 		BackgroundColor3 = options.Theme.Main,
 		Centered = true
 	}):round(10)
+	
+	
 
 	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
