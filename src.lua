@@ -147,15 +147,31 @@ end
 
 function Library:darken(color: Color3, f: number)
 	local h, s, v = Color3.toHSV(color)
-	f = f or 15
-	return Color3.fromHSV(h, s, math.clamp(v - (f/255), 0, 1))
+	f = 1 - ((f or 15) / 80)
+	return Color3.fromHSV(h, math.clamp(s/f, 0, 1), math.clamp(v*f, 0, 1))
 end
 
 function Library:lighten(color: Color3, f: number)
 	local h, s, v = Color3.toHSV(color)
-	f = f or 15
-	return Color3.fromHSV(h, s, math.clamp(v + (f/255), 0, 1))
+	f = 1 - ((f or 15) / 80)
+	return Color3.fromHSV(h, math.clamp(s*f, 0, 1), math.clamp(v/f, 0, 1))
 end
+
+--[[ old lighten/darken functions, may revert if contrast gets fucked up
+
+	function Library:darken(color: Color3, f: number)
+		local h, s, v = Color3.toHSV(color)
+		f = f or 15
+		return Color3.fromHSV(h, s, math.clamp(v - (f/255), 0, 1))
+	end
+
+	function Library:lighten(color: Color3, f: number)
+		local h, s, v = Color3.toHSV(color)
+		f = f or 15
+		return Color3.fromHSV(h, s, math.clamp(v + (f/255), 0, 1))
+	end
+	
+]]
 
 function Library:set_status(txt)
 	self.statusText.Text = "Status | " .. txt
@@ -293,7 +309,8 @@ function Library:create(options: table)
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 5, 0.5, 0),
 		Size = UDim2.new(0, 15, 0, 15),
-		Image = "http://www.roblox.com/asset/?id=8497544895"
+		Image = "http://www.roblox.com/asset/?id=8497544895",
+		ImageColor3 = options.Theme.StrongText
 	})
 
 	local homePage = content:object("Frame", {
@@ -379,8 +396,9 @@ function Library:create(options: table)
 	
 	local displayName; do
 		local h, s, v = Color3.toHSV(options.Theme.Tertiary)
-		local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
+		--local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
 		-- was using #efe4ff but for themes sake am using the above
+		local c = self:lighten(options.Theme.Tertiary, 55)
 		
 		local displayName = profile:object("TextLabel", {
 			RichText = true,
@@ -573,7 +591,8 @@ function Library:tab(options)
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 5, 0.5, 0),
 		Size = UDim2.new(0, 15, 0, 15),
-		Image = options.Icon
+		Image = options.Icon,
+		ImageColor3 = self.Theme.StrongText
 	})
 
 	local tabButtonClose = tabButton:object("ImageButton", {
@@ -581,7 +600,8 @@ function Library:tab(options)
 		BackgroundTransparency = 1,
 		Position = UDim2.new(1, -5, 0.5, 0),
 		Size = UDim2.fromOffset(14, 14),
-		Image = "rbxassetid://8497487650"
+		Image = "rbxassetid://8497487650",
+		ImageColor3 = self.Theme.StrongText
 	})
 
 	tabButtonClose.MouseButton1Click:connect(function()
