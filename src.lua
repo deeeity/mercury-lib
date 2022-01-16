@@ -345,7 +345,11 @@ function Library:create(options: table)
 	})
 
 	local tabs = {}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> 3202574ec677b60414f51541224afa22f97583a6
 	-- size handling lol 
 --[[ 	setmetatable(tabs, {
 		__newindex = function(self, i, v)
