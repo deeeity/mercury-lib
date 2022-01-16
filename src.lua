@@ -147,11 +147,11 @@ function Library:object(class: string, properties: table)
 		return Library:object(class, properties)
 	end
 	
-	function methods:fade(state: bool, length: number)
+	function methods:fade(state: bool, colorOverride: Color3, length: number)
 		length = length or 0.2
 		if not rawget(self, "fadeFrame") then
 			local frame = self:object("Frame", {
-				BackgroundColor3 = self.BackgroundColor3,
+				BackgroundColor3 = colorOverride or self.BackgroundColor3,
 				BackgroundTransparency = (state and 1) or 0,
 				Size = UDim2.fromScale(1, 1),
 				Centered = true,
@@ -171,16 +171,6 @@ function Library:object(class: string, properties: table)
 			end)
 		end
 	end
-
-
-	-- idk how lmao
---[[ 	function methods:fadeOut()
-		pcall(function()
-			for _, v in next, localObject.GetDescendants() do
-				
-			end
-		end)
-	end ]]
 
 	function methods:stroke(color: Color3, thickness: number, strokeMode: Enum.ApplyStrokeMode)
 		thickness = thickness or 1
@@ -656,6 +646,7 @@ function Library:tab(options)
 			if not tabButton.Visible then
 				tabButton.Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset)
 				tabButton.Visible = true
+				tabButton:fade(false, self.Theme.Main, 0.1)
 				tabButton:tween({Size = UDim2.new(0, 125, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1})
 			end
 		end)
@@ -693,6 +684,7 @@ function Library:tab(options)
 	})
 
 	tabButtonClose.MouseButton1Click:connect(function()
+		tabButton:fade(true, self.Theme.Main, 0.1)
 		tabButton:tween({Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1}, function()
 			tabButton.Visible = false
 			tab.Visible = false
