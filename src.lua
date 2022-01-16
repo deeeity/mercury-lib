@@ -188,7 +188,7 @@ function Library:create(options: table)
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Padding = UDim.new(0, 4)
 	})
-	
+
 	local closeButton = core:object("ImageButton", {
 		BackgroundTransparency = 1,
 		Size = UDim2.fromOffset(14, 14),
@@ -413,20 +413,40 @@ function Library:create(options: table)
 			end
 		end)
 	end
+	
+	local quickAccess = homePage:object("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, -20, 0, 180)
+	})
+	
+	quickAccess:object("UIGridLayout", {
+		CellPadding = UDim2.fromOffset(10, 10),
+		CellSize = UDim2.fromOffset(55, 55),
+		HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		VerticalAlignment = Enum.VerticalAlignment.Center
+	})
+	
+	quickAccess:object("UIPadding", {
+		PaddingBottom = UDim.new(0, 10),
+		PaddingLeft = UDim.new(0, 70),
+		PaddingRight = UDim.new(0, 70),
+		PaddingTop = UDim.new(0, 5)
+	})
 
 	return setmetatable({
 		statusText = status,
 		container = content,
 		navigation = tabButtons,
 		Theme = options.Theme,
-		Tabs = tabs
+		Tabs = tabs,
+		quickAccess = quickAccess
 	}, Library)
 end
 
 function Library:tab(options)
 	options = self:set_defaults({
 		Name = "New Tab",
-		Icon = "http://www.roblox.com/asset/?id=8497544895"
+		Icon = "rbxassetid://8497544895"
 
 	}, options)
 
@@ -441,11 +461,23 @@ function Library:tab(options)
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
 	
+	local quickAccessButton = self.quickAccess:object("TextButton", {
+		BackgroundColor3 = self.Theme.Secondary
+	}):round(5)
+	
+	local quickAccessIcon = quickAccessButton:object("ImageLabel", {
+		BackgroundTransparency = 1,
+		ImageColor3 = self.Theme.StrongText,
+		Image = options.Icon,
+		Size = UDim2.fromScale(0.5, 0.5),
+		Centered = true
+	})
+
 	tab:object("UIListLayout", {
 		Padding = UDim.new(0, 10),
 		HorizontalAlignment = Enum.HorizontalAlignment.Center
 	})
-	
+
 	tab:object("UIPadding", {
 		PaddingTop = UDim.new(0, 10)
 	})
@@ -461,28 +493,28 @@ function Library:tab(options)
 	do
 		local down = false
 		local hovered = false
-		
+
 		tabButton.MouseEnter:connect(function()
 			hovered = true
 			tabButton:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or 0.3}
 		end)
-		
+
 		tabButton.MouseLeave:connect(function()
 			hovered = false
 			tabButton:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or 1}
 		end)
-		
+
 		tabButton.MouseButton1Down:connect(function()
 			down = true
 			tabButton:tween{BackgroundTransparency = 0}
 		end)
-		
+
 		UserInputService.InputEnded:connect(function(key)
 			if key.UserInputType == Enum.UserInputType.MouseButton1 then
 				down = false
 				tabButton:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or (hovered and 0.3) or 1}
 			end
-			
+
 		end)
 
 		tabButton.MouseButton1Click:Connect(function()
@@ -495,6 +527,18 @@ function Library:tab(options)
 			selectedTab = tabButton
 			tab.Visible = true
 			tabButton.BackgroundTransparency = 0
+		end)
+		
+		quickAccessButton.MouseEnter:connect(function()
+			quickAccessButton:tween{BackgroundColor3 = self.Theme.Tertiary}
+		end)
+		
+		quickAccessButton.MouseLeave:connect(function()
+			quickAccessButton:tween{BackgroundColor3 = self.Theme.Secondary}
+		end)
+		
+		quickAccessButton.MouseButton1Click:connect(function()
+			tabButton.Visible = true
 		end)
 	end
 
@@ -517,7 +561,7 @@ function Library:tab(options)
 		Size = UDim2.new(0, 15, 0, 15),
 		Image = options.Icon
 	})
-	
+
 	local tabButtonClose = tabButton:object("ImageButton", {
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 1,
@@ -525,7 +569,7 @@ function Library:tab(options)
 		Size = UDim2.fromOffset(14, 14),
 		Image = "rbxassetid://8497487650"
 	})
-	
+
 	tabButtonClose.MouseButton1Click:connect(function()
 		tabButton.Visible = false
 	end)
@@ -543,12 +587,12 @@ function Library:button(options)
 		Description = nil,
 		Callback = function() end
 	}, options)
-	
+
 	local buttonContainer = self.container:object("TextButton", {
 		BackgroundColor3 = self.Theme.Secondary,
 		Size = UDim2.new(1, -20, 0, 52)
 	}):round(7)
-	
+
 	local text = buttonContainer:object("TextLabel", {
 		BackgroundTransparency = 1,
 		Position = UDim2.fromOffset(10, 5),
@@ -558,7 +602,7 @@ function Library:button(options)
 		TextColor3 = self.Theme.StrongText,
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
-	
+
 	if options.Description then
 		local description = buttonContainer:object("TextLabel", {
 			BackgroundTransparency = 1,
@@ -570,7 +614,7 @@ function Library:button(options)
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
 	end
-	
+
 	local icon = buttonContainer:object("ImageLabel", {
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 1,
@@ -579,7 +623,7 @@ function Library:button(options)
 		Image = "rbxassetid://8498776661",
 		ImageColor3 = self.Theme.WeakText
 	})
-	
+
 	buttonContainer.MouseButton1Click:connect(function()
 		options.Callback()
 	end)
