@@ -202,7 +202,7 @@ function Library:create(options: table)
 		Name = "Mercury",
 		Size = UDim2.fromOffset(600, 400),
 		Theme = self.Themes.Dark,
-		Link = "https://github.com/repos"
+		Link = "https://github.com/deeeity/mercury-lib"
 	}, options)
 
 	local gui = self:object("ScreenGui", {
