@@ -118,8 +118,12 @@ function Library:object(class: string, properties: table)
 			Direction = Enum.EasingDirection.InOut
 		}, options)
 		callback = callback or function() return end
+<<<<<<< HEAD
 
+=======
+>>>>>>> 46e6ee5c8d332ee7c180a268e7e769c35e1ab077
 
+		
 		local ti = TweenInfo.new(options.Length, options.Style, options.Direction)
 		options.Direction = nil
 		options.Style = nil 
@@ -362,7 +366,11 @@ function Library:create(options: table)
 	})
 
 	local tabs = {}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> 46e6ee5c8d332ee7c180a268e7e769c35e1ab077
 	-- size handling lol 
 --[[ 	setmetatable(tabs, {
 		__newindex = function(self, i, v)
@@ -673,7 +681,11 @@ function Library:tab(options)
 			tab.Visible = false
 			wait()
 		end)
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> 46e6ee5c8d332ee7c180a268e7e769c35e1ab077
 		local visible = {}
 		for _, tab in next, self.Tabs do
 			if not tab[2] == selectedTab then tab[1].Visible = false end
