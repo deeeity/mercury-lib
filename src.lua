@@ -38,7 +38,7 @@ local Library = {
 			Secondary = Color3.fromRGB(80, 82, 85),
 			Tertiary = Color3.fromRGB(226, 183, 20),
 
-			StrongText = Color3.fromHSV(0, 0.0, 1),		
+			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
 		},
 		Cyan = {
@@ -59,8 +59,17 @@ local Library = {
 			Light = true
 		}
 	},
-	Theme = nil,
-	Toggled = true
+	Toggled = true,
+	ThemeObjects = {
+		Main = {},
+		Secondary = {},
+		Tertiary = {},
+
+		StrongText = {},
+		WeakText = {}
+	},
+	WelcomeText = nil,
+	DisplayName = nil
 
 }
 Library.__index = Library
@@ -74,6 +83,26 @@ function Library:set_defaults(defaults: table, options: table)
 		defaults[option] = value
 	end
 	return defaults
+end
+
+function Library:change_theme(toTheme)
+	Library.CurrentTheme = toTheme
+	local c = self:lighten(toTheme.Tertiary, 55)
+	Library.DisplayName.Text = "Welcome, <font color='rgb(" ..  math.floor(c.R*255) .. "," .. math.floor(c.G*255) .. "," .. math.floor(c.B*255) .. ")'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>"
+	for color, objects in next, Library.ThemeObjects do
+		local themeColor = Library.CurrentTheme[color]
+		for _, obj in next, objects do
+			local element, property, theme, colorAlter = obj[1], obj[2], obj[3], obj[4] or 0
+			local themeColor = Library.CurrentTheme[theme]
+			local modifiedColor = themeColor
+			if colorAlter < 0 then
+				modifiedColor = Library:darken(themeColor, -1 * colorAlter)
+			elseif colorAlter > 0 then
+				modifiedColor = Library:lighten(themeColor, colorAlter)
+			end
+			element:tween{[property] = modifiedColor}
+		end
+	end
 end
 
 function Library:object(class: string, properties: table)
@@ -90,23 +119,6 @@ function Library:object(class: string, properties: table)
 		pcall(function()
 			localObject[property] = value
 		end)
-	end
-
-	local customHandlers = {
-		Centered = function(value)
-			if value then
-				localObject.AnchorPoint = Vector2.new(0.5, 0.5)
-				localObject.Position = UDim2.fromScale(0.5, 0.5)
-			end	
-		end
-	}
-
-	for property, value in next, properties do
-		if customHandlers[property] then
-			customHandlers[property](value)
-		else
-			localObject[property] = value
-		end
 	end
 
 	local methods = {}
@@ -166,6 +178,8 @@ function Library:object(class: string, properties: table)
 				ZIndex = 999
 			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
 			rawset(self, "fadeFrame", frame)
+		else
+			self.fadeFrame.BackgroundColor3 = self.BackgroundColor3
 		end
 
 		if state then
@@ -181,14 +195,69 @@ function Library:object(class: string, properties: table)
 	end
 
 	function methods:stroke(color: Color3, thickness: number, strokeMode: Enum.ApplyStrokeMode)
+
 		thickness = thickness or 1
 		strokeMode = strokeMode or Enum.ApplyStrokeMode.Border
-		self:object("UIStroke", {
+		local stroke = self:object("UIStroke", {
 			ApplyStrokeMode = strokeMode,
-			Color = color,
 			Thickness = thickness
 		})
+
+		if type(color) == "table" then
+			local theme, colorAlter = color[1], color[2] or 0
+			local themeColor = Library.CurrentTheme[theme]
+			local modifiedColor = themeColor
+			if colorAlter < 0 then
+				modifiedColor = Library:darken(themeColor, -1 * colorAlter)
+			elseif colorAlter > 0 then
+				modifiedColor = Library:lighten(themeColor, colorAlter)
+			end
+			stroke.Color = modifiedColor
+			table.insert(Library.ThemeObjects[theme], {stroke, "Color", theme, colorAlter})
+		else
+			local themeColor = Library.CurrentTheme[color]
+			stroke.Color = themeColor
+			table.insert(Library.ThemeObjects[color], {stroke, "Color", color, 0})
+		end
+
 		return methods
+	end
+
+	local customHandlers = {
+		Centered = function(value)
+			if value then
+				localObject.AnchorPoint = Vector2.new(0.5, 0.5)
+				localObject.Position = UDim2.fromScale(0.5, 0.5)
+			end	
+		end,
+		Theme = function(value)
+			for property, obj in next, value do
+				if type(obj) == "table" then
+					local theme, colorAlter = obj[1], obj[2] or 0
+					local themeColor = Library.CurrentTheme[theme]
+					local modifiedColor = themeColor
+					if colorAlter < 0 then
+						modifiedColor = Library:darken(themeColor, -1 * colorAlter)
+					elseif colorAlter > 0 then
+						modifiedColor = Library:lighten(themeColor, colorAlter)
+					end
+					localObject[property] = modifiedColor
+					table.insert(self.ThemeObjects[theme], {methods, property, theme, colorAlter})
+				else
+					local themeColor = Library.CurrentTheme[obj]
+					localObject[property] = themeColor
+					table.insert(self.ThemeObjects[obj], {methods, property, obj, 0})
+				end
+			end
+		end,
+	}
+
+	for property, value in next, properties do
+		if customHandlers[property] then
+			customHandlers[property](value)
+		else
+			localObject[property] = value
+		end
 	end
 
 	return setmetatable(methods, {
@@ -266,6 +335,8 @@ function Library:create(options: table)
 		self.darken, self.lighten = self.lighten, self.darken
 	end
 
+	self.CurrentTheme = options.Theme
+
 	local gui = self:object("ScreenGui", {
 		Parent = (RunService:IsStudio() and LocalPlayer.PlayerGui) or game:GetService("CoreGui"),
 		ZIndexBehavior = Enum.ZIndexBehavior.Global
@@ -273,7 +344,7 @@ function Library:create(options: table)
 
 	local core = gui:object("Frame", {
 		Size = options.Size,
-		BackgroundColor3 = options.Theme.Main,
+		Theme = {BackgroundColor3 = "Main"},
 		Centered = true
 	}):round(10)
 
@@ -316,7 +387,7 @@ function Library:create(options: table)
 	UserInputService.InputEnded:connect(function(key)
 		if key.KeyCode == Enum.KeyCode.Home then
 			self.Toggled = not self.Toggled
-			Library:toggle(self.Toggled)
+			Library:show(self.Toggled)
 		end
 	end)
 
@@ -341,7 +412,7 @@ function Library:create(options: table)
 		BackgroundTransparency = 1,
 		Size = UDim2.fromOffset(14, 14),
 		Position = UDim2.new(1, -11, 0, 11),
-		ImageColor3 = options.Theme.StrongText,
+		Theme = {ImageColor3 = "StrongText"},
 		Image = "http://www.roblox.com/asset/?id=8497487650",
 		AnchorPoint = Vector2.new(1)
 	})
@@ -349,16 +420,16 @@ function Library:create(options: table)
 	local urlBar = core:object("Frame", {
 		Size = UDim2.new(1, -10, 0, 25),
 		Position = UDim2.new(0, 5,0, 35),
-		BackgroundColor3 = options.Theme.Secondary
+		Theme = {BackgroundColor3 = "Secondary"}
 	}):round(5)
 
 	local searchIcon = urlBar:object("ImageLabel", {
 		AnchorPoint = Vector2.new(0, .5),
 		Position = UDim2.new(0, 5,0.5, 0);
-		BackgroundTransparency = 1,
-		ImageColor3 = options.Theme.Tertiary,
+		Theme = {ImageColor3 = "Tertiary"},
 		Size = UDim2.fromOffset(16, 16),
-		Image = "http://www.roblox.com/asset/?id=8497489946"
+		Image = "http://www.roblox.com/asset/?id=8497489946",
+		BackgroundTransparency = 1
 	})
 
 	local link = urlBar:object("TextLabel", {
@@ -367,7 +438,7 @@ function Library:create(options: table)
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -30, .6, 0),
 		Text = options.Link,
-		TextColor3 = options.Theme.WeakText,
+		Theme = {TextColor3 = "WeakText"},
 		TextSize = 14,
 		TextScaled = false,
 		TextXAlignment = Enum.TextXAlignment.Left
@@ -385,13 +456,13 @@ function Library:create(options: table)
 		ZIndex = 0,
 		ImageTransparency = 0.7,
 		Size = UDim2.new(1, 47, 1, 47),
-		ImageColor3 = Color3.fromRGB(0, 0, 0),
+		Theme = {ImageColor3 = "StrongText"},
 		SliceCenter = Rect.new(49, 49, 450, 450),
 		Image = "rbxassetid://6014261993"
 	})
 
 	local content = core:object("Frame", {
-		BackgroundColor3 = self:darken(options.Theme.Secondary, 10),
+		Theme = {BackgroundColor3 = {"Secondary", -10}},
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -20),
 		Size = UDim2.new(1, -10, 1, -86)
@@ -404,7 +475,7 @@ function Library:create(options: table)
 		Size = UDim2.new(0.2, 0, 0, 10),
 		Font = Enum.Font.SourceSans,
 		Text = "Status | Idle",
-		TextColor3 = options.Theme.Tertiary,
+		Theme = {TextColor3 = "Tertiary"},
 		TextSize = 14,
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
@@ -412,12 +483,12 @@ function Library:create(options: table)
 	local homeButton = tabButtons:object("TextButton", {
 		Name = "hehehe siuuuuuuuuu",
 		BackgroundTransparency = 0, -- yeah?
-		BackgroundColor3 = options.Theme.Secondary,
+		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(0, 125, 0, 25)
 	}):round(5)
 
 	local homeButtonText = homeButton:object("TextLabel", {
-		TextColor3 = options.Theme.StrongText,
+		Theme = {TextColor3 = "StrongText"},
 		AnchorPoint = Vector2.new(0, .5),
 		BackgroundTransparency = 1,
 		TextSize = 14,
@@ -435,7 +506,7 @@ function Library:create(options: table)
 		Position = UDim2.new(0, 5, 0.5, 0),
 		Size = UDim2.new(0, 15, 0, 15),
 		Image = "http://www.roblox.com/asset/?id=8497544895",
-		ImageColor3 = options.Theme.StrongText
+		Theme = {ImageColor3 = "StrongText"}
 	})
 
 	local homePage = content:object("Frame", {
@@ -516,13 +587,13 @@ function Library:create(options: table)
 
 	local profile = homePage:object("Frame", {
 		AnchorPoint = Vector2.new(0, .5),
-		BackgroundColor3 = options.Theme.Secondary,
-		Size = UDim2.new(1, -20,0, 100)
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 100)
 	}):round(7)
 
 	local profilePictureContainer = profile:object("ImageLabel", {
 		Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100),
-		BackgroundColor3 = self:lighten(options.Theme.Secondary, 10),
+		Theme = {BackgroundColor3 = {"Secondary", 10}},
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, 10, 0.5),
 		Size = UDim2.fromOffset(80, 80)
@@ -543,18 +614,19 @@ function Library:create(options: table)
 			Text = "Welcome, <font color='rgb(" ..  math.floor(c.R*255) .. "," .. math.floor(c.G*255) .. "," .. math.floor(c.B*255) .. ")'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>",
 			TextScaled = true,
 			Position = UDim2.new(0, 105,0, 10),
-			TextColor3 = self:lighten(options.Theme.Tertiary, 30),
+			Theme = {TextColor3 = {"Tertiary", 30}},
 			Size = UDim2.new(0, 400,0, 40),
 			BackgroundTransparency = 1,
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
+		Library.DisplayName = displayName
 	end
 
 	local profileName = profile:object("TextLabel", {
 		Text = "@" .. LocalPlayer.Name,
 		TextScaled = true,
 		Position = UDim2.new(0, 105,0, 47),
-		TextColor3 = self:lighten(options.Theme.Tertiary, 10),
+		Theme = {TextColor3 = {"Tertiary", 10}},
 		Size = UDim2.new(0, 400,0, 20),
 		BackgroundTransparency = 1,
 		TextXAlignment = Enum.TextXAlignment.Left
@@ -565,7 +637,7 @@ function Library:create(options: table)
 		Position = UDim2.new(0, 105, 1, -10),
 		Size = UDim2.new(0, 400,0, 20),
 		AnchorPoint = Vector2.new(0, 1),
-		TextColor3 = self:darken(options.Theme.WeakText, 20),
+		Theme = {TextColor3 = {"WeakText", -20}},
 		TextScaled = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Text = tostring(os.date("%X")):sub(1, os.date("%X"):len()-3)
@@ -583,10 +655,10 @@ function Library:create(options: table)
 			end
 		end)
 	end
-	
+
 	local settingsTabIcon = profile:object("ImageButton", {
 		BackgroundTransparency = 1,
-		ImageColor3 = options.Theme.WeakText,
+		Theme = {ImageColor3 = "WeakText"},
 		Size = UDim2.fromOffset(24, 24),
 		Position = UDim2.new(1, -10, 1, -10),
 		AnchorPoint = Vector2.new(1, 1),
@@ -611,7 +683,7 @@ function Library:create(options: table)
 		PaddingRight = UDim.new(0, 70),
 		PaddingTop = UDim.new(0, 5)
 	})
-	
+
 	local mt = setmetatable({
 		statusText = status,
 		container = content,
@@ -622,12 +694,12 @@ function Library:create(options: table)
 		homeButton = homeButton,
 		homePage = homePage
 	}, Library)
-	
+
 	local settingsTab = Library.tab(mt, {
 		Name = "Settings",
 		Internal = settingsTabIcon
 	})
-	
+
 	settingsTab:button{
 		Name = "yesssss"
 	}
@@ -651,18 +723,18 @@ function Library:tab(options)
 		ScrollBarThickness = 0,
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
-	
+
 	local quickAccessButton
 	local quickAccessIcon
-	
+
 	if not options.Internal then
 		quickAccessButton = self.quickAccess:object("TextButton", {
-			BackgroundColor3 = self.Theme.Secondary
+			Theme = {BackgroundColor3 = "Secondary"}
 		}):round(5)
 
 		quickAccessIcon = quickAccessButton:object("ImageLabel", {
 			BackgroundTransparency = 1,
-			ImageColor3 = self.Theme.StrongText,
+			Theme = {ImageColor3 = "StrongText"},
 			Image = options.Icon,
 			Size = UDim2.fromScale(0.5, 0.5),
 			Centered = true
@@ -682,7 +754,7 @@ function Library:tab(options)
 
 	local tabButton = self.navigation:object("TextButton", {
 		BackgroundTransparency = 1,
-		BackgroundColor3 = self.Theme.Secondary,
+		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(0, 125, 0, 25),
 		Visible = false
 	}):round(5)
@@ -727,27 +799,27 @@ function Library:tab(options)
 			tab.Visible = true
 			tabButton.BackgroundTransparency = 0
 		end)
-		
+
 		quickAccessButton.MouseEnter:connect(function()
-			quickAccessButton:tween{BackgroundColor3 = self.Theme.Tertiary}
+			quickAccessButton:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
 		end)
 
 		quickAccessButton.MouseLeave:connect(function()
-			quickAccessButton:tween{BackgroundColor3 = self.Theme.Secondary}
+			quickAccessButton:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
 		end)
 
 		quickAccessButton.MouseButton1Click:connect(function()
 			if not tabButton.Visible then
 				tabButton.Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset)
 				tabButton.Visible = true
-				tabButton:fade(false, self.Theme.Main, 0.1)
+				tabButton:fade(false, Library.CurrentTheme.Main, 0.1)
 				tabButton:tween({Size = UDim2.new(0, 125, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1})
 			end
 		end)
 	end
 
 	local tabButtonText = tabButton:object("TextLabel", {
-		TextColor3 = self.Theme.StrongText,
+		Theme = {TextColor3 = "StrongText"},
 		AnchorPoint = Vector2.new(0, .5),
 		BackgroundTransparency = 1,
 		TextSize = 14,
@@ -765,7 +837,7 @@ function Library:tab(options)
 		Position = UDim2.new(0, 5, 0.5, 0),
 		Size = UDim2.new(0, 15, 0, 15),
 		Image = options.Icon,
-		ImageColor3 = self.Theme.StrongText
+		Theme = {ImageColor3 = "StrongText"}
 	})
 
 	local tabButtonClose = tabButton:object("ImageButton", {
@@ -774,11 +846,11 @@ function Library:tab(options)
 		Position = UDim2.new(1, -5, 0.5, 0),
 		Size = UDim2.fromOffset(14, 14),
 		Image = "rbxassetid://8497487650",
-		ImageColor3 = self.Theme.StrongText
+		Theme = {ImageColor3 = "StrongText"}
 	})
 
 	tabButtonClose.MouseButton1Click:connect(function()
-		tabButton:fade(true, self.Theme.Main, 0.1)
+		tabButton:fade(true, Library.CurrentTheme.Main, 0.1)
 		tabButton:tween({Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1}, function()
 			tabButton.Visible = false
 			tab.Visible = false
@@ -832,7 +904,7 @@ function Library:toggle(options)
 	}, options)
 
 	local toggleContainer = self.container:object("TextButton", {
-		BackgroundColor3 = self.Theme.Secondary,
+		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
 	}):round(7)
 
@@ -847,7 +919,7 @@ function Library:toggle(options)
 		Position = UDim2.new(1, -11,0.5, 0),
 		Size = UDim2.new(0, 26,0, 26),
 		Image = on,
-		ImageColor3 = self.Theme.Tertiary,
+		Theme = {ImageColor3 = "Tertiary"},
 		ImageTransparency = (toggled and 0) or 1
 	})
 
@@ -857,7 +929,7 @@ function Library:toggle(options)
 		Position = UDim2.new(1, -11,0.5, 0),
 		Size = UDim2.new(0, 26,0, 26),
 		Image = off,
-		ImageColor3 =Color3.fromRGB(200, 200, 200),
+		Theme = {ImageColor3 = "WeakText"},
 		ImageTransparency = (toggled and 1) or 0
 	})
 
@@ -867,7 +939,7 @@ function Library:toggle(options)
 		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
 		Text = options.Name,
 		TextSize = 22,
-		TextColor3 = self.Theme.StrongText,
+		Theme = {TextColor3 = "StrongText"},
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
 
@@ -878,7 +950,7 @@ function Library:toggle(options)
 			Size = UDim2.new(0.5, -10, 0, 20),
 			Text = options.Description,
 			TextSize = 18,
-			TextColor3 = self.Theme.WeakText,
+			Theme = {TextColor3 = "WeakText"},
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
 	end
@@ -889,23 +961,23 @@ function Library:toggle(options)
 
 		toggleContainer.MouseEnter:connect(function()
 			hovered = true
-			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
+			toggleContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
 		end)
 
 		toggleContainer.MouseLeave:connect(function()
 			hovered = false
 			if not down then
-				toggleContainer:tween{BackgroundColor3 = self.Theme.Secondary}
+				toggleContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
 			end
 		end)
 
 		toggleContainer.MouseButton1Down:connect(function()
-			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
+			toggleContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
 		end)
 
 		UserInputService.InputEnded:connect(function(key)
 			if key.UserInputType == Enum.UserInputType.MouseButton1 then
-				toggleContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
+				toggleContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
 			end
 		end)
 
@@ -921,6 +993,81 @@ function Library:toggle(options)
 	end
 end
 
+function Library:button(options)
+	options = self:set_defaults({
+		Name = "Button",
+		Description = nil,
+		Callback = function() end
+	}, options)
+
+	local buttonContainer = self.container:object("TextButton", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = buttonContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = buttonContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			Theme = {TextColor3 = "WeakText"},
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+	local icon = buttonContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11, 0.5, 0),
+		Size = UDim2.fromOffset(26, 26),
+		Image = "rbxassetid://8498776661",
+		Theme = {ImageColor3 = "WeakText"}
+	})
+
+	do
+		local hovered = false
+		local down = false
+
+		buttonContainer.MouseEnter:connect(function()
+			hovered = true
+			buttonContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+		end)
+
+		buttonContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				buttonContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		buttonContainer.MouseButton1Down:connect(function()
+			buttonContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				buttonContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		buttonContainer.MouseButton1Click:connect(function()
+			options.Callback()
+		end)
+	end
+end
+
 function Library:keybind(options)
 	options = self:set_defaults({
 		Name = "Keybind",
@@ -929,7 +1076,7 @@ function Library:keybind(options)
 	}, options)
 
 	local keybindContainer = self.container:object("TextButton", {
-		BackgroundColor3 = self.Theme.Secondary,
+		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
 	}):round(7)
 
@@ -939,7 +1086,7 @@ function Library:keybind(options)
 		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
 		Text = options.Name,
 		TextSize = 22,
-		TextColor3 = self.Theme.StrongText,
+		Theme = {TextColor3 = "StrongText"},
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
 
@@ -950,7 +1097,7 @@ function Library:keybind(options)
 			Size = UDim2.new(0.5, -10, 0, 20),
 			Text = options.Description,
 			TextSize = 18,
-			TextColor3 = self.Theme.WeakText,
+			Theme = {TextColor3 = "WeakText"},
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
 	end
@@ -958,13 +1105,15 @@ function Library:keybind(options)
 
 	local keybindDisplay = keybindContainer:object("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0),
-		BackgroundColor3 = self:lighten(self.Theme.Main, 15),
+		Theme = {
+			BackgroundColor3 = {"Main", 15},
+			TextColor3 = "Tertiary"
+		},
 		Position = UDim2.new(1, -20,0, 16),
 		Size = UDim2.new(0, 50,0, 20),
 		TextSize = 12,
-		Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?",
-		TextColor3 = self.Theme.Tertiary
-	}):round(5):stroke(self.Theme.Tertiary)
+		Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
+	}):round(5):stroke("Tertiary")
 
 	do
 		local hovered = false
@@ -973,23 +1122,23 @@ function Library:keybind(options)
 
 		keybindContainer.MouseEnter:connect(function()
 			hovered = true
-			keybindContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
+			keybindContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
 		end)
 
 		keybindContainer.MouseLeave:connect(function()
 			hovered = false
 			if not down then
-				keybindContainer:tween{BackgroundColor3 = self.Theme.Secondary}
+				keybindContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
 			end
 		end)
 
 		keybindContainer.MouseButton1Down:connect(function()
-			keybindContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
+			keybindContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
 		end)
 
 		UserInputService.InputEnded:connect(function(key)
 			if key.UserInputType == Enum.UserInputType.MouseButton1 then
-				keybindContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
+				keybindContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
 			end
 		end)
 
@@ -1007,81 +1156,6 @@ function Library:keybind(options)
 
 		keybindContainer.MouseButton1Click:connect(function()
 			if not listening then listening = true; keybindDisplay.Text = "..." end
-		end)
-	end
-end
-
-function Library:button(options)
-	options = self:set_defaults({
-		Name = "Button",
-		Description = nil,
-		Callback = function() end
-	}, options)
-
-	local buttonContainer = self.container:object("TextButton", {
-		BackgroundColor3 = self.Theme.Secondary,
-		Size = UDim2.new(1, -20, 0, 52)
-	}):round(7)
-
-	local text = buttonContainer:object("TextLabel", {
-		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
-		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
-		Text = options.Name,
-		TextSize = 22,
-		TextColor3 = self.Theme.StrongText,
-		TextXAlignment = Enum.TextXAlignment.Left
-	})
-
-	if options.Description then
-		local description = buttonContainer:object("TextLabel", {
-			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(10, 27),
-			Size = UDim2.new(0.5, -10, 0, 20),
-			Text = options.Description,
-			TextSize = 18,
-			TextColor3 = self.Theme.WeakText,
-			TextXAlignment = Enum.TextXAlignment.Left
-		})
-	end
-
-	local icon = buttonContainer:object("ImageLabel", {
-		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1, -11, 0.5, 0),
-		Size = UDim2.fromOffset(26, 26),
-		Image = "rbxassetid://8498776661",
-		ImageColor3 = self.Theme.WeakText
-	})
-
-	do
-		local hovered = false
-		local down = false
-
-		buttonContainer.MouseEnter:connect(function()
-			hovered = true
-			buttonContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
-		end)
-
-		buttonContainer.MouseLeave:connect(function()
-			hovered = false
-			if not down then
-				buttonContainer:tween{BackgroundColor3 = self.Theme.Secondary}
-			end
-		end)
-
-		buttonContainer.MouseButton1Down:connect(function()
-			buttonContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
-		end)
-
-		UserInputService.InputEnded:connect(function(key)
-			if key.UserInputType == Enum.UserInputType.MouseButton1 then
-				buttonContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
-			end
-		end)
-
-		buttonContainer.MouseButton1Click:connect(function()
-			options.Callback()
 		end)
 	end
 end
