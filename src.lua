@@ -162,13 +162,14 @@ function Library:object(class: string, properties: table)
 		
 		if state then
 			self.fadeFrame.Visible = true
+			self.fadeFrame.BackgroundTransparency = 1
 			self.fadeFrame:tween{BackgroundTransparency = 0, Length = length}
 		else
+			self.fadeFrame.BackgroundTransparency = 0
 			self.fadeFrame:tween({BackgroundTransparency = 1, Length = length}, function()
 				self.fadeFrame.Visible = false
 			end)
 		end
-		
 	end
 
 
@@ -260,8 +261,6 @@ function Library:create(options: table)
 		BackgroundColor3 = options.Theme.Main,
 		Centered = true
 	}):round(10)
-	
-	
 
 	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
@@ -780,10 +779,37 @@ function Library:button(options)
 		Image = "rbxassetid://8498776661",
 		ImageColor3 = self.Theme.WeakText
 	})
-
-	buttonContainer.MouseButton1Click:connect(function()
-		options.Callback()
-	end)
+	
+	do
+		local hovered = false
+		local down = false
+		
+		buttonContainer.MouseEnter:connect(function()
+			hovered = true
+			buttonContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
+		end)
+		
+		buttonContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				buttonContainer:tween{BackgroundColor3 = self.Theme.Secondary}
+			end
+		end)
+		
+		buttonContainer.MouseButton1Down:connect(function()
+			buttonContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
+		end)
+		
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				buttonContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
+			end
+		end)
+		
+		buttonContainer.MouseButton1Click:connect(function()
+			options.Callback()
+			end)
+		end
 end
 
 return setmetatable(Library, {
