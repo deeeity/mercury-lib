@@ -216,10 +216,14 @@ function Library:create(options: table)
 		Centered = true
 	}):round(10)
 
-	local tabButtons = core:object("Frame", {
+	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
 		Position = UDim2.fromOffset(5, 5),
-		BackgroundTransparency = 1
+		BackgroundTransparency = 1,
+		ClipsDescendants = true,
+		ScrollBarThickness = 0,
+		ScrollingDirection = Enum.ScrollingDirection.X,
+		AutomaticCanvasSize = Enum.AutomaticSize.X
 	})
 
 	tabButtons:object("UIListLayout", {
@@ -305,7 +309,7 @@ function Library:create(options: table)
 		Name = "hehehe siuuuuuuuuu",
 		BackgroundTransparency = 0, -- yeah?
 		BackgroundColor3 = options.Theme.Secondary,
-		Size = UDim2.new(0, 125, 1, 0)
+		Size = UDim2.new(0, 125, 0, 25)
 	}):round(5)
 
 	local homeButtonText = homeButton:object("TextLabel", {
@@ -336,9 +340,22 @@ function Library:create(options: table)
 	})
 
 	local tabs = {}
+	
+	-- size handling lol 
+--[[ 	setmetatable(tabs, {
+		__newindex = function(self, i, v)
+			rawset(self, i, v)
+			local absoluteSize = tabButtons.AbsoluteSize.X
+			local newSize = #self + 1
+			for _, t in next, self do
+				local tab = t[2]
+				tab.Size = UDim2.new(0, absoluteSize/newSize, 1, 0)
+			end
+		end
+	}) ]]
 	selectedTab = homeButton
 
-	table.insert(tabs, {homePage, homeButton})
+	tabs[#tabs+1] = {homePage, homeButton}
 
 	do
 		local down = false
@@ -533,10 +550,10 @@ function Library:tab(options)
 	local tabButton = self.navigation:object("TextButton", {
 		BackgroundTransparency = 1,
 		BackgroundColor3 = self.Theme.Secondary,
-		Size = UDim2.new(0, 125, 1, 0)
+		Size = UDim2.new(0, 125, 0, 25)
 	}):round(5)
 
-	table.insert(self.Tabs, {tab, tabButton})
+	self.Tabs[#self.Tabs+1] = {tab, tabButton}
 
 	do
 		local down = false
