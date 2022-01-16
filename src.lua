@@ -52,7 +52,7 @@ local Library = {
 			Main = Color3.fromRGB(230, 245, 250),
 			Secondary = Color3.fromRGB(210, 225, 230),
 			Tertiary = Color3.fromRGB(140, 200, 220),
-			
+
 			StrongText = Color3.fromHSV(0, 20, 0),		
 			WeakText = Color3.fromHSV(0, 0, 60/255),
 			Light = true
@@ -111,19 +111,25 @@ function Library:object(class: string, properties: table)
 
 	methods.AbsoluteObject = localObject
 
-	function methods:tween(options: table)
+	function methods:tween(options: table, callback)
 		local options = Library:set_defaults({
 			Length = 0.2,
 			Style = Enum.EasingStyle.Linear,
 			Direction = Enum.EasingDirection.InOut
 		}, options)
+		callback = callback or function() return end
+
 
 		local ti = TweenInfo.new(options.Length, options.Style, options.Direction)
 		options.Direction = nil
 		options.Style = nil 
 		options.Length = nil
 
-		TweenService:Create(localObject, ti, options):Play()
+		local tween = TweenService:Create(localObject, ti, options); tween:Play()
+		tween.Completed:Connect(function()
+			callback()
+		end)
+
 	end
 
 	function methods:round(radius: number)
@@ -140,6 +146,16 @@ function Library:object(class: string, properties: table)
 		properties.Parent = localObject
 		return Library:object(class, properties)
 	end
+
+
+	-- idk how lmao
+--[[ 	function methods:fadeOut()
+		pcall(function()
+			for _, v in next, localObject.GetDescendants() do
+				
+			end
+		end)
+	end ]]
 
 	function methods:stroke(color: Color3, thickness: number, strokeMode: Enum.ApplyStrokeMode)
 		thickness = thickness or 1
@@ -205,7 +221,7 @@ function Library:create(options: table)
 		Theme = self.Themes.Dark,
 		Link = "https://github.com/deeeity/mercury-lib"
 	}, options)
-	
+
 	if options.Theme.Light then
 		self.darken, self.lighten = self.lighten, self.darken
 	end
@@ -326,7 +342,8 @@ function Library:create(options: table)
 		Position = UDim2.new(0, 25, 0.5, 0),
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, -45, 0.5, 0),
-		Font = Enum.Font.SourceSans
+		Font = Enum.Font.SourceSans,
+		TextTruncate = Enum.TextTruncate.AtEnd
 	})
 
 	local homeButtonIcon = homeButton:object("ImageLabel", {
@@ -345,11 +362,7 @@ function Library:create(options: table)
 	})
 
 	local tabs = {}
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> 3202574ec677b60414f51541224afa22f97583a6
 	-- size handling lol 
 --[[ 	setmetatable(tabs, {
 		__newindex = function(self, i, v)
@@ -514,7 +527,8 @@ function Library:create(options: table)
 		Theme = options.Theme,
 		Tabs = tabs,
 		quickAccess = quickAccess,
-		homeButton = homeButton
+		homeButton = homeButton,
+		homePage = homePage
 	}, Library)
 end
 
@@ -560,7 +574,8 @@ function Library:tab(options)
 	local tabButton = self.navigation:object("TextButton", {
 		BackgroundTransparency = 1,
 		BackgroundColor3 = self.Theme.Secondary,
-		Size = UDim2.new(0, 125, 0, 25)
+		Size = UDim2.new(0, 125, 0, 25),
+		Visible = false
 	}):round(5)
 
 	self.Tabs[#self.Tabs+1] = {tab, tabButton}
@@ -613,7 +628,11 @@ function Library:tab(options)
 		end)
 
 		quickAccessButton.MouseButton1Click:connect(function()
-			tabButton.Visible = true
+			if not tabButton.Visible then
+				tabButton.Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset)
+				tabButton.Visible = true
+				tabButton:tween({Size = UDim2.new(0, 125, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1})
+			end
 		end)
 	end
 
@@ -626,7 +645,8 @@ function Library:tab(options)
 		Position = UDim2.new(0, 25, 0.5, 0),
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, -45, 0.5, 0),
-		Font = Enum.Font.SourceSans
+		Font = Enum.Font.SourceSans,
+		TextTruncate = Enum.TextTruncate.AtEnd
 	})
 
 	local tabButtonIcon = tabButton:object("ImageLabel", {
@@ -648,10 +668,15 @@ function Library:tab(options)
 	})
 
 	tabButtonClose.MouseButton1Click:connect(function()
-		tabButton.Visible = false
-		tab.Visible = false
+		tabButton:tween({Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1}, function()
+			tabButton.Visible = false
+			tab.Visible = false
+			wait()
+		end)
+
 		local visible = {}
 		for _, tab in next, self.Tabs do
+			if not tab[2] == selectedTab then tab[1].Visible = false end
 			if tab[2].Visible then
 				visible[#visible+1] = tab
 			end
@@ -659,9 +684,25 @@ function Library:tab(options)
 		
 		local lastTab = visible[#visible]
 		
-		selectedTab = lastTab[2]
-		lastTab[2]:tween{BackgroundTransparency = 0.15}
-		lastTab[1].Visible = true
+		if #visible == 2 then
+			if not selectedTab == self.homeButton then selectedTab.Visible = false end
+			tab.Visible = false
+			self.homePage.Visible = true
+			self.homeButton:tween{BackgroundTransparency = 0.15}
+			selectedTab = self.homeButton
+		elseif tabButton == lastTab[2] then
+			lastTab = visible[#visible-1]
+			
+			tab.Visible = false
+			lastTab[2]:tween{BackgroundTransparency = 0.15}
+			lastTab[1].Visible = true
+			selectedTab = lastTab[2]
+		else
+			tab.Visible = false
+			lastTab[2]:tween{BackgroundTransparency = 0.15}
+			lastTab[1].Visible = true
+			selectedTab = lastTab[2]
+		end
 	end)
 
 	return setmetatable({
