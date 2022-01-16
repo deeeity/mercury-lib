@@ -57,7 +57,11 @@ local Library = {
 			StrongText = Color3.fromHSV(0, 20, 0),		
 			WeakText = Color3.fromHSV(0, 0, 60/255),
 			Light = true
-		}
+		},
+		Vaporwave = {},
+		OperaGX = {},
+		VisualStudio = {},
+		
 	},
 	Toggled = true,
 	ThemeObjects = {
