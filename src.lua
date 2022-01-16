@@ -39,6 +39,22 @@ local Library = {
 
 			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
+		},
+		Ocean = {
+			Main = Color3.fromRGB(35, 40, 40),
+			Secondary = Color3.fromRGB(60, 65, 65),
+			Tertiary = Color3.fromRGB(85, 150, 145),
+			
+			StrongText = Color3.fromHSV(0, 0, 1),		
+			WeakText = Color3.fromHSV(0, 0, 172/255)
+		},
+		Cyan = {
+			Main = Color3.fromRGB(30, 30, 35),
+			Secondary = Color3.fromRGB(50, 50, 55),
+			Tertiary = Color3.fromRGB(70, 130, 180),
+			
+			StrongText = Color3.fromHSV(0, 0, 1),		
+			WeakText = Color3.fromHSV(0, 0, 172/255)
 		}
 	},
 	Theme = nil
@@ -393,13 +409,13 @@ function Library:create(options: table)
     --[[
         os.date("%X")
     ]]
-	
+
 	local displayName; do
 		local h, s, v = Color3.toHSV(options.Theme.Tertiary)
 		--local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
 		-- was using #efe4ff but for themes sake am using the above
 		local c = self:lighten(options.Theme.Tertiary, 55)
-		
+
 		local displayName = profile:object("TextLabel", {
 			RichText = true,
 			Text = "Welcome, <font color='rgb(" ..  math.floor(c.R*255) .. "," .. math.floor(c.G*255) .. "," .. math.floor(c.B*255) .. ")'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>",
@@ -445,19 +461,19 @@ function Library:create(options: table)
 			end
 		end)
 	end
-	
+
 	local quickAccess = homePage:object("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -20, 0, 180)
 	})
-	
+
 	quickAccess:object("UIGridLayout", {
 		CellPadding = UDim2.fromOffset(10, 10),
 		CellSize = UDim2.fromOffset(55, 55),
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		VerticalAlignment = Enum.VerticalAlignment.Center
 	})
-	
+
 	quickAccess:object("UIPadding", {
 		PaddingBottom = UDim.new(0, 10),
 		PaddingLeft = UDim.new(0, 70),
@@ -492,11 +508,11 @@ function Library:tab(options)
 		ScrollBarThickness = 0,
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
-	
+
 	local quickAccessButton = self.quickAccess:object("TextButton", {
 		BackgroundColor3 = self.Theme.Secondary
 	}):round(5)
-	
+
 	local quickAccessIcon = quickAccessButton:object("ImageLabel", {
 		BackgroundTransparency = 1,
 		ImageColor3 = self.Theme.StrongText,
@@ -560,15 +576,15 @@ function Library:tab(options)
 			tab.Visible = true
 			tabButton.BackgroundTransparency = 0
 		end)
-		
+
 		quickAccessButton.MouseEnter:connect(function()
 			quickAccessButton:tween{BackgroundColor3 = self.Theme.Tertiary}
 		end)
-		
+
 		quickAccessButton.MouseLeave:connect(function()
 			quickAccessButton:tween{BackgroundColor3 = self.Theme.Secondary}
 		end)
-		
+
 		quickAccessButton.MouseButton1Click:connect(function()
 			tabButton.Visible = true
 		end)
