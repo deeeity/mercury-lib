@@ -814,7 +814,6 @@ function Library:toggle(options)
 	local off = "http://www.roblox.com/asset/?id=8498691125"
 
 	local toggled = options.StartingState
-	print(toggled)
 
 	local onIcon = toggleContainer:object("ImageLabel", {
 		AnchorPoint = Vector2.new(1, .5),
