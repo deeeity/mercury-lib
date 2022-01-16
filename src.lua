@@ -700,9 +700,7 @@ function Library:create(options: table)
 		Internal = settingsTabIcon
 	})
 
-	settingsTab:button{
-		Name = "yesssss"
-	}
+	settingsTab:_theme_selector()
 
 	return mt
 end
@@ -1064,6 +1062,84 @@ function Library:button(options)
 
 		buttonContainer.MouseButton1Click:connect(function()
 			options.Callback()
+		end)
+	end
+end
+
+function Library:_theme_selector()
+
+	local themeContainer = self.container:object("Frame", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 90),
+	}):round(7)
+
+	local grid = themeContainer:object("UIGridLayout", {
+		CellPadding = UDim2.fromOffset(20, 20),
+		CellSize = UDim2.fromOffset(math.clamp((themeContainer.AbsoluteSize.X - 80) / 4, 0, 125), 70),
+		VerticalAlignment = Enum.VerticalAlignment.Center
+	})
+	print((themeContainer.AbsoluteSize.X - 80) / 4)
+	
+	themeContainer:object("UIPadding", {
+		PaddingLeft = UDim.new(0, 10)
+	})
+
+	for themeName, themeColors in next, Library.Themes do
+		local count = 0
+
+		local theme = themeContainer:object("TextButton", {
+			BackgroundTransparency = 1
+		})
+		
+		local themeColorsContainer = theme:object("Frame", {
+			Size = UDim2.new(1, 0, 1, -20),
+			BackgroundTransparency = 1
+		}):round(5):stroke("WeakText")
+		
+		local themeNameLabel = theme:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Text = themeName,
+			TextSize = 16,
+			Theme = {TextColor3 = "StrongText"},
+			Size = UDim2.new(1, 0, 0, 20),
+			Position = UDim2.fromScale(0, 1),
+			AnchorPoint = Vector2.new(0, 1)
+		})
+		
+		local index = 0
+		
+		for _, color in next, themeColors do			
+			if not (type(color) == "boolean") then
+				index += 1
+				local colorFrame = themeColorsContainer:object("Frame", {
+					Size = UDim2.fromScale(0.2, 1),
+					AnchorPoint = Vector2.new(0, 0.5),
+					Position = UDim2.fromScale((0.2 * index) - 0.2, 0.5),
+					BackgroundColor3 = color
+				})
+
+				if index == 1 then
+					colorFrame:round(5)
+					colorFrame:object("Frame", {
+						Size = UDim2.fromScale(0.5, 1),
+						AnchorPoint = Vector2.new(1, 0.5),
+						Position = UDim2.fromScale(1, 0.5),
+						BackgroundColor3 = color
+					})
+				elseif index == 5 then
+					colorFrame:round(5)
+					colorFrame:object("Frame", {
+						Size = UDim2.fromScale(0.5, 1),
+						AnchorPoint = Vector2.new(0, 0.5),
+						Position = UDim2.fromScale(0, 0.5),
+						BackgroundColor3 = color
+					})
+				end
+			end
+		end
+
+		theme.MouseButton1Click:connect(function()
+			Library:change_theme(Library.Themes[themeName])
 		end)
 	end
 end
