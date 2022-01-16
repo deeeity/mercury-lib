@@ -148,8 +148,14 @@ function Library:object(class: string, properties: table)
 		properties.Parent = localObject
 		return Library:object(class, properties)
 	end
+
+	function methods:crossfade(p2, length)
+		length = length or .2
+		self:tween({ImageTransparency = 1})
+		p2:tween({ImageTransparency = 0})
+	end
 	
-	function methods:fade(state: bool, colorOverride: Color3, length: number)
+	function methods:fade(state: boolean, colorOverride: Color3, length: number)
 		length = length or 0.2
 		if not rawget(self, "fadeFrame") then
 			local frame = self:object("Frame", {
@@ -195,7 +201,7 @@ function Library:object(class: string, properties: table)
 	})
 end
 
-function Library:toggle(state)
+function Library:show(state)
 	self.Toggled = state
 	self.mainFrame.ClipsDescendants = true
 	if state then
@@ -791,6 +797,105 @@ function Library:tab(options)
 	}, Library)
 end
 
+function Library:toggle(options)
+	options = self:set_defaults({
+		Name = "Toggle",
+		StartingState = false,
+		Description = nil,
+		Callback = function(state) end
+	}, options)
+
+	local toggleContainer = self.container:object("TextButton", {
+		BackgroundColor3 = self.Theme.Secondary,
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local on = "http://www.roblox.com/asset/?id=8498709213"
+	local off = "http://www.roblox.com/asset/?id=8498691125"
+
+	local toggled = options.StartingState
+	print(toggled)
+
+	local onIcon = toggleContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, .5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11,0.5, 0),
+		Size = UDim2.new(0, 26,0, 26),
+		Image = on,
+		ImageColor3 = self.Theme.Tertiary,
+		ImageTransparency = (toggled and 0) or 1
+	})
+
+	local offIcon = toggleContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, .5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11,0.5, 0),
+		Size = UDim2.new(0, 26,0, 26),
+		Image = off,
+		ImageColor3 =Color3.fromRGB(200, 200, 200),
+		ImageTransparency = (toggled and 1) or 0
+	})
+
+	local text = toggleContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		TextColor3 = self.Theme.StrongText,
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = toggleContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			TextColor3 = self.Theme.WeakText,
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+	do
+		local hovered = false
+		local down = false
+		
+		toggleContainer.MouseEnter:connect(function()
+			hovered = true
+			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
+		end)
+		
+		toggleContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				toggleContainer:tween{BackgroundColor3 = self.Theme.Secondary}
+			end
+		end)
+		
+		toggleContainer.MouseButton1Down:connect(function()
+			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
+		end)
+		
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				toggleContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
+			end
+		end)
+		
+		toggleContainer.MouseButton1Click:connect(function()
+			toggled = not toggled
+			if toggled then
+				offIcon:crossfade(onIcon, 0.1)
+			else
+				onIcon:crossfade(offIcon, 0.1)
+			end
+			options.Callback(toggled)
+		end)
+	end
+end
+
 function Library:button(options)
 	options = self:set_defaults({
 		Name = "Button",
@@ -862,8 +967,8 @@ function Library:button(options)
 		
 		buttonContainer.MouseButton1Click:connect(function()
 			options.Callback()
-			end)
-		end
+		end)
+	end
 end
 
 return setmetatable(Library, {
