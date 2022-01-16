@@ -126,7 +126,7 @@ function Library:object(class: string, properties: table)
 		options.Length = nil
 		options.Style = nil 
 		options.Direction = nil
-		
+
 		local tween = TweenService:Create(localObject, ti, options); tween:Play()
 		tween.Completed:Connect(function()
 			callback()
@@ -148,8 +148,14 @@ function Library:object(class: string, properties: table)
 		properties.Parent = localObject
 		return Library:object(class, properties)
 	end
-	
-	function methods:fade(state: bool, colorOverride: Color3, length: number)
+
+	function methods:crossfade(p2, length)
+		length = length or .2
+		self:tween({ImageTransparency = 1})
+		p2:tween({ImageTransparency = 0})
+	end
+
+	function methods:fade(state: boolean, colorOverride: Color3, length: number)
 		length = length or 0.2
 		if not rawget(self, "fadeFrame") then
 			local frame = self:object("Frame", {
@@ -161,7 +167,7 @@ function Library:object(class: string, properties: table)
 			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
 			rawset(self, "fadeFrame", frame)
 		end
-		
+
 		if state then
 			self.fadeFrame.Visible = true
 			self.fadeFrame.BackgroundTransparency = 1
@@ -195,7 +201,7 @@ function Library:object(class: string, properties: table)
 	})
 end
 
-function Library:toggle(state)
+function Library:show(state)
 	self.Toggled = state
 	self.mainFrame.ClipsDescendants = true
 	if state then
@@ -270,7 +276,7 @@ function Library:create(options: table)
 		BackgroundColor3 = options.Theme.Main,
 		Centered = true
 	}):round(10)
-	
+
 	do
 		local S, Event = pcall(function()
 			return core.MouseEnter
@@ -302,18 +308,18 @@ function Library:create(options: table)
 			end)
 		end
 	end
-	
+
 	rawset(core, "oldSize", options.Size)
-	
+
 	self.mainFrame = core
-	
+
 	UserInputService.InputEnded:connect(function(key)
 		if key.KeyCode == Enum.KeyCode.Home then
 			self.Toggled = not self.Toggled
 			Library:toggle(self.Toggled)
 		end
 	end)
-	
+
 	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
 		Position = UDim2.fromOffset(5, 5),
@@ -577,6 +583,15 @@ function Library:create(options: table)
 			end
 		end)
 	end
+	
+	local settingsTabIcon = profile:object("ImageButton", {
+		BackgroundTransparency = 1,
+		ImageColor3 = options.Theme.WeakText,
+		Size = UDim2.fromOffset(24, 24),
+		Position = UDim2.new(1, -10, 1, -10),
+		AnchorPoint = Vector2.new(1, 1),
+		Image = "http://www.roblox.com/asset/?id=8559790237"
+	})
 
 	local quickAccess = homePage:object("Frame", {
 		BackgroundTransparency = 1,
@@ -596,8 +611,8 @@ function Library:create(options: table)
 		PaddingRight = UDim.new(0, 70),
 		PaddingTop = UDim.new(0, 5)
 	})
-
-	return setmetatable({
+	
+	local mt = setmetatable({
 		statusText = status,
 		container = content,
 		navigation = tabButtons,
@@ -607,13 +622,23 @@ function Library:create(options: table)
 		homeButton = homeButton,
 		homePage = homePage
 	}, Library)
+	
+	local settingsTab = Library.tab(mt, {
+		Name = "Settings",
+		Internal = settingsTabIcon
+	})
+	
+	settingsTab:button{
+		Name = "yesssss"
+	}
+
+	return mt
 end
 
 function Library:tab(options)
 	options = self:set_defaults({
 		Name = "New Tab",
 		Icon = "rbxassetid://8497544895"
-
 	}, options)
 
 	local tab = self.container:object("ScrollingFrame", {
@@ -626,18 +651,25 @@ function Library:tab(options)
 		ScrollBarThickness = 0,
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
+	
+	local quickAccessButton
+	local quickAccessIcon
+	
+	if not options.Internal then
+		quickAccessButton = self.quickAccess:object("TextButton", {
+			BackgroundColor3 = self.Theme.Secondary
+		}):round(5)
 
-	local quickAccessButton = self.quickAccess:object("TextButton", {
-		BackgroundColor3 = self.Theme.Secondary
-	}):round(5)
-
-	local quickAccessIcon = quickAccessButton:object("ImageLabel", {
-		BackgroundTransparency = 1,
-		ImageColor3 = self.Theme.StrongText,
-		Image = options.Icon,
-		Size = UDim2.fromScale(0.5, 0.5),
-		Centered = true
-	})
+		quickAccessIcon = quickAccessButton:object("ImageLabel", {
+			BackgroundTransparency = 1,
+			ImageColor3 = self.Theme.StrongText,
+			Image = options.Icon,
+			Size = UDim2.fromScale(0.5, 0.5),
+			Centered = true
+		})
+	else
+		quickAccessButton = options.Internal
+	end
 
 	tab:object("UIListLayout", {
 		Padding = UDim.new(0, 10),
@@ -695,7 +727,7 @@ function Library:tab(options)
 			tab.Visible = true
 			tabButton.BackgroundTransparency = 0
 		end)
-
+		
 		quickAccessButton.MouseEnter:connect(function()
 			quickAccessButton:tween{BackgroundColor3 = self.Theme.Tertiary}
 		end)
@@ -760,9 +792,9 @@ function Library:tab(options)
 				visible[#visible+1] = tab
 			end
 		end
-		
+
 		local lastTab = visible[#visible]
-		
+
 		if #visible == 2 then
 			if not selectedTab == self.homeButton then selectedTab.Visible = false end
 			tab.Visible = false
@@ -771,7 +803,7 @@ function Library:tab(options)
 			selectedTab = self.homeButton
 		elseif tabButton == lastTab[2] then
 			lastTab = visible[#visible-1]
-			
+
 			tab.Visible = false
 			lastTab[2]:tween{BackgroundTransparency = 0.15}
 			lastTab[1].Visible = true
@@ -789,6 +821,104 @@ function Library:tab(options)
 		container = tab,
 		Theme = self.Theme
 	}, Library)
+end
+
+function Library:toggle(options)
+	options = self:set_defaults({
+		Name = "Toggle",
+		StartingState = false,
+		Description = nil,
+		Callback = function(state) end
+	}, options)
+
+	local toggleContainer = self.container:object("TextButton", {
+		BackgroundColor3 = self.Theme.Secondary,
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local on = "http://www.roblox.com/asset/?id=8498709213"
+	local off = "http://www.roblox.com/asset/?id=8498691125"
+
+	local toggled = options.StartingState
+
+	local onIcon = toggleContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, .5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11,0.5, 0),
+		Size = UDim2.new(0, 26,0, 26),
+		Image = on,
+		ImageColor3 = self.Theme.Tertiary,
+		ImageTransparency = (toggled and 0) or 1
+	})
+
+	local offIcon = toggleContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, .5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11,0.5, 0),
+		Size = UDim2.new(0, 26,0, 26),
+		Image = off,
+		ImageColor3 =Color3.fromRGB(200, 200, 200),
+		ImageTransparency = (toggled and 1) or 0
+	})
+
+	local text = toggleContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		TextColor3 = self.Theme.StrongText,
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = toggleContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			TextColor3 = self.Theme.WeakText,
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+	do
+		local hovered = false
+		local down = false
+
+		toggleContainer.MouseEnter:connect(function()
+			hovered = true
+			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
+		end)
+
+		toggleContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				toggleContainer:tween{BackgroundColor3 = self.Theme.Secondary}
+			end
+		end)
+
+		toggleContainer.MouseButton1Down:connect(function()
+			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				toggleContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
+			end
+		end)
+
+		toggleContainer.MouseButton1Click:connect(function()
+			toggled = not toggled
+			if toggled then
+				offIcon:crossfade(onIcon, 0.1)
+			else
+				onIcon:crossfade(offIcon, 0.1)
+			end
+			options.Callback(toggled)
+		end)
+	end
 end
 
 function Library:button(options)
@@ -833,37 +963,37 @@ function Library:button(options)
 		Image = "rbxassetid://8498776661",
 		ImageColor3 = self.Theme.WeakText
 	})
-	
+
 	do
 		local hovered = false
 		local down = false
-		
+
 		buttonContainer.MouseEnter:connect(function()
 			hovered = true
 			buttonContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
 		end)
-		
+
 		buttonContainer.MouseLeave:connect(function()
 			hovered = false
 			if not down then
 				buttonContainer:tween{BackgroundColor3 = self.Theme.Secondary}
 			end
 		end)
-		
+
 		buttonContainer.MouseButton1Down:connect(function()
 			buttonContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
 		end)
-		
+
 		UserInputService.InputEnded:connect(function(key)
 			if key.UserInputType == Enum.UserInputType.MouseButton1 then
 				buttonContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
 			end
 		end)
-		
+
 		buttonContainer.MouseButton1Click:connect(function()
 			options.Callback()
-			end)
-		end
+		end)
+	end
 end
 
 return setmetatable(Library, {
