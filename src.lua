@@ -154,11 +154,7 @@ function Library:object(class: string, properties: table)
 		self:tween({ImageTransparency = 1})
 		p2:tween({ImageTransparency = 0})
 	end
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> 516925481260da20c6dcbbae6b5d2fed48a191e6
 	function methods:fade(state: boolean, colorOverride: Color3, length: number)
 		length = length or 0.2
 		if not rawget(self, "fadeFrame") then
@@ -890,49 +886,29 @@ function Library:toggle(options)
 	do
 		local hovered = false
 		local down = false
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 516925481260da20c6dcbbae6b5d2fed48a191e6
 		toggleContainer.MouseEnter:connect(function()
 			hovered = true
 			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 10)}
 		end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 516925481260da20c6dcbbae6b5d2fed48a191e6
 		toggleContainer.MouseLeave:connect(function()
 			hovered = false
 			if not down then
 				toggleContainer:tween{BackgroundColor3 = self.Theme.Secondary}
 			end
 		end)
-<<<<<<< HEAD
 
 		toggleContainer.MouseButton1Down:connect(function()
 			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
 		end)
 
-=======
-		
-		toggleContainer.MouseButton1Down:connect(function()
-			toggleContainer:tween{BackgroundColor3 = self:lighten(self.Theme.Secondary, 20)}
-		end)
-		
->>>>>>> 516925481260da20c6dcbbae6b5d2fed48a191e6
 		UserInputService.InputEnded:connect(function(key)
 			if key.UserInputType == Enum.UserInputType.MouseButton1 then
 				toggleContainer:tween{BackgroundColor3 = (hovered and self:lighten(self.Theme.Secondary)) or self.Theme.Secondary}
 			end
 		end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 516925481260da20c6dcbbae6b5d2fed48a191e6
 		toggleContainer.MouseButton1Click:connect(function()
 			toggled = not toggled
 			if toggled then
