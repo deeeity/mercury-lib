@@ -60,8 +60,7 @@ local Library = {
 		},
 		Vaporwave = {},
 		OperaGX = {},
-		VisualStudio = {},
-		
+		VisualStudio = {}
 	},
 	Toggled = true,
 	ThemeObjects = {
@@ -1090,61 +1089,69 @@ function Library:_theme_selector()
 
 	for themeName, themeColors in next, Library.Themes do
 		local count = 0
-
-		local theme = themeContainer:object("TextButton", {
-			BackgroundTransparency = 1
-		})
 		
-		local themeColorsContainer = theme:object("Frame", {
-			Size = UDim2.new(1, 0, 1, -20),
-			BackgroundTransparency = 1
-		}):round(5):stroke("WeakText")
-		
-		local themeNameLabel = theme:object("TextLabel", {
-			BackgroundTransparency = 1,
-			Text = themeName,
-			TextSize = 16,
-			Theme = {TextColor3 = "StrongText"},
-			Size = UDim2.new(1, 0, 0, 20),
-			Position = UDim2.fromScale(0, 1),
-			AnchorPoint = Vector2.new(0, 1)
-		})
-		
-		local index = 0
-		
-		for _, color in next, themeColors do			
+		for _, color in next, themeColors do
 			if not (type(color) == "boolean") then
-				index += 1
-				local colorFrame = themeColorsContainer:object("Frame", {
-					Size = UDim2.fromScale(0.2, 1),
-					AnchorPoint = Vector2.new(0, 0.5),
-					Position = UDim2.fromScale((0.2 * index) - 0.2, 0.5),
-					BackgroundColor3 = color
-				})
-
-				if index == 1 then
-					colorFrame:round(5)
-					colorFrame:object("Frame", {
-						Size = UDim2.fromScale(0.5, 1),
-						AnchorPoint = Vector2.new(1, 0.5),
-						Position = UDim2.fromScale(1, 0.5),
-						BackgroundColor3 = color
-					})
-				elseif index == 5 then
-					colorFrame:round(5)
-					colorFrame:object("Frame", {
-						Size = UDim2.fromScale(0.5, 1),
-						AnchorPoint = Vector2.new(0, 0.5),
-						Position = UDim2.fromScale(0, 0.5),
-						BackgroundColor3 = color
-					})
-				end
+				count += 1
 			end
 		end
+		
+		if count >= 5 then
+			local theme = themeContainer:object("TextButton", {
+				BackgroundTransparency = 1
+			})
+			
+			local themeColorsContainer = theme:object("Frame", {
+				Size = UDim2.new(1, 0, 1, -20),
+				BackgroundTransparency = 1
+			}):round(5):stroke("WeakText")
+			
+			local themeNameLabel = theme:object("TextLabel", {
+				BackgroundTransparency = 1,
+				Text = themeName,
+				TextSize = 16,
+				Theme = {TextColor3 = "StrongText"},
+				Size = UDim2.new(1, 0, 0, 20),
+				Position = UDim2.fromScale(0, 1),
+				AnchorPoint = Vector2.new(0, 1)
+			})
+			
+			local index = 0
+		
+		
+			for _, color in next, themeColors do			
+				if not (type(color) == "boolean") then
+					index += 1
+					local colorFrame = themeColorsContainer:object("Frame", {
+						Size = UDim2.fromScale(0.2, 1),
+						AnchorPoint = Vector2.new(0, 0.5),
+						Position = UDim2.fromScale((0.2 * index) - 0.2, 0.5),
+						BackgroundColor3 = color
+					})
 
-		theme.MouseButton1Click:connect(function()
-			Library:change_theme(Library.Themes[themeName])
-		end)
+					if index == 1 then
+						colorFrame:round(5)
+						colorFrame:object("Frame", {
+							Size = UDim2.fromScale(0.5, 1),
+							AnchorPoint = Vector2.new(1, 0.5),
+							Position = UDim2.fromScale(1, 0.5),
+							BackgroundColor3 = color
+						})
+					elseif index == 5 then
+						colorFrame:round(5)
+						colorFrame:object("Frame", {
+							Size = UDim2.fromScale(0.5, 1),
+							AnchorPoint = Vector2.new(0, 0.5),
+							Position = UDim2.fromScale(0, 0.5),
+							BackgroundColor3 = color
+						})
+					end
+				end
+			end
+			theme.MouseButton1Click:connect(function()
+				Library:change_theme(Library.Themes[themeName])
+			end)
+		end
 	end
 end
 
