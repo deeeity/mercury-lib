@@ -9,7 +9,7 @@
                                    __/ |
                                   |___/ 
 
-edited: 1/15
+edited: 1/16
 developers:
 v3rm AbstractPoo	discord Abstract#8007
 v3rm 0xDEITY		discord Deity#0228
@@ -40,21 +40,22 @@ local Library = {
 			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
 		},
-		Ocean = {
-			Main = Color3.fromRGB(35, 40, 40),
-			Secondary = Color3.fromRGB(60, 65, 65),
-			Tertiary = Color3.fromRGB(85, 150, 145),
-			
-			StrongText = Color3.fromHSV(0, 0, 1),		
-			WeakText = Color3.fromHSV(0, 0, 172/255)
-		},
 		Cyan = {
 			Main = Color3.fromRGB(30, 30, 35),
 			Secondary = Color3.fromRGB(50, 50, 55),
 			Tertiary = Color3.fromRGB(70, 130, 180),
-			
+
 			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
+		},
+		Frost = {
+			Main = Color3.fromRGB(),
+			Secondary = Color3.fromRGB(),
+			Tertiary = Color3.fromRGB(),
+			
+			StrongText = Color3.fromHSV(0, 20, 0),		
+			WeakText = Color3.fromHSV(0, 0, 60/255),
+			Light = true
 		}
 	},
 	Theme = nil
@@ -202,8 +203,12 @@ function Library:create(options: table)
 		Name = "Mercury",
 		Size = UDim2.fromOffset(600, 400),
 		Theme = self.Themes.Dark,
-		Link = "https://github.com/repos"
+		Link = "https://github.com/deeeity/mercury-lib"
 	}, options)
+	
+	if options.Theme.Light then
+		self.darken, self.lighten = self.lighten, self.darken
+	end
 
 	local gui = self:object("ScreenGui", {
 		Parent = (RunService:IsStudio() and LocalPlayer.PlayerGui) or game:GetService("CoreGui"),
@@ -216,10 +221,14 @@ function Library:create(options: table)
 		Centered = true
 	}):round(10)
 
-	local tabButtons = core:object("Frame", {
+	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
 		Position = UDim2.fromOffset(5, 5),
-		BackgroundTransparency = 1
+		BackgroundTransparency = 1,
+		ClipsDescendants = true,
+		ScrollBarThickness = 0,
+		ScrollingDirection = Enum.ScrollingDirection.X,
+		AutomaticCanvasSize = Enum.AutomaticSize.X
 	})
 
 	tabButtons:object("UIListLayout", {
@@ -305,7 +314,7 @@ function Library:create(options: table)
 		Name = "hehehe siuuuuuuuuu",
 		BackgroundTransparency = 0, -- yeah?
 		BackgroundColor3 = options.Theme.Secondary,
-		Size = UDim2.new(0, 125, 1, 0)
+		Size = UDim2.new(0, 125, 0, 25)
 	}):round(5)
 
 	local homeButtonText = homeButton:object("TextLabel", {
@@ -336,9 +345,22 @@ function Library:create(options: table)
 	})
 
 	local tabs = {}
+
+	-- size handling lol 
+--[[ 	setmetatable(tabs, {
+		__newindex = function(self, i, v)
+			rawset(self, i, v)
+			local absoluteSize = tabButtons.AbsoluteSize.X
+			local newSize = #self + 1
+			for _, t in next, self do
+				local tab = t[2]
+				tab.Size = UDim2.new(0, absoluteSize/newSize, 1, 0)
+			end
+		end
+	}) ]]
 	selectedTab = homeButton
 
-	table.insert(tabs, {homePage, homeButton})
+	tabs[#tabs+1] = {homePage, homeButton}
 
 	do
 		local down = false
@@ -487,7 +509,8 @@ function Library:create(options: table)
 		navigation = tabButtons,
 		Theme = options.Theme,
 		Tabs = tabs,
-		quickAccess = quickAccess
+		quickAccess = quickAccess,
+		homeButton = homeButton
 	}, Library)
 end
 
@@ -533,10 +556,10 @@ function Library:tab(options)
 	local tabButton = self.navigation:object("TextButton", {
 		BackgroundTransparency = 1,
 		BackgroundColor3 = self.Theme.Secondary,
-		Size = UDim2.new(0, 125, 1, 0)
+		Size = UDim2.new(0, 125, 0, 25)
 	}):round(5)
 
-	table.insert(self.Tabs, {tab, tabButton})
+	self.Tabs[#self.Tabs+1] = {tab, tabButton}
 
 	do
 		local down = false
@@ -622,6 +645,19 @@ function Library:tab(options)
 
 	tabButtonClose.MouseButton1Click:connect(function()
 		tabButton.Visible = false
+		tab.Visible = false
+		local visible = {}
+		for _, tab in next, self.Tabs do
+			if tab[2].Visible then
+				visible[#visible+1] = tab
+			end
+		end
+		
+		local lastTab = visible[#visible]
+		
+		selectedTab = lastTab[2]
+		lastTab[2]:tween{BackgroundTransparency = 0.15}
+		lastTab[1].Visible = true
 	end)
 
 	return setmetatable({
