@@ -78,7 +78,8 @@ local Library = {
 		WeakText = {}
 	},
 	WelcomeText = nil,
-	DisplayName = nil
+	DisplayName = nil,
+	DragSpeed = 0.06
 
 }
 Library.__index = Library
@@ -192,8 +193,8 @@ function Library:object(class: string, properties: table)
 		end
 
 		if state then
-			self.fadeFrame.Visible = true
 			self.fadeFrame.BackgroundTransparency = 1
+			self.fadeFrame.Visible = true
 			self.fadeFrame:tween{BackgroundTransparency = 0, Length = length}
 		else
 			self.fadeFrame.BackgroundTransparency = 0
@@ -374,8 +375,16 @@ function Library:create(options: table)
 								Position = UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),
 								Direction = Enum.EasingDirection.Out,
 								Style = Enum.EasingStyle.Quad,
-								Length = 0.06
+								Length = Library.DragSpeed
 							}
+							
+							--[[core.AbsoluteObject:TweenPosition(
+								UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),           
+								Enum.EasingDirection.In,
+								Enum.EasingStyle.Sine,
+								Library.DragSpeed,
+								true
+							)]]
 						end
 					end
 				end)
@@ -710,6 +719,15 @@ function Library:create(options: table)
 	})
 
 	settingsTab:_theme_selector()
+	
+	settingsTab:slider{
+		Name = "UI Drag Speed",
+		Max = 20,
+		Default = 6,
+		Callback = function(value)
+			Library.DragSpeed = value/100
+		end,
+	}
 
 	return mt
 end
@@ -1008,7 +1026,7 @@ function Library:dropdown(options)
 		Callback = function(item) return end
 	}, options)
 
-	
+
 	local newSize = 0
 
 	local dropdownContainer = self.container:object("TextButton", {
@@ -1018,8 +1036,8 @@ function Library:dropdown(options)
 
 	local text = dropdownContainer:object("TextLabel", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(10, (options.Description and 8) or 16),
-		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 0, 22),
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 15),
+		Size = UDim2.new(0.5, -10, 0, 22),
 		Text = options.Name,
 		TextSize = 22,
 		Theme = {TextColor3 = "StrongText"},
@@ -1082,7 +1100,7 @@ function Library:dropdown(options)
 			itemContainer.Size = UDim2.new(1, -10, 0, newSize)
 		end
 	})
-	
+
 	for i, v in next, options.Items do
 		if typeof(v) == "table" then
 			items[i] = v
@@ -1090,7 +1108,7 @@ function Library:dropdown(options)
 			items[i] = {tostring(v), v}
 		end
 	end
-	
+
 	local toggle;
 
 	for i, item in next, items do
@@ -1109,29 +1127,29 @@ function Library:dropdown(options)
 		do
 			local hovered = false
 			local down = false
-	
+
 			newItem.MouseEnter:connect(function()
 				hovered = true
 				newItem:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
 			end)
-	
+
 			newItem.MouseLeave:connect(function()
 				hovered = false
 				if not down then
 					newItem:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 25)}
 				end
 			end)
-	
+
 			newItem.MouseButton1Down:connect(function()
 				newItem:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
 			end)
-	
+
 			UserInputService.InputEnded:connect(function(key)
 				if key.UserInputType == Enum.UserInputType.MouseButton1 then
 					newItem:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary, 5)) or self:lighten(Library.CurrentTheme.Secondary, 25)}
 				end
 			end)
-	
+
 			newItem.MouseButton1Click:connect(function()
 				toggle()
 				selectedText.Text = newItem.Text
@@ -1269,20 +1287,38 @@ function Library:_theme_selector()
 
 	local themeContainer = self.container:object("Frame", {
 		Theme = {BackgroundColor3 = "Secondary"},
-		Size = UDim2.new(1, -20, 0, 90),
+		Size = UDim2.new(1, -20, 0, 127),
 	}):round(7)
-
-	local grid = themeContainer:object("UIGridLayout", {
-		CellPadding = UDim2.fromOffset(20, 20),
-		CellSize = UDim2.fromOffset(math.clamp((themeContainer.AbsoluteSize.X - 80) / 4, 0, 125), 57),
-		VerticalAlignment = Enum.VerticalAlignment.Center
+	
+	local text = themeContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, 5),
+		Size = UDim2.new(0.5, -10, 0, 22),
+		Text = "Theme",
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
 	})
 	
-	themeContainer:object("UIPadding", {
-		PaddingLeft = UDim.new(0, 10)
+	local colorThemesContainer = themeContainer:object("Frame", {
+		Size = UDim2.new(1, 0, 1, -32),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0, 1, -5),
+		AnchorPoint = Vector2.new(0.5, 1)
+	})
+	
+	local grid = colorThemesContainer:object("UIGridLayout", {
+		CellPadding = UDim2.fromOffset(10, 10),
+		CellSize = UDim2.fromOffset(102, 83),
+		VerticalAlignment = Enum.VerticalAlignment.Center
 	})
 
-	--[[for themeName, themeColors in next, Library.Themes do
+	colorThemesContainer:object("UIPadding", {
+		PaddingLeft = UDim.new(0, 10),
+		PaddingTop = UDim.new(0, 5)
+	})
+
+	for themeName, themeColors in next, Library.Themes do
 		local count = 0
 		
 		for _, color in next, themeColors do
@@ -1292,14 +1328,14 @@ function Library:_theme_selector()
 		end
 		
 		if count >= 5 then
-			local theme = themeContainer:object("TextButton", {
+			local theme = colorThemesContainer:object("TextButton", {
 				BackgroundTransparency = 1
 			})
 			
 			local themeColorsContainer = theme:object("Frame", {
 				Size = UDim2.new(1, 0, 1, -20),
 				BackgroundTransparency = 1
-			}):round(5):stroke("WeakText")
+			})
 			
 			local themeNameLabel = theme:object("TextLabel", {
 				BackgroundTransparency = 1,
@@ -1315,34 +1351,35 @@ function Library:_theme_selector()
 				Centered = true,
 				Size = UDim2.fromScale(1, 1),
 				BackgroundColor3 = themeColors.Main
-			}):round(5)
+			}):round(4)
 
 			local colorSecondary = colorMain:object("Frame", {
 				Centered = true,
-				Size = UDim2.new(1, -10, 1, -10),
+				Size = UDim2.new(1, -16, 1, -16),
 				BackgroundColor3 = themeColors.Secondary
-			}):round(5)
+			}):round(4)
 
 			colorSecondary:object("UIListLayout", {
 				Padding = UDim.new(0, 5)
 			})
 
 			colorSecondary:object("UIPadding", {
-				PaddingTop = UDim.new(0, 5)
+				PaddingTop = UDim.new(0, 5),
+				PaddingLeft = UDim.new(0, 5)
 			})
 
 			local colorTertiary = colorSecondary:object("Frame", {
-				Size = UDim2.new(1, -10, 0, 9),
+				Size = UDim2.new(1, -20, 0, 9),
 				BackgroundColor3 = themeColors.Tertiary
 			}):round(100)
 
 			local colorStrong = colorSecondary:object("Frame", {
-				Size = UDim2.new(1, -15, 0, 9),
+				Size = UDim2.new(1, -30, 0, 9),
 				BackgroundColor3 = themeColors.StrongText
 			}):round(100)
 
 			local colorTertiary = colorSecondary:object("Frame", {
-				Size = UDim2.new(1, -20, 0, 9),
+				Size = UDim2.new(1, -40, 0, 9),
 				BackgroundColor3 = themeColors.WeakText
 			}):round(100)
 
@@ -1350,7 +1387,7 @@ function Library:_theme_selector()
 				Library:change_theme(Library.Themes[themeName])
 			end)
 		end
-	end]]
+	end
 end
 
 function Library:keybind(options)
@@ -1444,6 +1481,118 @@ function Library:keybind(options)
 		end)
 	end
 end
+
+function Library:slider(options)
+	options = self:set_defaults({
+		Name = "Slider",
+		Default = 50,
+		Min = 0,
+		Max = 100,
+		Callback = function() end
+	}, options)
+
+
+	local sliderContainer = self.container:object("TextButton", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = sliderContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, 5),
+		Size = UDim2.new(0.5, -10, 0, 22),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = sliderContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			Theme = {TextColor3 = "WeakText"},
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+		sliderContainer.Size = UDim2.new(1, -20, 0, 72)
+	end
+	
+	local valueText = sliderContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -10, 0, 10),
+		Size = UDim2.fromOffset(100, 16),
+		Text = options.Default,
+		TextSize = 16,
+		Theme = {TextColor3 = "WeakText"},
+		TextXAlignment = Enum.TextXAlignment.Right
+	})
+
+	local sliderBar = sliderContainer:object("Frame", {
+		Theme = {BackgroundColor3 = {"Secondary", -20}},
+		AnchorPoint = Vector2.new(0.5, 1),
+		Size = UDim2.new(1, -20, 0, 5),
+		Position = UDim2.new(0.5, 0, 1, -12)
+	}):round(100)
+	
+	local sliderLine = sliderBar:object("Frame", {
+		Size = UDim2.fromScale(((options.Default - options.Min) / (options.Max - options.Min)), 1),
+		Theme = {BackgroundColor3 = "Tertiary"}
+	}):round(100)
+	
+	local sliderBall = sliderLine:object("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(1, 0.5),
+		Size = UDim2.fromOffset(14, 14),
+		Theme = {BackgroundColor3 = {"Tertiary", 20}}
+	}):round(100)
+	
+	do
+		local hovered = false
+		local down = false
+
+		sliderContainer.MouseEnter:connect(function()
+			hovered = true
+			sliderContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+		end)
+
+		sliderContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				sliderContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				down = false
+				sliderContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
+			end
+		end)
+		
+		sliderContainer.MouseButton1Down:connect(function()
+			sliderContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
+			down = true
+			while RunService.RenderStepped:wait() and down do
+				local percentage = math.clamp((Mouse.X - sliderBar.AbsolutePosition.X) / (sliderBar.AbsoluteSize.X), 0, 1)
+				local value = ((options.Max - options.Min) * percentage) + options.Min
+				value = math.floor(value)
+				valueText.Text = value
+				sliderLine:tween{
+					Length = 0.06,
+					Size = UDim2.fromScale(percentage, 1)
+				}
+				options.Callback(value)
+			end
+		end)
+
+	end	
+end
+
+-- add to settings thingy bounds
 
 return setmetatable(Library, {
 	__index = function(_, i)
