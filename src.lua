@@ -1219,10 +1219,9 @@ function Library:_theme_selector()
 
 	local grid = themeContainer:object("UIGridLayout", {
 		CellPadding = UDim2.fromOffset(20, 20),
-		CellSize = UDim2.fromOffset(math.clamp((themeContainer.AbsoluteSize.X - 80) / 4, 0, 125), 70),
+		CellSize = UDim2.fromOffset(math.clamp((themeContainer.AbsoluteSize.X - 80) / 4, 0, 125), 57),
 		VerticalAlignment = Enum.VerticalAlignment.Center
 	})
-	print((themeContainer.AbsoluteSize.X - 80) / 4)
 	
 	themeContainer:object("UIPadding", {
 		PaddingLeft = UDim.new(0, 10)
@@ -1257,38 +1256,41 @@ function Library:_theme_selector()
 				AnchorPoint = Vector2.new(0, 1)
 			})
 			
-			local index = 0
-		
-		
-			for _, color in next, themeColors do			
-				if not (type(color) == "boolean") then
-					index += 1
-					local colorFrame = themeColorsContainer:object("Frame", {
-						Size = UDim2.fromScale(0.2, 1),
-						AnchorPoint = Vector2.new(0, 0.5),
-						Position = UDim2.fromScale((0.2 * index) - 0.2, 0.5),
-						BackgroundColor3 = color
-					})
+			local colorMain = themeColorsContainer:object("Frame", {
+				Centered = true,
+				Size = UDim2.fromScale(1, 1),
+				BackgroundColor3 = themeColors.Main
+			}):round(5)
 
-					if index == 1 then
-						colorFrame:round(5)
-						colorFrame:object("Frame", {
-							Size = UDim2.fromScale(0.5, 1),
-							AnchorPoint = Vector2.new(1, 0.5),
-							Position = UDim2.fromScale(1, 0.5),
-							BackgroundColor3 = color
-						})
-					elseif index == 5 then
-						colorFrame:round(5)
-						colorFrame:object("Frame", {
-							Size = UDim2.fromScale(0.5, 1),
-							AnchorPoint = Vector2.new(0, 0.5),
-							Position = UDim2.fromScale(0, 0.5),
-							BackgroundColor3 = color
-						})
-					end
-				end
-			end
+			local colorSecondary = colorMain:object("Frame", {
+				Centered = true,
+				Size = UDim2.new(1, -10, 1, -10),
+				BackgroundColor3 = themeColors.Secondary
+			}):round(5)
+
+			colorSecondary:object("UIListLayout", {
+				Padding = UDim.new(0, 5)
+			})
+
+			colorSecondary:object("UIPadding", {
+				PaddingTop = UDim.new(0, 5)
+			})
+
+			local colorTertiary = colorSecondary:object("Frame", {
+				Size = UDim2.new(1, -10, 0, 9),
+				BackgroundColor3 = themeColors.Tertiary
+			}):round(100)
+
+			local colorStrong = colorSecondary:object("Frame", {
+				Size = UDim2.new(1, -15, 0, 9),
+				BackgroundColor3 = themeColors.StrongText
+			}):round(100)
+
+			local colorTertiary = colorSecondary:object("Frame", {
+				Size = UDim2.new(1, -20, 0, 9),
+				BackgroundColor3 = themeColors.WeakText
+			}):round(100)
+
 			theme.MouseButton1Click:connect(function()
 				Library:change_theme(Library.Themes[themeName])
 			end)
