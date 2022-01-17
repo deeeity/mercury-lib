@@ -703,7 +703,7 @@ function Library:create(options: table)
 		PaddingRight = UDim.new(0, 70),
 		PaddingTop = UDim.new(0, 5)
 	})
-
+	
 	local mt = setmetatable({
 		statusText = status,
 		container = content,
@@ -712,7 +712,8 @@ function Library:create(options: table)
 		Tabs = tabs,
 		quickAccess = quickAccess,
 		homeButton = homeButton,
-		homePage = homePage
+		homePage = homePage,
+		nilFolder = core:object("Folder")
 	}, Library)
 
 	local settingsTab = Library.tab(mt, {
@@ -782,7 +783,7 @@ function Library:tab(options)
 
 	local tabButton = Library:object("TextButton", {
 		BackgroundTransparency = 1,
-		Parent = nil,
+		Parent = self.nilFolder.AbsoluteObject,
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(0, 125, 0, 25),
 		Visible = false
@@ -884,7 +885,7 @@ function Library:tab(options)
 		tabButton:tween({Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1}, function()
 			tabButton.Visible = false
 			tab.Visible = false
-			tabButton.Parent = nil
+			tabButton.Parent = self.nilFolder.AbsoluteObject
 			wait()
 		end)
 
@@ -897,7 +898,7 @@ function Library:tab(options)
 		end
 
 		local lastTab = visible[#visible]
-		
+
 		if selectedTab == self.homeButton then
 			tab.Visible = false
 		elseif #visible == 2 then
