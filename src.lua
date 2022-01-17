@@ -64,6 +64,14 @@ local Library = {
 			WeakText = Color3.fromHSV(0, 0, 60/255),
 			Light = true
 		},
+		Rust = {
+			Main = Color3.fromRGB(37, 35, 33),
+			Secondary = Color3.fromRGB(65, 63, 63),
+			Tertiary = Color3.fromRGB(237, 94, 38),
+
+			StrongText = Color3.fromHSV(0, 0, 1),		
+			WeakText = Color3.fromHSV(0, 0, 172/255)
+		},
 		Vaporwave = {},
 		OperaGX = {},
 		VisualStudio = {}
@@ -97,7 +105,7 @@ end
 
 function Library:change_theme(toTheme)
 	Library.CurrentTheme = toTheme
-	local c = self:lighten(toTheme.Tertiary, 55)
+	local c = self:lighten(toTheme.Tertiary, 20)
 	Library.DisplayName.Text = "Welcome, <font color='rgb(" ..  math.floor(c.R*255) .. "," .. math.floor(c.G*255) .. "," .. math.floor(c.B*255) .. ")'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>"
 	for color, objects in next, Library.ThemeObjects do
 		local themeColor = Library.CurrentTheme[color]
@@ -627,14 +635,14 @@ function Library:create(options: table)
 		local h, s, v = Color3.toHSV(options.Theme.Tertiary)
 		--local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
 		-- was using #efe4ff but for themes sake am using the above
-		local c = self:lighten(options.Theme.Tertiary, 55)
+		local c = self:lighten(options.Theme.Tertiary, 20)
 
 		local displayName = profile:object("TextLabel", {
 			RichText = true,
 			Text = "Welcome, <font color='rgb(" ..  math.floor(c.R*255) .. "," .. math.floor(c.G*255) .. "," .. math.floor(c.B*255) .. ")'> <b>" .. LocalPlayer.DisplayName .. "</b> </font>",
 			TextScaled = true,
 			Position = UDim2.new(0, 105,0, 10),
-			Theme = {TextColor3 = {"Tertiary", 30}},
+			Theme = {TextColor3 = {"Tertiary", 10}},
 			Size = UDim2.new(0, 400,0, 40),
 			BackgroundTransparency = 1,
 			TextXAlignment = Enum.TextXAlignment.Left
@@ -646,7 +654,7 @@ function Library:create(options: table)
 		Text = "@" .. LocalPlayer.Name,
 		TextScaled = true,
 		Position = UDim2.new(0, 105,0, 47),
-		Theme = {TextColor3 = {"Tertiary", 10}},
+		Theme = {TextColor3 = "Tertiary"},
 		Size = UDim2.new(0, 400,0, 20),
 		BackgroundTransparency = 1,
 		TextXAlignment = Enum.TextXAlignment.Left
@@ -703,7 +711,7 @@ function Library:create(options: table)
 		PaddingRight = UDim.new(0, 70),
 		PaddingTop = UDim.new(0, 5)
 	})
-	
+
 	local mt = setmetatable({
 		statusText = status,
 		container = content,
