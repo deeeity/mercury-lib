@@ -193,7 +193,7 @@ function Library:object(class: string, properties: table)
 		else
 			self.fadeFrame.BackgroundColor3 = colorOverride or self.BackgroundColor3
 		end
-		
+
 		if state then
 			self.fadeFrame.BackgroundTransparency = 1
 			self.fadeFrame.Visible = true
@@ -726,9 +726,9 @@ function Library:create(options: table)
 	settingsTab:slider{
 		Name = "UI Drag Speed",
 		Max = 20,
-		Default = 6,
+		Default = 14,
 		Callback = function(value)
-			Library.DragSpeed = value/100
+			Library.DragSpeed = (20 - value)/100
 		end,
 	}
 
