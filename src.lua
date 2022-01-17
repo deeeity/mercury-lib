@@ -377,7 +377,7 @@ function Library:create(options: table)
 								Style = Enum.EasingStyle.Quad,
 								Length = Library.DragSpeed
 							}
-							
+
 							--[[core.AbsoluteObject:TweenPosition(
 								UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),           
 								Enum.EasingDirection.In,
@@ -523,7 +523,7 @@ function Library:create(options: table)
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 5, 0.5, 0),
 		Size = UDim2.new(0, 15, 0, 15),
-		Image = "http://www.roblox.com/asset/?id=8497544895",
+		Image = "http://www.roblox.com/asset/?id=8569322835",
 		Theme = {ImageColor3 = "StrongText"}
 	})
 
@@ -715,11 +715,12 @@ function Library:create(options: table)
 
 	local settingsTab = Library.tab(mt, {
 		Name = "Settings",
-		Internal = settingsTabIcon
+		Internal = settingsTabIcon,
+		Icon = "rbxassetid://8559790237"
 	})
 
 	settingsTab:_theme_selector()
-	
+
 	settingsTab:slider{
 		Name = "UI Drag Speed",
 		Max = 20,
@@ -735,7 +736,7 @@ end
 function Library:tab(options)
 	options = self:set_defaults({
 		Name = "New Tab",
-		Icon = "rbxassetid://8497544895"
+		Icon = "rbxassetid://8569322835"
 	}, options)
 
 	local tab = self.container:object("ScrollingFrame", {
@@ -1083,7 +1084,7 @@ function Library:dropdown(options)
 		Size = UDim2.new(1, -10, 0, 0),
 		ClipsDescendants = true
 	})
-	
+
 	selectedText.Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20)
 
 	local _gridItemContainer = itemContainer:object("UIGridLayout", {
@@ -1292,7 +1293,7 @@ function Library:_theme_selector()
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 127),
 	}):round(7)
-	
+
 	local text = themeContainer:object("TextLabel", {
 		BackgroundTransparency = 1,
 		Position = UDim2.fromOffset(10, 5),
@@ -1302,14 +1303,14 @@ function Library:_theme_selector()
 		Theme = {TextColor3 = "StrongText"},
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
-	
+
 	local colorThemesContainer = themeContainer:object("Frame", {
 		Size = UDim2.new(1, 0, 1, -32),
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0.5, 0, 1, -5),
 		AnchorPoint = Vector2.new(0.5, 1)
 	})
-	
+
 	local grid = colorThemesContainer:object("UIGridLayout", {
 		CellPadding = UDim2.fromOffset(10, 10),
 		CellSize = UDim2.fromOffset(102, 83),
@@ -1323,23 +1324,23 @@ function Library:_theme_selector()
 
 	for themeName, themeColors in next, Library.Themes do
 		local count = 0
-		
+
 		for _, color in next, themeColors do
 			if not (type(color) == "boolean") then
 				count += 1
 			end
 		end
-		
+
 		if count >= 5 then
 			local theme = colorThemesContainer:object("TextButton", {
 				BackgroundTransparency = 1
 			})
-			
+
 			local themeColorsContainer = theme:object("Frame", {
 				Size = UDim2.new(1, 0, 1, -20),
 				BackgroundTransparency = 1
 			})
-			
+
 			local themeNameLabel = theme:object("TextLabel", {
 				BackgroundTransparency = 1,
 				Text = themeName,
@@ -1349,7 +1350,7 @@ function Library:_theme_selector()
 				Position = UDim2.fromScale(0, 1),
 				AnchorPoint = Vector2.new(0, 1)
 			})
-			
+
 			local colorMain = themeColorsContainer:object("Frame", {
 				Centered = true,
 				Size = UDim2.fromScale(1, 1),
@@ -1439,7 +1440,7 @@ function Library:keybind(options)
 		TextSize = 12,
 		Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
 	}):round(5):stroke("Tertiary")
-	
+
 	keybindDisplay.Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20)
 
 	do
@@ -1525,7 +1526,7 @@ function Library:slider(options)
 		})
 		sliderContainer.Size = UDim2.new(1, -20, 0, 72)
 	end
-	
+
 	local valueText = sliderContainer:object("TextLabel", {
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(1, 0),
@@ -1543,19 +1544,19 @@ function Library:slider(options)
 		Size = UDim2.new(1, -20, 0, 5),
 		Position = UDim2.new(0.5, 0, 1, -12)
 	}):round(100)
-	
+
 	local sliderLine = sliderBar:object("Frame", {
 		Size = UDim2.fromScale(((options.Default - options.Min) / (options.Max - options.Min)), 1),
 		Theme = {BackgroundColor3 = "Tertiary"}
 	}):round(100)
-	
+
 	local sliderBall = sliderLine:object("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(1, 0.5),
 		Size = UDim2.fromOffset(14, 14),
 		Theme = {BackgroundColor3 = {"Tertiary", 20}}
 	}):round(100)
-	
+
 	do
 		local hovered = false
 		local down = false
@@ -1578,7 +1579,7 @@ function Library:slider(options)
 				sliderContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
 			end
 		end)
-		
+
 		sliderContainer.MouseButton1Down:connect(function()
 			sliderContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
 			down = true
