@@ -150,10 +150,12 @@ function Library:object(class: string, properties: table)
 		options.Direction = nil
 
 		local tween = TweenService:Create(localObject, ti, options); tween:Play()
+		
 		tween.Completed:Connect(function()
 			callback()
 		end)
-
+		
+		return tween
 	end
 
 	function methods:round(radius: number)
@@ -1501,7 +1503,7 @@ function Library:slider(options)
 
 	local sliderContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
-		Size = UDim2.new(1, -20, 0, 52)
+		Size = UDim2.new(1, -20, 0, 56)
 	}):round(7)
 
 	local text = sliderContainer:object("TextLabel", {
@@ -1524,19 +1526,22 @@ function Library:slider(options)
 			Theme = {TextColor3 = "WeakText"},
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
-		sliderContainer.Size = UDim2.new(1, -20, 0, 72)
+		sliderContainer.Size = UDim2.new(1, -20, 0, 76)
 	end
 
 	local valueText = sliderContainer:object("TextLabel", {
-		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(1, 0),
+		Theme = {
+			BackgroundColor3 = {"Main", 15},
+			TextColor3 = "Tertiary"
+		},
 		Position = UDim2.new(1, -10, 0, 10),
-		Size = UDim2.fromOffset(100, 16),
-		Text = options.Default,
-		TextSize = 16,
-		Theme = {TextColor3 = "WeakText"},
-		TextXAlignment = Enum.TextXAlignment.Right
-	})
+		Size = UDim2.new(0, 50,0, 20),
+		TextSize = 12,
+		Text = options.Default
+	}):round(5):stroke("Tertiary")
+
+	valueText.Size = UDim2.fromOffset(valueText.TextBounds.X + 20, 20)
 
 	local sliderBar = sliderContainer:object("Frame", {
 		Theme = {BackgroundColor3 = {"Secondary", -20}},
@@ -1583,11 +1588,16 @@ function Library:slider(options)
 		sliderContainer.MouseButton1Down:connect(function()
 			sliderContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
 			down = true
+			local tween = valueText:tween{Size = UDim2.fromOffset(valueText.TextBounds.X + 20, 20)}
 			while RunService.RenderStepped:wait() and down do
 				local percentage = math.clamp((Mouse.X - sliderBar.AbsolutePosition.X) / (sliderBar.AbsoluteSize.X), 0, 1)
 				local value = ((options.Max - options.Min) * percentage) + options.Min
 				value = math.floor(value)
 				valueText.Text = value
+				if tween.PlaybackState == Enum.PlaybackState.Completed then
+					tween = valueText:tween{Size = UDim2.fromOffset(valueText.TextBounds.X + 20, 20)}
+				end
+				
 				sliderLine:tween{
 					Length = 0.06,
 					Size = UDim2.fromScale(percentage, 1)
