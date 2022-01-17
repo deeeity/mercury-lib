@@ -1227,7 +1227,7 @@ function Library:_theme_selector()
 		PaddingLeft = UDim.new(0, 10)
 	})
 
-	for themeName, themeColors in next, Library.Themes do
+	--[[for themeName, themeColors in next, Library.Themes do
 		local count = 0
 		
 		for _, color in next, themeColors do
@@ -1295,7 +1295,7 @@ function Library:_theme_selector()
 				Library:change_theme(Library.Themes[themeName])
 			end)
 		end
-	end
+	end]]
 end
 
 function Library:keybind(options)
