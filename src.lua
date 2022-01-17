@@ -1083,8 +1083,8 @@ function Library:dropdown(options)
 	for i, item in next, options.Items do
 		local newItem = itemContainer:object("TextButton", {
 			Theme = {
-				BackgroundColor3 = self:lighten(self.CurrentTheme.Secondary, 15),
-				TextColor3 = self:lighten(self.CurrentTheme.StrongText, 25)
+				BackgroundColor3 = {"Secondary", 15},
+				TextColor3 = {"StrongText", 25}
 			},
 			Text = tostring(item),
 			TextSize = 14
