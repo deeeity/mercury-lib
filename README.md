@@ -14,3 +14,5 @@ MercuryLib is a free and open sourced Roblox UI library.
 ... more to be added.
 
 Created by [Deity#0228] and [Abstract#8007]
+
+add https://coolors.co/fffcf2-ccc5b9-403d39-252422-eb5e28
