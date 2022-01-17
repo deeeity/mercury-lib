@@ -1008,6 +1008,9 @@ function Library:dropdown(options)
 		Callback = function(item) return end
 	}, options)
 
+	
+	local newSize = 0
+
 	local dropdownContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
@@ -1015,8 +1018,8 @@ function Library:dropdown(options)
 
 	local text = dropdownContainer:object("TextLabel", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
-		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Position = UDim2.fromOffset(10, (options.Description and 8) or 16),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 0, 22),
 		Text = options.Name,
 		TextSize = 22,
 		Theme = {TextColor3 = "StrongText"},
@@ -1036,9 +1039,9 @@ function Library:dropdown(options)
 	end
 
 	local icon = dropdownContainer:object("ImageLabel", {
-		AnchorPoint = Vector2.new(1, 0.5),
+		AnchorPoint = Vector2.new(1, 0),
 		BackgroundTransparency = 1,
-		Position = UDim2.new(1, -11, 0.5, 0),
+		Position = UDim2.new(1, -11, 0, 12),
 		Size = UDim2.fromOffset(26, 26),
 		Image = "rbxassetid://8498840035",
 		Theme = {ImageColor3 = "Tertiary"}
@@ -1075,41 +1078,93 @@ function Library:dropdown(options)
 	local items = setmetatable({}, {
 		__newindex = function(self, i, v)
 			rawset(self, i, v)
-			local newSize = (25 * #self) + 5
+			newSize = (25 * #self) + 5
 			itemContainer.Size = UDim2.new(1, -10, 0, newSize)
 		end
 	})
+	
+	for i, v in next, options.Items do
+		if typeof(v) == "table" then
+			items[i] = v
+		else
+			items[i] = {tostring(v), v}
+		end
+	end
+	
+	local toggle;
 
-	for i, item in next, options.Items do
+	for i, item in next, items do
+		local label = item[1]
+		local value = item[2]
+
 		local newItem = itemContainer:object("TextButton", {
 			Theme = {
-				BackgroundColor3 = {"Secondary", 15},
+				BackgroundColor3 = {"Secondary", 25},
 				TextColor3 = {"StrongText", 25}
 			},
-			Text = tostring(item),
+			Text = label,
 			TextSize = 14
 		}):round(5)
-		items[i] = newItem
+
+		do
+			local hovered = false
+			local down = false
+	
+			newItem.MouseEnter:connect(function()
+				hovered = true
+				newItem:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+			end)
+	
+			newItem.MouseLeave:connect(function()
+				hovered = false
+				if not down then
+					newItem:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 25)}
+				end
+			end)
+	
+			newItem.MouseButton1Down:connect(function()
+				newItem:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
+			end)
+	
+			UserInputService.InputEnded:connect(function(key)
+				if key.UserInputType == Enum.UserInputType.MouseButton1 then
+					newItem:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary, 5)) or self:lighten(Library.CurrentTheme.Secondary, 25)}
+				end
+			end)
+	
+			newItem.MouseButton1Click:connect(function()
+				toggle()
+				selectedText.Text = newItem.Text
+				options.Callback(value)
+			end)
+		end
+
+		items[i] = {{label, value}, newItem} 
 	end
+
+	itemContainer.Size = UDim2.new(1, -10, 0, 0)
 
 	do
 		local hovered = false
 		local down = false
 		local open = false
 
-		local function toggle()
+		toggle = function()
 			open = not open
 			if open then
-				local newSize = (25 * #items) + 5
-				itemContainer.Size = UDim2.new(1, -10, 0, newSize)
+				itemContainer:tween{Size = UDim2.new(1, -10, 0, newSize)}
+				dropdownContainer:tween{Size = UDim2.new(1, -20, 0, 52 + newSize)}
+				icon:tween{Rotation = 180, Position = UDim2.new(1, -11, 0, 15)}
 			else
-				itemContainer.Size = UDim2.new(1, -10, 0, 0)
+				itemContainer:tween{Size = UDim2.new(1, -10, 0, 0)}
+				dropdownContainer:tween{Size = UDim2.new(1, -20, 0, 52)}
+				icon:tween{Rotation = 0, Position = UDim2.new(1, -11, 0, 12)}
 			end
 		end
 
 		dropdownContainer.MouseEnter:connect(function()
 			hovered = true
-			selectedText:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+			dropdownContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
 		end)
 
 		dropdownContainer.MouseLeave:connect(function()
