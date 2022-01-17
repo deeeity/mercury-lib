@@ -1083,7 +1083,7 @@ function Library:_theme_selector()
 
 	local grid = themeContainer:object("UIGridLayout", {
 		CellPadding = UDim2.fromOffset(20, 20),
-		CellSize = UDim2.fromOffset(math.clamp((themeContainer.AbsoluteSize.X - 80) / 4, 0, 125), 70),
+		CellSize = UDim2.fromOffset(math.clamp((themeContainer.AbsoluteSize.X - 80) / 4, 0, 125), 57),
 		VerticalAlignment = Enum.VerticalAlignment.Center
 	})
 	
@@ -1143,17 +1143,17 @@ function Library:_theme_selector()
 			local colorTertiary = colorSecondary:object("Frame", {
 				Size = UDim2.new(1, -10, 0, 9),
 				BackgroundColor3 = themeColors.Tertiary
-			})
+			}):round(100)
 
 			local colorStrong = colorSecondary:object("Frame", {
 				Size = UDim2.new(1, -15, 0, 9),
 				BackgroundColor3 = themeColors.StrongText
-			})
+			}):round(100)
 
 			local colorTertiary = colorSecondary:object("Frame", {
 				Size = UDim2.new(1, -20, 0, 9),
 				BackgroundColor3 = themeColors.WeakText
-			})
+			}):round(100)
 
 			theme.MouseButton1Click:connect(function()
 				Library:change_theme(Library.Themes[themeName])
