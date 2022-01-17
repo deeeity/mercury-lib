@@ -713,6 +713,7 @@ function Library:create(options: table)
 	})
 
 	local mt = setmetatable({
+		core = core,
 		statusText = status,
 		container = content,
 		navigation = tabButtons,
@@ -932,7 +933,8 @@ function Library:tab(options)
 	return setmetatable({
 		statusText = self.statusText,
 		container = tab,
-		Theme = self.Theme
+		Theme = self.Theme,
+		core = self.core
 	}, Library)
 end
 
@@ -1501,6 +1503,152 @@ function Library:keybind(options)
 		keybindContainer.MouseButton1Click:connect(function()
 			if not listening then listening = true; keybindDisplay.Text = "..." end
 		end)
+	end
+end
+
+local _temporaryPromptButtons = {}
+
+function Library:prompt(options)
+	options = self:set_defaults({
+		Title = "Prompt",
+		Text = "yo momma dead",
+		Buttons = {
+			ok = function()
+				return true
+			end
+		}
+	}, options)
+
+	local count = 0; for a, _ in next, options.Buttons do
+		count += 1
+	end
+
+	local darkener = self.core:object("Frame", {
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 1)
+	}):round(10)
+
+	local promptContainer = darkener:object("Frame", {
+		Theme = {BackgroundColor3 = "Main"},
+		BackgroundTransparency = 1,
+		Centered = true,
+		Size = UDim2.fromOffset(200, 120)
+	}):round(6)
+
+	local _promptContainerStroke = promptContainer:object("UIStroke", {
+		Theme = {Color = "Tertiary"},
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Transparency = 1
+	})
+
+	local _padding = promptContainer:object("UIPadding", {
+		PaddingTop = UDim.new(0, 5),
+		PaddingLeft = UDim.new(0, 5),
+		PaddingBottom = UDim.new(0, 5),
+		PaddingRight = UDim.new(0, 5)
+	})
+
+	local promptTitle = promptContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 0, 20),
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Font = Enum.Font.SourceSansBold,
+		Text = options.Title,
+		Theme = {TextColor3 = {"Tertiary", 15}},
+		TextSize = 16,
+		TextTransparency = 1
+	})
+
+	local promptText = promptContainer:object("TextLabel", {
+		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0,0, 26),
+		Size = UDim2.new(1, -20,1, -60),
+		TextSize = 14,
+		Theme = {TextColor3 = "StrongText"},
+		Text = options.Text,
+		TextTransparency = 1,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.AtEnd
+	})
+
+	local buttonHolder = promptContainer:object("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0,1, -5),
+		Size = UDim2.new(1, 0,0, 20)
+	})
+
+	local _gridButtonHolder = buttonHolder:object("UIGridLayout", {
+		CellPadding = UDim2.new(0, 10,0, 5),
+		CellSize = UDim2.new(1/count, -10, 1, 0),
+		FillDirection = Enum.FillDirection.Horizontal,
+		HorizontalAlignment = Enum.HorizontalAlignment.Center
+	})
+
+	for text, callback in next, options.Buttons do
+		local button = buttonHolder:object("TextButton", {
+			AnchorPoint = Vector2.new(1, 1),
+			Theme = {BackgroundColor3 = "Tertiary"},
+			Text = tostring(text):upper(),
+			TextSize = 13,
+			Font = Enum.Font.SourceSansBold,
+			BackgroundTransparency = 1,
+			TextTransparency = 1
+		}):round(4)
+
+		table.insert(_temporaryPromptButtons, button)
+
+		do
+			darkener:tween({BackgroundTransparency = 0.5})
+			promptContainer:tween({BackgroundTransparency = 0})
+			promptTitle:tween({TextTransparency = 0})
+			_promptContainerStroke:tween({Transparency = 0})
+			promptText:tween({TextTransparency = 0})
+			button:tween({TextTransparency = 0, BackgroundTransparency = 0})
+
+			local hovered = false
+			local down = false
+	
+			button.MouseEnter:connect(function()
+				hovered = true
+				button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
+			end)
+	
+			button.MouseLeave:connect(function()
+				hovered = false
+				if not down then
+					button:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+				end
+			end)
+	
+			button.MouseButton1Down:connect(function()
+				button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
+			end)
+	
+			UserInputService.InputEnded:connect(function(key)
+				if key.UserInputType == Enum.UserInputType.MouseButton1 then
+					button:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary)) or Library.CurrentTheme.Tertiary}
+				end
+			end)
+
+			button.MouseButton1Click:connect(function()
+				promptContainer:tween({BackgroundTransparency = 1})
+				promptTitle:tween({TextTransparency = 1})
+				_promptContainerStroke:tween({Transparency = 1})
+				promptText:tween({TextTransparency = 1})
+				for i, b in next, _temporaryPromptButtons do
+					b:tween({TextTransparency = 1, BackgroundTransparency = 1})
+				end
+				darkener:tween({BackgroundTransparency = 1}, function()
+					darkener.AbsoluteObject:Destroy()
+				end)
+				callback()
+			end)
+		end
 	end
 end
 
