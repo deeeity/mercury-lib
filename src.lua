@@ -150,11 +150,11 @@ function Library:object(class: string, properties: table)
 		options.Direction = nil
 
 		local tween = TweenService:Create(localObject, ti, options); tween:Play()
-		
+
 		tween.Completed:Connect(function()
 			callback()
 		end)
-		
+
 		return tween
 	end
 
@@ -191,9 +191,9 @@ function Library:object(class: string, properties: table)
 			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
 			rawset(self, "fadeFrame", frame)
 		else
-			self.fadeFrame.BackgroundColor3 = self.BackgroundColor3
+			self.fadeFrame.BackgroundColor3 = colorOverride or self.BackgroundColor3
 		end
-
+		
 		if state then
 			self.fadeFrame.BackgroundTransparency = 1
 			self.fadeFrame.Visible = true
@@ -840,7 +840,7 @@ function Library:tab(options)
 			if not tabButton.Visible then
 				tabButton.Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset)
 				tabButton.Visible = true
-				tabButton:fade(false, Library.CurrentTheme.Main, 0.1)
+				tabButton:fade(false, Library.CurrentTheme.Main, 0.1)			
 				tabButton:tween({Size = UDim2.new(0, 125, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1})
 			end
 		end)
@@ -1597,7 +1597,6 @@ function Library:slider(options)
 				if tween.PlaybackState == Enum.PlaybackState.Completed then
 					tween = valueText:tween{Size = UDim2.fromOffset(valueText.TextBounds.X + 20, 20)}
 				end
-				
 				sliderLine:tween{
 					Length = 0.06,
 					Size = UDim2.fromScale(percentage, 1)
