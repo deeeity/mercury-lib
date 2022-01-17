@@ -502,7 +502,7 @@ function Library:create(options: table)
 
 	local homeButton = tabButtons:object("TextButton", {
 		Name = "hehehe siuuuuuuuuu",
-		BackgroundTransparency = 0, -- yeah?
+		BackgroundTransparency = 0,
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(0, 125, 0, 25)
 	}):round(5)
@@ -1608,8 +1608,6 @@ function Library:slider(options)
 
 	end	
 end
-
--- add to settings thingy bounds
 
 return setmetatable(Library, {
 	__index = function(_, i)
