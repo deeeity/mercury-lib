@@ -780,8 +780,9 @@ function Library:tab(options)
 		PaddingTop = UDim.new(0, 10)
 	})
 
-	local tabButton = self.navigation:object("TextButton", {
+	local tabButton = Library:object("TextButton", {
 		BackgroundTransparency = 1,
+		Parent = nil,
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(0, 125, 0, 25),
 		Visible = false
@@ -838,6 +839,7 @@ function Library:tab(options)
 
 		quickAccessButton.MouseButton1Click:connect(function()
 			if not tabButton.Visible then
+				tabButton.Parent = self.navigation.AbsoluteObject
 				tabButton.Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset)
 				tabButton.Visible = true
 				tabButton:fade(false, Library.CurrentTheme.Main, 0.1)			
@@ -882,6 +884,7 @@ function Library:tab(options)
 		tabButton:tween({Size = UDim2.new(0, 50, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1}, function()
 			tabButton.Visible = false
 			tab.Visible = false
+			tabButton.Parent = nil
 			wait()
 		end)
 
@@ -894,16 +897,17 @@ function Library:tab(options)
 		end
 
 		local lastTab = visible[#visible]
-
-		if #visible == 2 then
-			if not selectedTab == self.homeButton then selectedTab.Visible = false end
+		
+		if selectedTab == self.homeButton then
+			tab.Visible = false
+		elseif #visible == 2 then
+			selectedTab.Visible = false
 			tab.Visible = false
 			self.homePage.Visible = true
 			self.homeButton:tween{BackgroundTransparency = 0.15}
 			selectedTab = self.homeButton
 		elseif tabButton == lastTab[2] then
 			lastTab = visible[#visible-1]
-
 			tab.Visible = false
 			lastTab[2]:tween{BackgroundTransparency = 0.15}
 			lastTab[1].Visible = true
