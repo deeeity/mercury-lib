@@ -1341,7 +1341,7 @@ function Library:_theme_selector()
 			local themeColorsContainer = theme:object("Frame", {
 				Size = UDim2.new(1, 0, 1, -20),
 				BackgroundTransparency = 1
-			})
+			}):round(5):stroke("WeakText", 1)
 
 			local themeNameLabel = theme:object("TextLabel", {
 				BackgroundTransparency = 1,
