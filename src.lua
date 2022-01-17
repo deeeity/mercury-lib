@@ -21,10 +21,11 @@ v3rm 0xDEITY		discord Deity#0228
 
 ]]
 
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
+local yue = game
+local TweenService = yue:GetService("TweenService")
+local RunService = yue:GetService("RunService")
+local UserInputService = yue:GetService("UserInputService")
+local Players = yue:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
@@ -995,6 +996,141 @@ function Library:toggle(options)
 				onIcon:crossfade(offIcon, 0.1)
 			end
 			options.Callback(toggled)
+		end)
+	end
+end
+
+function Library:dropdown(options)
+	options = self:set_defaults({
+		Name = "Dropdown",
+		StartingText = "Select...",
+		Items = {},
+		Callback = function(item) return end
+	}, options)
+
+	local dropdownContainer = self.container:object("TextButton", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = dropdownContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = dropdownContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			Theme = {TextColor3 = "WeakText"},
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+	local icon = dropdownContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11, 0.5, 0),
+		Size = UDim2.fromOffset(26, 26),
+		Image = "rbxassetid://8498840035",
+		Theme = {ImageColor3 = "Tertiary"}
+	})
+
+	local selectedText = dropdownContainer:object("TextLabel", {
+		AnchorPoint = Vector2.new(1, 0),
+		Theme = {
+			BackgroundColor3 = {"Main", 15},
+			TextColor3 = "Tertiary"
+		},
+		Position = UDim2.new(1, -50,0, 16),
+		Size = UDim2.fromOffset(200, 20),
+		TextSize = 14,
+		Text = options.StartingText
+	}):round(5):stroke("Tertiary")
+
+	local itemContainer = dropdownContainer:object("Frame", {
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 5,0, 55),
+		Size = UDim2.new(1, -10, 0, 0),
+		ClipsDescendants = true
+	})
+
+	local _gridItemContainer = itemContainer:object("UIGridLayout", {
+		CellPadding = UDim2.fromOffset(0, 5),
+		CellSize = UDim2.new(1, 0, 0, 20),
+		FillDirection = Enum.FillDirection.Horizontal,
+		HorizontalAlignment = Enum.HorizontalAlignment.Left,
+		VerticalAlignment = Enum.VerticalAlignment.Top
+	})
+
+
+	local items = setmetatable({}, {
+		__newindex = function(self, i, v)
+			rawset(self, i, v)
+			local newSize = (25 * #self) + 5
+			itemContainer.Size = UDim2.new(1, -10, 0, newSize)
+		end
+	})
+
+	for i, item in next, options.Items do
+		local newItem = itemContainer:object("TextButton", {
+			Theme = {
+				BackgroundColor3 = self:lighten(self.CurrentTheme.Secondary, 15),
+				TextColor3 = self:lighten(self.CurrentTheme.StrongText, 25)
+			},
+			Text = tostring(item),
+			TextSize = 14
+		}):round(5)
+		items[i] = newItem
+	end
+
+	do
+		local hovered = false
+		local down = false
+		local open = false
+
+		local function toggle()
+			open = not open
+			if open then
+				local newSize = (25 * #items) + 5
+				itemContainer.Size = UDim2.new(1, -10, 0, newSize)
+			else
+				itemContainer.Size = UDim2.new(1, -10, 0, 0)
+			end
+		end
+
+		dropdownContainer.MouseEnter:connect(function()
+			hovered = true
+			selectedText:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+		end)
+
+		dropdownContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				dropdownContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		dropdownContainer.MouseButton1Down:connect(function()
+			dropdownContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				dropdownContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		dropdownContainer.MouseButton1Click:connect(function()
+			toggle()
 		end)
 	end
 end
