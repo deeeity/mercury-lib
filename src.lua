@@ -55,15 +55,6 @@ local Library = {
 			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
 		},
-		Frost = {
-			Main = Color3.fromRGB(230, 245, 250),
-			Secondary = Color3.fromRGB(210, 225, 230),
-			Tertiary = Color3.fromRGB(140, 200, 220),
-
-			StrongText = Color3.fromHSV(0, 20, 0),		
-			WeakText = Color3.fromHSV(0, 0, 60/255),
-			Light = true
-		},
 		Rust = {
 			Main = Color3.fromRGB(37, 35, 33),
 			Secondary = Color3.fromRGB(65, 63, 63),
@@ -71,6 +62,14 @@ local Library = {
 
 			StrongText = Color3.fromHSV(0, 0, 1),		
 			WeakText = Color3.fromHSV(0, 0, 172/255)
+		},
+		Aqua = {
+			Main = Color3.fromRGB(19, 21, 21),
+			Secondary = Color3.fromRGB(65, 63, 63),
+			Tertiary = Color3.fromRGB(51, 153, 137),
+
+			StrongText = Color3.fromHSV(0, 0, 1),        
+			WeakText = Color3.fromHSV(0, 0, 172/255) -- support for more than 5 themes & main to secondary for background
 		},
 		Vaporwave = {},
 		OperaGX = {},
@@ -1086,8 +1085,8 @@ function Library:dropdown(options)
 	local selectedText = dropdownContainer:object("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0),
 		Theme = {
-			BackgroundColor3 = {"Main", 15},
-			TextColor3 = "Tertiary"
+			BackgroundColor3 = {"Secondary", -20},
+			TextColor3 = "WeakText"
 		},
 		Position = UDim2.new(1, -50, 0, 16),
 		Size = UDim2.fromOffset(200, 20),
@@ -1305,10 +1304,16 @@ function Library:button(options)
 end
 
 function Library:_theme_selector()
-
+	
+	local themesCount = 0
+	
+	for _ in next, Library.Themes do
+		themesCount += 1
+	end
+	
 	local themeContainer = self.container:object("Frame", {
 		Theme = {BackgroundColor3 = "Secondary"},
-		Size = UDim2.new(1, -20, 0, 127),
+		Size = UDim2.new(1, -20, 0, 127)
 	}):round(7)
 
 	local text = themeContainer:object("TextLabel", {
@@ -1449,8 +1454,8 @@ function Library:keybind(options)
 	local keybindDisplay = keybindContainer:object("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0),
 		Theme = {
-			BackgroundColor3 = {"Main", 15},
-			TextColor3 = "Tertiary"
+			BackgroundColor3 = {"Secondary", -20},
+			TextColor3 = "WeakText"
 		},
 		Position = UDim2.new(1, -20,0, 16),
 		Size = UDim2.new(0, 50,0, 20),
@@ -1567,6 +1572,7 @@ function Library:prompt(options)
 		Size = UDim2.new(1, -20,1, -60),
 		TextSize = 14,
 		Theme = {TextColor3 = "StrongText"},
+		
 		Text = options.Text,
 		TextTransparency = 1,
 		TextYAlignment = Enum.TextYAlignment.Top,
@@ -1612,23 +1618,23 @@ function Library:prompt(options)
 
 			local hovered = false
 			local down = false
-	
+
 			button.MouseEnter:connect(function()
 				hovered = true
 				button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
 			end)
-	
+
 			button.MouseLeave:connect(function()
 				hovered = false
 				if not down then
 					button:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
 				end
 			end)
-	
+
 			button.MouseButton1Down:connect(function()
 				button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
 			end)
-	
+
 			UserInputService.InputEnded:connect(function(key)
 				if key.UserInputType == Enum.UserInputType.MouseButton1 then
 					button:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary)) or Library.CurrentTheme.Tertiary}
@@ -1692,9 +1698,10 @@ function Library:slider(options)
 
 	local valueText = sliderContainer:object("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0),
+		
 		Theme = {
-			BackgroundColor3 = {"Main", 15},
-			TextColor3 = "Tertiary"
+			BackgroundColor3 = {"Secondary", -20},
+			TextColor3 = "WeakText"
 		},
 		Position = UDim2.new(1, -10, 0, 10),
 		Size = UDim2.new(0, 50,0, 20),
@@ -1714,6 +1721,7 @@ function Library:slider(options)
 	local sliderLine = sliderBar:object("Frame", {
 		Size = UDim2.fromScale(((options.Default - options.Min) / (options.Max - options.Min)), 1),
 		Theme = {BackgroundColor3 = "Tertiary"}
+		
 	}):round(100)
 
 	local sliderBall = sliderLine:object("Frame", {
