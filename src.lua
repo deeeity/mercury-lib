@@ -1071,7 +1071,7 @@ function Library:dropdown(options)
 			BackgroundColor3 = {"Main", 15},
 			TextColor3 = "Tertiary"
 		},
-		Position = UDim2.new(1, -50,0, 16),
+		Position = UDim2.new(1, -50, 0, 16),
 		Size = UDim2.fromOffset(200, 20),
 		TextSize = 14,
 		Text = options.StartingText
@@ -1083,6 +1083,8 @@ function Library:dropdown(options)
 		Size = UDim2.new(1, -10, 0, 0),
 		ClipsDescendants = true
 	})
+	
+	selectedText.Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20)
 
 	local _gridItemContainer = itemContainer:object("UIGridLayout", {
 		CellPadding = UDim2.fromOffset(0, 5),
@@ -1153,6 +1155,7 @@ function Library:dropdown(options)
 			newItem.MouseButton1Click:connect(function()
 				toggle()
 				selectedText.Text = newItem.Text
+				selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
 				options.Callback(value)
 			end)
 		end
@@ -1436,6 +1439,8 @@ function Library:keybind(options)
 		TextSize = 12,
 		Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
 	}):round(5):stroke("Tertiary")
+	
+	keybindDisplay.Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20)
 
 	do
 		local hovered = false
@@ -1471,6 +1476,7 @@ function Library:keybind(options)
 						options.Keybind = key.KeyCode
 					end
 					keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
+					keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
 					listening = false
 				end
 			end
