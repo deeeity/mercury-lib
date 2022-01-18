@@ -10,7 +10,8 @@ MercuryLib is a free and open sourced Roblox UI library.
 
 Code:
 ```lua
-require(loadstring(game:HttpGet("https://github.com/deeeity/mercury-lib/blob/master/src.lua"))())
+-- Last Update: 1/17
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
 ```
 
 ## Features:
