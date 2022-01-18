@@ -761,7 +761,8 @@ function Library:create(options: table)
 		PaddingRight = UDim.new(0, 70),
 		PaddingTop = UDim.new(0, 5)
 	})
-
+	
+	
 	local mt = setmetatable({
 		core = core,
 		statusText = status,
@@ -780,12 +781,6 @@ function Library:create(options: table)
 		Internal = settingsTabIcon,
 		Icon = "rbxassetid://8559790237"
 	})
-	
-	local creditsTab = Library.tab(mt, {
-		Name = "Credits",
-		Internal = creditsTabIcon,
-		Icon = "http://www.roblox.com/asset/?id=8577523456"
-	})
 
 	settingsTab:_theme_selector()
 
@@ -797,6 +792,15 @@ function Library:create(options: table)
 			Library.DragSpeed = (20 - value)/100
 		end,
 	}
+	
+	local creditsTab = Library.tab(mt, {
+		Name = "Credits",
+		Internal = creditsTabIcon,
+		Icon = "http://www.roblox.com/asset/?id=8577523456"
+	})
+	
+	creditsTab:credit{Name = "Abstract"}
+	creditsTab:credit{Name = "Deity"}
 
 	return mt
 end
@@ -1360,6 +1364,28 @@ function Library:button(options)
 	end
 end
 
+function Library:credit(options)
+	options = self:set_defaults({
+		Name = "Creditor",
+		Description = nil
+	}, options)
+	
+	local creditContainer = self.container:object("Frame", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+	
+	local name = creditContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+end
+
 function Library:_theme_selector()
 
 	local themesCount = 0
@@ -1896,6 +1922,8 @@ function Library:textbox(options)
 		Size = UDim2.new(0, 16, 0, 16),
 		Theme = {ImageColor3 = "StrongText"}
 	})
+
+
 
 	textBox.Size = UDim2.fromOffset(textBox.TextBounds.X + 20, 20)
 
