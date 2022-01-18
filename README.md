@@ -10,7 +10,7 @@ Mercury is a free and open sourced Roblox UI library.
 
 ## Loadstring
 ```lua
--- Last Update: 1/17
+-- Last Update: 1/18
 loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
 ```
 
@@ -34,9 +34,9 @@ Created by [Deity#0228] and [Abstract#8007]
 local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
 ```
 
-### Create the Gui
+### Create the GUI
 ```lua
-local Gui = Mercury:Create{
+local GUI = Mercury:Create{
     Name = "Mercury",
     Size = UDim2.fromOffset(600, 400),
     Theme = self.Themes.Dark,
@@ -46,7 +46,7 @@ local Gui = Mercury:Create{
 
 ### Tabs
 ```lua
-local Tab = Mercury:Tab{
+local Tab = GUI:Tab{
 	Name = "New Tab",
 	Icon = "rbxassetid://8569322835"
 }
@@ -104,7 +104,7 @@ Tab:Keybind{
 
 ### Prompt
 ```lua
-Gui:Prompt{
+GUI:Prompt{
 	Title = "Prompt",
 	Text = "Prompts are cool",
 	Buttons = {
@@ -117,3 +117,13 @@ Gui:Prompt{
 	}
 }
 ```
+
+### Color Picker
+```lua
+GUI:ColorPicker{
+	DefaultColor = Color3.fromHSV(0, 1, 1), -- Red, Can also be done using Color3.fromRGB, .new, etc.
+	Callback = function(color) end
+}
+
+
+**PLEASE NOTE THAT THE LOWER- AND UPPERCASE LETTERS DON'T MATTER WHEN CALLING LIBRARY FUNCTIONS.**
