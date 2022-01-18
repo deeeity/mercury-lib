@@ -1777,6 +1777,90 @@ function Library:slider(options)
 	end	
 end
 
+function Library:textbox(options)
+	options = self:set_defaults({
+		Name = "Text Box",
+		Placeholder = ""
+		Description = nil
+	}, options)
+
+	local textboxContainer = self.container:object("TextButton", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = textboxContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = textboxContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			Theme = {TextColor3 = "WeakText"},
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+
+	local textBox = textboxContainer:object("TextBox", {
+		AnchorPoint = Vector2.new(1, 0),
+		Theme = {
+			BackgroundColor3 = {"Secondary", -20},
+			TextColor3 = "WeakText"
+		},
+		Position = UDim2.new(1, -20,0, 16),
+		Size = UDim2.new(0, 50,0, 20),
+		TextSize = 12,
+		PlaceholderText = options.Placeholder
+	}):round(5):stroke("Tertiary")
+
+	textBox.Size = UDim2.fromOffset(textBox.TextBounds.X + 20, 20)
+
+	do
+		local hovered = false
+		local down = false
+		local focused = false
+
+		textboxContainer.MouseEnter:connect(function()
+			textboxContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+		end)
+
+		textboxContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				textboxContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		textBox.Focused:connect(function()
+			focused = true
+			local size = textBox.TextBounds.X + 20
+			local tween = textBox:tween{Size = UDim2.fromOffset(size, 20)}
+			while focused and RunService.RenderStepped:wait() do
+				if tween.PlaybackState == Enum.PlaybackState.Completed and not size == textBox.TextBounds.X + 20 then
+					size = textBox.TextBounds.X + 20
+					tween = textBox:tween{Size = UDim2.fromOffset(size, 20)}
+				end
+			end
+		end)
+
+		textBox.FocusLost:connect(function()
+			focused = false
+			options.Callback(textBox.Text)
+		end)
+	end
+end
+
 return setmetatable(Library, {
 	__index = function(_, i)
 		return rawget(Library, i:lower())
