@@ -27,14 +27,14 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/m
 
 Created by [Deity#0228] and [Abstract#8007]
 
-# Documentation
+## Documentation
 
-## Get the Library
+### Get the Library
 ```lua
 local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
 ```
 
-## Create the Gui
+### Create the Gui
 ```lua
 local Gui = Mercury:Create{
     Name = "Mercury",
@@ -44,7 +44,7 @@ local Gui = Mercury:Create{
 }
 ```
 
-## Tabs
+### Tabs
 ```lua
 local Tab = Mercury:Tab{
 	Name = "New Tab",
@@ -52,7 +52,7 @@ local Tab = Mercury:Tab{
 }
 ```
 
-## Buttons
+### Buttons
 ```lua
 Tab:Button{
 	Name = "Button",
@@ -61,7 +61,7 @@ Tab:Button{
 }
 ```
 
-## Toggles
+### Toggles
 ```lua
 Tab:Toggle{
 	Name = "Toggle",
@@ -71,7 +71,7 @@ Tab:Toggle{
 }
 ```
 
-## Dropdowns
+### Dropdowns
 ```lua
 Tab:Dropdown{
 	Name = "Dropdown",
@@ -82,7 +82,7 @@ Tab:Dropdown{
 }
 ```
 
-## Sliders
+### Sliders
 ```lua
 Tab:Slider{
 	Name = "Slider",
@@ -93,7 +93,7 @@ Tab:Slider{
 }
 ```
 
-## Keybinds
+### Keybinds
 ```lua
 Tab:Keybind{
 	Name = "Keybind",
@@ -102,7 +102,7 @@ Tab:Keybind{
 }
 ```
 
-## Prompt
+### Prompt
 ```lua
 	Gui:Prompt{
 		Title = "Prompt",
