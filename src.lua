@@ -69,7 +69,7 @@ local Library = {
 			Tertiary = Color3.fromRGB(51, 153, 137),
 
 			StrongText = Color3.fromHSV(0, 0, 1),        
-			WeakText = Color3.fromHSV(0, 0, 172/255) -- support for more than 5 themes & main to secondary for background
+			WeakText = Color3.fromHSV(0, 0, 172/255)
 		},
 		Vaporwave = {},
 		OperaGX = {},
@@ -626,14 +626,8 @@ function Library:create(options: table)
 		Size = UDim2.fromOffset(80, 80)
 	}):round(100)
 
-    --[[
-        os.date("%X")
-    ]]
-
 	local displayName; do
 		local h, s, v = Color3.toHSV(options.Theme.Tertiary)
-		--local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
-		-- was using #efe4ff but for themes sake am using the above
 		local c = self:lighten(options.Theme.Tertiary, 20)
 
 		local displayName = profile:object("TextLabel", {
@@ -1304,13 +1298,13 @@ function Library:button(options)
 end
 
 function Library:_theme_selector()
-	
+
 	local themesCount = 0
-	
+
 	for _ in next, Library.Themes do
 		themesCount += 1
 	end
-	
+
 	local themeContainer = self.container:object("Frame", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 127)
@@ -1420,7 +1414,8 @@ function Library:keybind(options)
 	options = self:set_defaults({
 		Name = "Keybind",
 		Keybind = nil,
-		Description = nil
+		Description = nil,
+		Callback = function() end
 	}, options)
 
 	local keybindContainer = self.container:object("TextButton", {
@@ -1502,6 +1497,10 @@ function Library:keybind(options)
 					keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
 					listening = false
 				end
+			else
+				if key.KeyCode == options.Keybind then
+					options.Callback()
+				end
 			end
 		end)
 
@@ -1572,7 +1571,7 @@ function Library:prompt(options)
 		Size = UDim2.new(1, -20,1, -60),
 		TextSize = 14,
 		Theme = {TextColor3 = "StrongText"},
-		
+
 		Text = options.Text,
 		TextTransparency = 1,
 		TextYAlignment = Enum.TextYAlignment.Top,
@@ -1698,7 +1697,7 @@ function Library:slider(options)
 
 	local valueText = sliderContainer:object("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0),
-		
+
 		Theme = {
 			BackgroundColor3 = {"Secondary", -20},
 			TextColor3 = "WeakText"
@@ -1721,7 +1720,7 @@ function Library:slider(options)
 	local sliderLine = sliderBar:object("Frame", {
 		Size = UDim2.fromScale(((options.Default - options.Min) / (options.Max - options.Min)), 1),
 		Theme = {BackgroundColor3 = "Tertiary"}
-		
+
 	}):round(100)
 
 	local sliderBall = sliderLine:object("Frame", {
@@ -1775,6 +1774,104 @@ function Library:slider(options)
 		end)
 
 	end	
+end
+
+function Library:textbox(options)
+	options = self:set_defaults({
+		Name = "Text Box",
+		Placeholder = "Type something..",
+		Description = nil,
+		Callback = function(t) end
+	}, options)
+
+	local textboxContainer = self.container:object("TextButton", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = textboxContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = textboxContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			Theme = {TextColor3 = "WeakText"},
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+
+	local textBox = textboxContainer:object("TextBox", {
+		AnchorPoint = Vector2.new(1, 0),
+		Theme = {
+			BackgroundColor3 = {"Secondary", -20},
+			TextColor3 = "WeakText"
+		},
+		Position = UDim2.new(1, -50,0, 16),
+		Size = UDim2.new(0, 50,0, 20),
+		TextSize = 12,
+		PlaceholderText = options.Placeholder,
+		ClipsDescendants = true
+	}):round(5):stroke("Tertiary")
+	
+	local writeIcon = textboxContainer:object("ImageLabel", {
+		Image = "http://www.roblox.com/asset/?id=8569329416",
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -13, 0.5, 0),
+		Size = UDim2.new(0, 16, 0, 16),
+		Theme = {ImageColor3 = "StrongText"}
+	})
+	
+	
+	
+	textBox.Size = UDim2.fromOffset(textBox.TextBounds.X + 20, 20)
+
+	do
+		local hovered = false
+		local down = false
+		local focused = false
+
+		textboxContainer.MouseEnter:connect(function()
+			textboxContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+		end)
+
+		textboxContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				textboxContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
+			end
+		end)
+		
+		textBox.Focused:connect(function()
+			focused = true
+			while focused and RunService.RenderStepped:wait() do
+				textBox.AbsoluteObject:TweenSize(
+					UDim2.fromOffset(math.clamp(textBox.TextBounds.X + 20, 0, 0.5 * textboxContainer.AbsoluteSize.X), 20),
+					Enum.EasingDirection.InOut,
+					Enum.EasingStyle.Linear,
+					0.1,
+					true
+				)
+			end
+		end)
+
+		textBox.FocusLost:connect(function()
+			focused = false
+			options.Callback(textBox.Text)
+		end)
+	end
 end
 
 return setmetatable(Library, {
