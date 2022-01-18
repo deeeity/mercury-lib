@@ -117,6 +117,3 @@ Gui:Prompt{
 	}
 }
 ```
-
-icon for credits
-https://icons8.com/icon/Ug0KpFRzvNoe/contact
