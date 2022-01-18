@@ -4,9 +4,9 @@
   <img src="https://cdn.discordapp.com/attachments/929706675022233640/932699962767200327/icons8-moon-15.png"/>
 </p>
 
-# MercuryLib
+# Mercury
 
-MercuryLib is a free and open sourced Roblox UI library.
+Mercury is a free and open sourced Roblox UI library.
 
 Code:
 ```lua
