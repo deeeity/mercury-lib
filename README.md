@@ -117,3 +117,11 @@ Gui:Prompt{
 	}
 }
 ```
+
+
+
+use one of the following for a credits page
+https://icons8.com/icon/63Z8ZdTPySEz/contact-info
+https://icons8.com/icon/Ug0KpFRzvNoe/contact
+https://icons8.com/icon/YzsadpdsoN8e/people
+https://icons8.com/icon/4C2pzaBlIDEO/groups
