@@ -104,16 +104,16 @@ Tab:Keybind{
 
 ### Prompt
 ```lua
-	Gui:Prompt{
-		Title = "Prompt",
-		Text = "Prompts are cool",
-		Buttons = {
-			ok = function()
-				return true
-			end
-			no = function()
-				return false
-			end
-		}
+Gui:Prompt{
+	Title = "Prompt",
+	Text = "Prompts are cool",
+	Buttons = {
+		ok = function()
+			return true
+		end
+		no = function()
+			return false
+		end
 	}
+}
 ```
