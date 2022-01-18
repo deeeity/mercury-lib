@@ -1420,7 +1420,8 @@ function Library:keybind(options)
 	options = self:set_defaults({
 		Name = "Keybind",
 		Keybind = nil,
-		Description = nil
+		Description = nil,
+		Callback = function() end
 	}, options)
 
 	local keybindContainer = self.container:object("TextButton", {
@@ -1501,6 +1502,10 @@ function Library:keybind(options)
 					keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
 					keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
 					listening = false
+				end
+			else
+				if key.KeyCode == options.Keybind then
+					options.Callback()
 				end
 			end
 		end)
@@ -1780,8 +1785,9 @@ end
 function Library:textbox(options)
 	options = self:set_defaults({
 		Name = "Text Box",
-		Placeholder = ""
-		Description = nil
+		Placeholder = "Type something..",
+		Description = nil,
+		Callback = function(t) end
 	}, options)
 
 	local textboxContainer = self.container:object("TextButton", {
