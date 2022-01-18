@@ -4,9 +4,15 @@
   <img src="https://cdn.discordapp.com/attachments/929706675022233640/932699962767200327/icons8-moon-15.png"/>
 </p>
 
-# MercuryLib
+# Mercury
 
-MercuryLib is a free and open sourced Roblox UI library.
+Mercury is a free and open sourced Roblox UI library.
+
+## Loadstring
+```lua
+-- Last Update: 1/17
+loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+```
 
 ## Features:
 - Customizable (Themes)
@@ -21,5 +27,93 @@ MercuryLib is a free and open sourced Roblox UI library.
 
 Created by [Deity#0228] and [Abstract#8007]
 
-add https://coolors.co/fffcf2-ccc5b9-403d39-252422-eb5e28
-add https://coolors.co/131515-2b2c28-339989-7de2d1-fffafb
+## Documentation
+
+### Get the Library
+```lua
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+```
+
+### Create the Gui
+```lua
+local Gui = Mercury:Create{
+    Name = "Mercury",
+    Size = UDim2.fromOffset(600, 400),
+    Theme = self.Themes.Dark,
+    Link = "https://github.com/deeeity/mercury-lib"
+}
+```
+
+### Tabs
+```lua
+local Tab = Mercury:Tab{
+	Name = "New Tab",
+	Icon = "rbxassetid://8569322835"
+}
+```
+
+### Buttons
+```lua
+Tab:Button{
+	Name = "Button",
+	Description = nil,
+	Callback = function() end
+}
+```
+
+### Toggles
+```lua
+Tab:Toggle{
+	Name = "Toggle",
+	StartingState = false,
+	Description = nil,
+	Callback = function(state) end
+}
+```
+
+### Dropdowns
+```lua
+Tab:Dropdown{
+	Name = "Dropdown",
+	StartingText = "Select...",
+	Description = nil,
+	Items = {},
+	Callback = function(item) return end
+}
+```
+
+### Sliders
+```lua
+Tab:Slider{
+	Name = "Slider",
+	Default = 50,
+	Min = 0,
+	Max = 100,
+	Callback = function() end
+}
+```
+
+### Keybinds
+```lua
+Tab:Keybind{
+	Name = "Keybind",
+	Keybind = nil,
+	Description = nil
+}
+```
+
+### Prompt
+```lua
+Gui:Prompt{
+	Title = "Prompt",
+	Text = "Prompts are cool",
+	Buttons = {
+		ok = function()
+			return true
+		end
+		no = function()
+			return false
+		end
+	}
+}
+```
