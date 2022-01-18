@@ -1975,12 +1975,12 @@ function Library:color_picker(options)
 		AnchorPoint = Vector2.new(.5, .5),
 		BackgroundTransparency = 1,
 		Size = UDim2.fromOffset(6, 6),
-		Position = UDim2.new(0, 152, 0, 187),
+		Position = UDim2.new(0, 152, 0, 3),
 		ZIndex = 20
 	}):round(100):stroke(Color3.fromRGB(255, 255, 255), 1.6)
 
 	-- REMEMBER THIS::::::::::::
-	-- Position = UDim2.fromOffset(math.clamp(newPos.X, 0, 152), math.clamp(newPos.Y, 0, 187))
+	-- Position = UDim2.fromOffset(math.clamp(newPos.X, 3, 152), math.clamp(newPos.Y, 3, 187))
 
 
 	
