@@ -626,14 +626,8 @@ function Library:create(options: table)
 		Size = UDim2.fromOffset(80, 80)
 	}):round(100)
 
-    --[[
-        os.date("%X")
-    ]]
-
 	local displayName; do
 		local h, s, v = Color3.toHSV(options.Theme.Tertiary)
-		--local c = Color3.fromHSV(h, math.clamp(s/3, 0, 1), math.clamp(v*2, 0, 1))
-		-- was using #efe4ff but for themes sake am using the above
 		local c = self:lighten(options.Theme.Tertiary, 20)
 
 		local displayName = profile:object("TextLabel", {
