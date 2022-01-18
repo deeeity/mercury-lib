@@ -241,6 +241,54 @@ function Library:object(class: string, properties: table)
 
 		return methods
 	end
+	
+	function methods:tooltip(text)
+		local tooltipContainer = methods:object("TextLabel", {
+			Theme = {
+				BackgroundColor3 = {"Main", 10},
+				TextColor3 = {"WeakText"}
+			},
+			TextSize = 16,
+			Text = text,
+			Position = UDim2.new(0.5, 0, 0, -8),
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextYAlignment = Enum.TextYAlignment.Center,
+			AnchorPoint = Vector2.new(0.5, 1),
+			BackgroundTransparency = 1,
+			TextTransparency = 1
+		}):round(5)
+		tooltipContainer.Size = UDim2.fromOffset(tooltipContainer.TextBounds.X + 16, tooltipContainer.TextBounds.Y + 8)
+		
+		local tooltipArrow = tooltipContainer:object("ImageLabel", {
+			Image = "http://www.roblox.com/asset/?id=4292970642",
+			Theme = {ImageColor3 = {"Main", 10}},
+			AnchorPoint = Vector2.new(0.5, 0),
+			Rotation = 180,
+			Position = UDim2.fromScale(0.5, 1),
+			Size = UDim2.fromOffset(10, 6),
+			BackgroundTransparency = 1,
+			ImageTransparency = 1
+		})
+		
+		local hovered = false
+		
+		methods.MouseEnter:connect(function()
+			hovered = true
+			wait(0.2)
+			if hovered then
+				tooltipContainer:tween{BackgroundTransparency = 0.2, TextTransparency = 0.2}
+				tooltipArrow:tween{ImageTransparency = 0.2}
+			end
+		end)
+		
+		methods.MouseLeave:connect(function()
+			hovered = false
+			tooltipContainer:tween{BackgroundTransparency = 1, TextTransparency = 1}
+			tooltipArrow:tween{ImageTransparency = 1}
+		end)
+		
+		return methods
+	end
 
 	local customHandlers = {
 		Centered = function(value)
@@ -684,7 +732,16 @@ function Library:create(options: table)
 		Position = UDim2.new(1, -10, 1, -10),
 		AnchorPoint = Vector2.new(1, 1),
 		Image = "http://www.roblox.com/asset/?id=8559790237"
-	})
+	}):tooltip("settings")
+	
+	local creditsTabIcon = profile:object("ImageButton", {
+		BackgroundTransparency = 1,
+		Theme = {ImageColor3 = "WeakText"},
+		Size = UDim2.fromOffset(24, 24),
+		Position = UDim2.new(1, -44, 1, -10),
+		AnchorPoint = Vector2.new(1, 1),
+		Image = "http://www.roblox.com/asset/?id=8577523456"
+	}):tooltip("credits")
 
 	local quickAccess = homePage:object("Frame", {
 		BackgroundTransparency = 1,
@@ -722,6 +779,12 @@ function Library:create(options: table)
 		Name = "Settings",
 		Internal = settingsTabIcon,
 		Icon = "rbxassetid://8559790237"
+	})
+	
+	local creditsTab = Library.tab(mt, {
+		Name = "Credits",
+		Internal = creditsTabIcon,
+		Icon = "http://www.roblox.com/asset/?id=8577523456"
 	})
 
 	settingsTab:_theme_selector()
@@ -1824,7 +1887,7 @@ function Library:textbox(options)
 		PlaceholderText = options.Placeholder,
 		ClipsDescendants = true
 	}):round(5):stroke("Tertiary")
-	
+
 	local writeIcon = textboxContainer:object("ImageLabel", {
 		Image = "http://www.roblox.com/asset/?id=8569329416",
 		AnchorPoint = Vector2.new(1, 0.5),
@@ -1833,9 +1896,7 @@ function Library:textbox(options)
 		Size = UDim2.new(0, 16, 0, 16),
 		Theme = {ImageColor3 = "StrongText"}
 	})
-	
-	
-	
+
 	textBox.Size = UDim2.fromOffset(textBox.TextBounds.X + 20, 20)
 
 	do
@@ -1853,7 +1914,7 @@ function Library:textbox(options)
 				textboxContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
 			end
 		end)
-		
+
 		textBox.Focused:connect(function()
 			focused = true
 			while focused and RunService.RenderStepped:wait() do
