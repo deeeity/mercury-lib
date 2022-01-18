@@ -93,6 +93,9 @@ Library.__index = Library
 
 local selectedTab
 
+Library._promptExists = false
+Library._colorPickerExists = false
+
 function Library:set_defaults(defaults: table, options: table)
 	defaults = defaults or {}
 	options = options or {}
@@ -233,10 +236,12 @@ function Library:object(class: string, properties: table)
 			end
 			stroke.Color = modifiedColor
 			table.insert(Library.ThemeObjects[theme], {stroke, "Color", theme, colorAlter})
-		else
+		elseif type(color) == "string" then
 			local themeColor = Library.CurrentTheme[color]
 			stroke.Color = themeColor
 			table.insert(Library.ThemeObjects[color], {stroke, "Color", color, 0})
+		else
+			stroke.Color = color
 		end
 
 		return methods
@@ -1499,6 +1504,7 @@ function Library:_theme_selector()
 	end
 end
 
+
 function Library:keybind(options)
 	options = self:set_defaults({
 		Name = "Keybind",
@@ -1602,6 +1608,9 @@ end
 local _temporaryPromptButtons = {}
 
 function Library:prompt(options)
+	if Library._promptExists then return end
+	Library._promptExists = true
+
 	options = self:set_defaults({
 		Title = "Prompt",
 		Text = "yo momma dead",
@@ -1683,6 +1692,12 @@ function Library:prompt(options)
 		HorizontalAlignment = Enum.HorizontalAlignment.Center
 	})
 
+	darkener:tween({BackgroundTransparency = 0.4})
+	promptContainer:tween({BackgroundTransparency = 0})
+	promptTitle:tween({TextTransparency = 0})
+	_promptContainerStroke:tween({Transparency = 0})
+	promptText:tween({TextTransparency = 0})
+
 	for text, callback in next, options.Buttons do
 		local button = buttonHolder:object("TextButton", {
 			AnchorPoint = Vector2.new(1, 1),
@@ -1697,11 +1712,6 @@ function Library:prompt(options)
 		table.insert(_temporaryPromptButtons, button)
 
 		do
-			darkener:tween({BackgroundTransparency = 0.5})
-			promptContainer:tween({BackgroundTransparency = 0})
-			promptTitle:tween({TextTransparency = 0})
-			_promptContainerStroke:tween({Transparency = 0})
-			promptText:tween({TextTransparency = 0})
 			button:tween({TextTransparency = 0, BackgroundTransparency = 0})
 
 			local hovered = false
@@ -1739,11 +1749,242 @@ function Library:prompt(options)
 				end
 				darkener:tween({BackgroundTransparency = 1}, function()
 					darkener.AbsoluteObject:Destroy()
+					task.delay(0.25, function()
+						Library._promptExists = false
+					end)
+					callback()
 				end)
-				callback()
 			end)
 		end
 	end
+end
+
+
+function Library:color_picker(options)
+	if Library._colorPickerExists then return end
+	Library._colorPickerExists = true
+
+	options = self:set_defaults({
+		DefaultColor = Color3.fromHSV(0, 1, 1),
+		Callback = function(c : Color3) end
+	}, options)
+
+	local selectedColor = options.DefaultColor
+
+	local darkener = self.core:object("Frame", {
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = .4,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 10
+	}):round(10)
+
+	local arrow = darkener:object("ImageLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 365,0, 102),
+		Size = UDim2.new(0, 56,0, 48),
+		ZIndex = 10,
+		Image = "rbxassetid://8579148508",
+		ImageColor3 = selectedColor,
+		ImageTransparency = 0,
+		Rotation = 180
+	})
+
+	local text = darkener:object("ImageLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 364,0, 158),
+		Rotation = -4,
+		Size = UDim2.new(0, 141,0, 37),
+		ZIndex = 10,
+		Image = "rbxassetid://8579166120",
+		ImageColor3 = selectedColor,
+		ImageTransparency = 0
+	})
+
+	local cpHolder = darkener:object("Frame", {
+		AnchorPoint = Vector2.new(.5, .5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, -50,0.5, 0),
+		Size = UDim2.fromOffset(160, 240),
+		ZIndex = 12
+	})
+
+	local _cpShadowHolder = cpHolder:object("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 11
+	})
+
+	local _cpShadow = _cpShadowHolder:object("ImageLabel", {
+		Centered = true,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 47,1, 47),
+		ZIndex = 11,
+		Image = "rbxassetid://6015897843",
+		ImageColor3 = Color3.new(0, 0, 0),
+		ImageTransparency = 0.5,
+		SliceCenter = Rect.new(49, 49, 450, 450),
+		ScaleType = Enum.ScaleType.Slice,
+		SliceScale = 1
+	})
+
+	local btnHolder = cpHolder:object("Frame", {
+		AnchorPoint = Vector2.new(1, 1),
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		Position = UDim2.fromScale(1, 1),
+		Size = UDim2.new(1, -5,0, 50),
+		ZIndex = 12
+	})
+
+	local button = btnHolder:object("TextButton", {
+		Centered = true,
+		BackgroundTransparency = 1,
+		Size = UDim2.fromOffset(80, 20),
+		ZIndex = 12,
+		Text = "SELECT",
+		TextSize = 13,
+		Theme = {TextColor3 = {"Tertiary", -10}, BackgroundColor3 = {"Tertiary", -10}}
+	}):round(8):stroke({"Tertiary", -10})
+
+	do
+		local hovered = false
+		local down = false
+
+		button.MouseEnter:connect(function()
+			hovered = true
+			button:tween{BackgroundTransparency = 0, TextColor3 = self:lighten(Library.CurrentTheme.StrongText, 15)}
+		end)
+
+		button.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				button:tween{BackgroundTransparency = 1, TextColor3 = self:darken(Library.CurrentTheme.Tertiary, 10)}
+			end
+		end)
+
+		button.MouseButton1Down:connect(function()
+			button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				button:tween{BackgroundTransparency = (hovered and 0) or 1}
+				if hovered then
+					button:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+				end
+			end
+		end)
+
+		button.MouseButton1Click:connect(function()
+			task.delay(0.25, function()
+				Library._colorPickerExists = false
+				options.Callback(selectedColor)
+			end)
+		end)
+	end
+
+	local hueBar = cpHolder:object("TextButton", {
+		BackgroundColor3 = Color3.new(255, 255, 255),
+		BorderSizePixel = 0,
+		Text = "",
+		Size = UDim2.new(0, 5, 1, 0),
+		ZIndex = 12,
+		ClipsDescendants = true
+	})
+
+	local _hueBarGradient = hueBar:object("UIGradient", {
+		Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+			ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+			ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+			ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+			ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+		},
+		Rotation = 90
+	})
+
+	local hueDraggable = hueBar:object("ImageButton", {
+		BackgroundTransparency = 1,
+		Position = UDim2.new(-2, 3,0, -10),
+		Size = UDim2.fromOffset(20, 20),
+		ZIndex = 12,
+		Image = "rbxassetid://8579244616"
+	})
+
+	-- use this to get the HUE value from the bar
+	local function convertBarTo360(amount)
+		return (hueBar.AbsoluteSize.Y/360)*math.clamp(amount, 0, 360)
+	end
+
+	local pickerArea = cpHolder:object("Frame", {
+		AnchorPoint = Vector2.new(1, 0),
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(1, 0),
+		Size = UDim2.new(1, -5,1, -50),
+		ZIndex = 12,
+		ClipsDescendants = true
+	})
+
+	local color = pickerArea:object("Frame", {
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 13,
+		BackgroundColor3 = selectedColor,
+		BorderSizePixel = 0
+	})
+
+	local brightness = pickerArea:object("Frame", {
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 14,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BorderSizePixel = 0
+	})
+
+	local _brightness = brightness:object("UIGradient", {
+		Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(255 ,255, 255))
+		},
+		Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(1, 1),
+		}
+	})
+
+	local black = pickerArea:object("Frame", {
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 16,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BorderSizePixel = 0
+	})
+
+	local _black = black:object("UIGradient", {
+		Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+		},
+		Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(1, 1),
+		},
+		Rotation = -90
+	})
+
+	local colorPickerDraggable = pickerArea:object("TextButton", {
+		Text = "",
+		AnchorPoint = Vector2.new(.5, .5),
+		BackgroundTransparency = 1,
+		Size = UDim2.fromOffset(6, 6),
+		Position = UDim2.new(0, 152, 0, 187),
+		ZIndex = 20
+	}):round(100):stroke(Color3.fromRGB(255, 255, 255), 1.6)
+
+	-- REMEMBER THIS::::::::::::
+	-- Position = UDim2.fromOffset(math.clamp(newPos.X, 0, 152), math.clamp(newPos.Y, 0, 187))
+
+
+	
+
 end
 
 function Library:slider(options)
