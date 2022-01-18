@@ -8,10 +8,10 @@
 
 Mercury is a free and open sourced Roblox UI library.
 
-Code:
+loadstring:
 ```lua
 -- Last Update: 1/17
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
 ```
 
 ## Features:
@@ -26,3 +26,94 @@ local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeei
 ... more to be added.
 
 Created by [Deity#0228] and [Abstract#8007]
+
+# Documentation
+
+## Get the Library
+```lua
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+```
+
+## Create the Gui
+```lua
+local Gui = Mercury:Create{
+    Name = "Mercury",
+    Size = UDim2.fromOffset(600, 400),
+    Theme = self.Themes.Dark,
+    Link = "https://github.com/deeeity/mercury-lib"
+}
+```
+
+## Tabs
+```lua
+local Tab = Mercury:Tab{
+	Name = "New Tab",
+	Icon = "rbxassetid://8569322835"
+}
+```
+
+## Buttons
+```lua
+Tab:Button{
+	Name = "Button",
+	Description = nil,
+	Callback = function() end
+}
+```
+
+## Toggles
+```lua
+Tab:Toggle{
+	Name = "Toggle",
+	StartingState = false,
+	Description = nil,
+	Callback = function(state) end
+}
+```
+
+## Dropdowns
+```lua
+Tab:Dropdown{
+	Name = "Dropdown",
+	StartingText = "Select...",
+	Description = nil,
+	Items = {},
+	Callback = function(item) return end
+}
+```
+
+## Sliders
+```lua
+Tab:Slider{
+	Name = "Slider",
+	Default = 50,
+	Min = 0,
+	Max = 100,
+	Callback = function() end
+}
+```
+
+## Keybinds
+```lua
+Tab:Keybind{
+	Name = "Keybind",
+	Keybind = nil,
+	Description = nil
+}
+```
+
+## Prompt
+```lua
+	Gui:Prompt{
+		Title = "Prompt",
+		Text = "Prompts are cool",
+		Buttons = {
+			ok = function()
+				return true
+			end
+			no = function()
+				return false
+			end
+		}
+	}
+```
