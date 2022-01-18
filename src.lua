@@ -1987,6 +1987,10 @@ function Library:color_picker(options)
 
 end
 
+function Library:colorpicker(options)
+	return Library:color_picker(options)
+end
+
 function Library:slider(options)
 	options = self:set_defaults({
 		Name = "Slider",
