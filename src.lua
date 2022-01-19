@@ -198,7 +198,7 @@ function Library:object(class: string, properties: table)
 				Size = UDim2.fromScale(1, 1),
 				Centered = true,
 				ZIndex = 999
-			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
+			}):round(self.AbsoluteObject:FindFirstChildOfClass("UICorner") and self.AbsoluteObject:FindFirstChildOfClass("UICorner").CornerRadius.Offset or 0)
 			rawset(self, "fadeFrame", frame)
 		else
 			self.fadeFrame.BackgroundColor3 = colorOverride or self.BackgroundColor3
@@ -1605,13 +1605,9 @@ function Library:keybind(options)
 	end
 end
 
-local _temporaryPromptButtons = {}
-
 function Library:prompt(options)
-	if Library._promptExists then return end
-	Library._promptExists = true
-
 	options = self:set_defaults({
+		Followup = false,
 		Title = "Prompt",
 		Text = "yo momma dead",
 		Buttons = {
@@ -1620,6 +1616,9 @@ function Library:prompt(options)
 			end
 		}
 	}, options)
+
+	if Library._promptExists and not options.Followup then return end
+	Library._promptExists = true
 
 	local count = 0; for a, _ in next, options.Buttons do
 		count += 1
@@ -1692,11 +1691,13 @@ function Library:prompt(options)
 		HorizontalAlignment = Enum.HorizontalAlignment.Center
 	})
 
-	darkener:tween({BackgroundTransparency = 0.4})
-	promptContainer:tween({BackgroundTransparency = 0})
-	promptTitle:tween({TextTransparency = 0})
-	_promptContainerStroke:tween({Transparency = 0})
-	promptText:tween({TextTransparency = 0})
+	darkener:tween({BackgroundTransparency = 0.4, Length = 0.1})
+	promptContainer:tween({BackgroundTransparency = 0, Length = 0.1})
+	promptTitle:tween({TextTransparency = 0, Length = 0.1})
+	_promptContainerStroke:tween({Transparency = 0, Length = 0.1})
+	promptText:tween({TextTransparency = 0, Length = 0.1})
+
+	local _temporaryPromptButtons = {}
 
 	for text, callback in next, options.Buttons do
 		local button = buttonHolder:object("TextButton", {
@@ -1740,14 +1741,14 @@ function Library:prompt(options)
 			end)
 
 			button.MouseButton1Click:connect(function()
-				promptContainer:tween({BackgroundTransparency = 1})
-				promptTitle:tween({TextTransparency = 1})
-				_promptContainerStroke:tween({Transparency = 1})
-				promptText:tween({TextTransparency = 1})
+				promptContainer:tween({BackgroundTransparency = 1, Length = 0.1})
+				promptTitle:tween({TextTransparency = 1, Length = 0.1})
+				_promptContainerStroke:tween({Transparency = 1, Length = 0.1})
+				promptText:tween({TextTransparency = 1, Length = 0.1})
 				for i, b in next, _temporaryPromptButtons do
-					b:tween({TextTransparency = 1, BackgroundTransparency = 1})
+					b:tween({TextTransparency = 1, BackgroundTransparency = 1, Length = 0.1})
 				end
-				darkener:tween({BackgroundTransparency = 1}, function()
+				darkener:tween({BackgroundTransparency = 1, Length = 0.1}, function()
 					darkener.AbsoluteObject:Destroy()
 					task.delay(0.25, function()
 						Library._promptExists = false
@@ -1759,21 +1760,25 @@ function Library:prompt(options)
 	end
 end
 
-
 function Library:color_picker(options)
-	if Library._colorPickerExists then return end
-	Library._colorPickerExists = true
-
 	options = self:set_defaults({
-		DefaultColor = Color3.fromHSV(0, 1, 1),
+		Followup = false,
 		Callback = function(c : Color3) end
 	}, options)
 
-	local selectedColor = options.DefaultColor
+	if Library._colorPickerExists and not options.Followup then return end
+	Library._colorPickerExists = true
+
+	local hue, sat, val;
+	local updatePicker, updateHue;
+
+	local fadeOut;
+
+	local selectedColor = Color3.fromRGB(255, 0, 0);
 
 	local darkener = self.core:object("Frame", {
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = .4,
+		BackgroundTransparency = 1,
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 10
 	}):round(10)
@@ -1785,7 +1790,7 @@ function Library:color_picker(options)
 		ZIndex = 10,
 		Image = "rbxassetid://8579148508",
 		ImageColor3 = selectedColor,
-		ImageTransparency = 0,
+		ImageTransparency = 1,
 		Rotation = 180
 	})
 
@@ -1821,7 +1826,7 @@ function Library:color_picker(options)
 		ZIndex = 11,
 		Image = "rbxassetid://6015897843",
 		ImageColor3 = Color3.new(0, 0, 0),
-		ImageTransparency = 0.5,
+		ImageTransparency = 1,
 		SliceCenter = Rect.new(49, 49, 450, 450),
 		ScaleType = Enum.ScaleType.Slice,
 		SliceScale = 1
@@ -1830,6 +1835,7 @@ function Library:color_picker(options)
 	local btnHolder = cpHolder:object("Frame", {
 		AnchorPoint = Vector2.new(1, 1),
 		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 1,
 		Position = UDim2.fromScale(1, 1),
 		Size = UDim2.new(1, -5,0, 50),
 		ZIndex = 12
@@ -1838,6 +1844,7 @@ function Library:color_picker(options)
 	local button = btnHolder:object("TextButton", {
 		Centered = true,
 		BackgroundTransparency = 1,
+		TextTransparency = 1,
 		Size = UDim2.fromOffset(80, 20),
 		ZIndex = 12,
 		Text = "SELECT",
@@ -1875,10 +1882,8 @@ function Library:color_picker(options)
 		end)
 
 		button.MouseButton1Click:connect(function()
-			task.delay(0.25, function()
-				Library._colorPickerExists = false
-				options.Callback(selectedColor)
-			end)
+			fadeOut()
+			options.Callback(selectedColor)
 		end)
 	end
 
@@ -1888,7 +1893,8 @@ function Library:color_picker(options)
 		Text = "",
 		Size = UDim2.new(0, 5, 1, 0),
 		ZIndex = 12,
-		ClipsDescendants = true
+		ClipsDescendants = true,
+		BackgroundTransparency = 1
 	})
 
 	local _hueBarGradient = hueBar:object("UIGradient", {
@@ -1906,18 +1912,15 @@ function Library:color_picker(options)
 
 	local hueDraggable = hueBar:object("ImageButton", {
 		BackgroundTransparency = 1,
+		ImageTransparency = 1,
 		Position = UDim2.new(-2, 3,0, -10),
 		Size = UDim2.fromOffset(20, 20),
 		ZIndex = 12,
 		Image = "rbxassetid://8579244616"
 	})
 
-	-- use this to get the HUE value from the bar
-	local function convertBarTo360(amount)
-		return (hueBar.AbsoluteSize.Y/360)*math.clamp(amount, 0, 360)
-	end
-
-	local pickerArea = cpHolder:object("Frame", {
+	local pickerArea = cpHolder:object("TextButton", {
+		Text = "",
 		AnchorPoint = Vector2.new(1, 0),
 		BackgroundTransparency = 1,
 		Position = UDim2.fromScale(1, 0),
@@ -1930,6 +1933,7 @@ function Library:color_picker(options)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 13,
 		BackgroundColor3 = selectedColor,
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0
 	})
 
@@ -1937,6 +1941,7 @@ function Library:color_picker(options)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 14,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0
 	})
 
@@ -1955,7 +1960,8 @@ function Library:color_picker(options)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 16,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BorderSizePixel = 0
+		BorderSizePixel = 0,
+		BackgroundTransparency = 1
 	})
 
 	local _black = black:object("UIGradient", {
@@ -1977,13 +1983,124 @@ function Library:color_picker(options)
 		Size = UDim2.fromOffset(6, 6),
 		Position = UDim2.new(0, 152, 0, 3),
 		ZIndex = 20
-	}):round(100):stroke(Color3.fromRGB(255, 255, 255), 1.6)
+	}):round(100)
 
-	-- REMEMBER THIS::::::::::::
-	-- Position = UDim2.fromOffset(math.clamp(newPos.X, 3, 152), math.clamp(newPos.Y, 3, 187))
+	local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
+		Color = Color3.fromRGB(255, 255 ,255),
+		Thickness = 1.6,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Transparency = 1
+	})
+
+	-- HUE
+	do
+		updateHue = function()
+			hue = math.clamp((Mouse.Y - hueBar.AbsolutePosition.Y) / (hueBar.AbsoluteSize.Y), 0, 1)
+			local tempVal = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
+			local newYPos = math.clamp((Mouse.Y - hueBar.AbsolutePosition.Y) / (hueBar.AbsoluteSize.Y) * hueBar.AbsoluteSize.Y, 0, hueBar.AbsoluteSize.Y)
+			selectedColor = Color3.fromHSV(hue, sat, val)
+			color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
+			text:tween({ImageColor3 = selectedColor, Length = 0.05})
+			arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
+			hueDraggable:tween({Length = 0.05, Position = UDim2.new(-2, 3, 0, math.clamp(newYPos - 10, -10, hueBar.AbsoluteSize.Y + 10)), ImageColor3 = Color3.fromHSV(1, 0, -tempVal)})
+		end
 
 
-	
+		local down = false
+
+		hueBar.MouseButton1Down:Connect(function()
+			down = true
+			while RunService.RenderStepped:Wait() and down do
+				updateHue()
+			end
+		end)
+
+		hueDraggable.MouseButton1Down:connect(function()
+			down = true
+			while RunService.RenderStepped:Wait() and down do
+				updateHue()
+			end
+		end)
+
+		UserInputService.InputEnded:Connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				if down then
+					down = false
+				end
+			end
+		end)
+	end
+	-- END HUE
+
+	-- SAT & VALUE [PICKER]
+	do
+		local down = false
+
+		updatePicker = function()
+			sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
+			val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
+
+			local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
+			local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
+
+			selectedColor = Color3.fromHSV(hue, sat, val)
+
+			colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
+			text:tween({ImageColor3 = selectedColor, Length = 0.05})
+			arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
+		end
+
+		pickerArea.MouseButton1Down:Connect(function()
+			down = true
+			while RunService.RenderStepped:wait() and down do
+				updatePicker()
+			end
+		end)
+
+		UserInputService.InputEnded:Connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				if down then
+					down = false
+				end
+			end
+		end)
+	end
+	-- END SAT & VALUE
+
+	-- opening (fade in)
+	darkener:tween({BackgroundTransparency = .4, Length = 0.1})
+	arrow:tween({ImageTransparency = 0, Length = 0.1})
+	text:tween({ImageTransparency = 0, Length = 0.1})
+	_cpShadow:tween({ImageTransparency = .5, Length = 0.1})
+	btnHolder:tween({BackgroundTransparency = 0, Length = 0.1})
+	button:tween({TextTransparency = 0, Length = 0.1})
+	hueBar:tween({BackgroundTransparency = 0, Length = 0.1})
+	hueDraggable:tween({ImageTransparency = 0, Length = 0.1})
+	color:tween{BackgroundTransparency = 0, Length = 0.1}
+	brightness:tween{BackgroundTransparency = 0, Length = 0.1}
+	black:tween{BackgroundTransparency = 0, Length = 0.1}
+	_colorPickerDraggableStroke:tween{Transparency = 0, Length = 0.1}
+
+	-- closing fade in
+	fadeOut = function()
+		darkener:tween({BackgroundTransparency = 1, Length = 0.1})
+		arrow:tween({ImageTransparency = 1, Length = 0.1})
+		text:tween({ImageTransparency = 1, Length = 0.1})
+		_cpShadow:tween({ImageTransparency = 1, Length = 0.1})
+		btnHolder:tween({BackgroundTransparency = 1, Length = 0.1})
+		button:tween({TextTransparency = 1, Length = 0.1})
+		hueBar:tween({BackgroundTransparency = 1, Length = 0.1})
+		hueDraggable:tween({ImageTransparency = 1, Length = 0.1})
+		color:tween{BackgroundTransparency = 1, Length = 0.1}
+		brightness:tween{BackgroundTransparency = 1, Length = 0.1}
+		black:tween{BackgroundTransparency = 1, Length = 0.1}
+		_colorPickerDraggableStroke:tween({Transparency = 1, Length = 0.1}, function()
+			darkener.AbsoluteObject:Destroy()
+			task.delay(0.25, function()
+				Library._colorPickerExists = false
+			end)
+		end)
+	end
 
 end
 
