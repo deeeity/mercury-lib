@@ -87,7 +87,8 @@ local Library = {
 	WelcomeText = nil,
 	DisplayName = nil,
 	DragSpeed = 0.06,
-	LockDragging = false
+	LockDragging = false,
+	ToggleKey = Enum.KeyCode.Home
 
 }
 Library.__index = Library
@@ -479,13 +480,6 @@ function Library:create(options: table)
 
 	self.mainFrame = core
 
-	UserInputService.InputEnded:connect(function(key)
-		if key.KeyCode == Enum.KeyCode.Home then
-			self.Toggled = not self.Toggled
-			Library:show(self.Toggled)
-		end
-	end)
-
 	local tabButtons = core:object("ScrollingFrame", {
 		Size = UDim2.new(1, -40, 0, 25),
 		Position = UDim2.fromOffset(5, 5),
@@ -822,13 +816,13 @@ function Library:create(options: table)
 	})
 
 	settingsTab:_theme_selector()
-
-	settingsTab:slider{
-		Name = "UI Drag Speed",
-		Max = 20,
-		Default = 14,
-		Callback = function(value)
-			Library.DragSpeed = (20 - value)/100
+	
+	settingsTab:keybind{
+		Name = "Toggle Key",
+		Keybind = Enum.KeyCode.Home,
+		Callback = function()
+			self.Toggled = not self.Toggled
+			Library:show(self.Toggled)
 		end,
 	}
 
@@ -836,6 +830,15 @@ function Library:create(options: table)
 		Name = "Lock Dragging",
 		Callback = function(state)
 			Library.LockDragging = state
+		end,
+	}
+	
+	settingsTab:slider{
+		Name = "Drag Speed",
+		Max = 20,
+		Default = 14,
+		Callback = function(value)
+			Library.DragSpeed = (20 - value)/100
 		end,
 	}
 
