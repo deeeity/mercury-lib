@@ -86,7 +86,8 @@ local Library = {
 	},
 	WelcomeText = nil,
 	DisplayName = nil,
-	DragSpeed = 0.06
+	DragSpeed = 0.06,
+	LockDragging = false
 
 }
 Library.__index = Library
@@ -246,7 +247,7 @@ function Library:object(class: string, properties: table)
 
 		return methods
 	end
-	
+
 	function methods:tooltip(text)
 		local tooltipContainer = methods:object("TextLabel", {
 			Theme = {
@@ -263,7 +264,7 @@ function Library:object(class: string, properties: table)
 			TextTransparency = 1
 		}):round(5)
 		tooltipContainer.Size = UDim2.fromOffset(tooltipContainer.TextBounds.X + 16, tooltipContainer.TextBounds.Y + 8)
-		
+
 		local tooltipArrow = tooltipContainer:object("ImageLabel", {
 			Image = "http://www.roblox.com/asset/?id=4292970642",
 			Theme = {ImageColor3 = {"Main", 10}},
@@ -274,9 +275,9 @@ function Library:object(class: string, properties: table)
 			BackgroundTransparency = 1,
 			ImageTransparency = 1
 		})
-		
+
 		local hovered = false
-		
+
 		methods.MouseEnter:connect(function()
 			hovered = true
 			wait(0.2)
@@ -285,13 +286,13 @@ function Library:object(class: string, properties: table)
 				tooltipArrow:tween{ImageTransparency = 0.2}
 			end
 		end)
-		
+
 		methods.MouseLeave:connect(function()
 			hovered = false
 			tooltipContainer:tween{BackgroundTransparency = 1, TextTransparency = 1}
 			tooltipArrow:tween{ImageTransparency = 1}
 		end)
-		
+
 		return methods
 	end
 
@@ -433,19 +434,33 @@ function Library:create(options: table)
 					if Key.UserInputType == Enum.UserInputType.MouseButton1 then
 						local ObjectPosition = Vector2.new(Mouse.X - core.AbsolutePosition.X, Mouse.Y - core.AbsolutePosition.Y)
 						while RunService.RenderStepped:wait() and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-							core:tween{
-								Position = UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),
-								Direction = Enum.EasingDirection.Out,
-								Style = Enum.EasingStyle.Quad,
-								Length = Library.DragSpeed
-							}
-
+							
+							if Library.LockDragging then
+								local FrameX, FrameY = math.clamp(Mouse.X - ObjectPosition.X, 0, gui.AbsoluteSize.X - core.AbsoluteSize.X), math.clamp(Mouse.Y - ObjectPosition.Y, 0, gui.AbsoluteSize.Y - core.AbsoluteSize.Y)
+								core:tween{
+									Position = UDim2.fromOffset(FrameX + (core.Size.X.Offset * core.AnchorPoint.X), FrameY + (core.Size.Y.Offset * core.AnchorPoint.Y)),
+									Length = Library.DragSpeed
+								}
+							else
+								core:tween{
+									Position = UDim2.fromOffset(Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),
+									Length = Library.DragSpeed	
+								}
+							end	
 							--[[core.AbsoluteObject:TweenPosition(
 								UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),           
 								Enum.EasingDirection.In,
 								Enum.EasingStyle.Sine,
 								Library.DragSpeed,
 								true
+								
+								--
+								core:tween{
+								Position = UDim2.new(0, Mouse.X - ObjectPosition.X + (core.Size.X.Offset * core.AnchorPoint.X), 0, Mouse.Y - ObjectPosition.Y + (core.Size.Y.Offset * core.AnchorPoint.Y)),
+								Direction = Enum.EasingDirection.Out,
+								Style = Enum.EasingStyle.Quad,
+								Length = Library.DragSpeed
+							}
 							)]]
 						end
 					end
@@ -738,7 +753,7 @@ function Library:create(options: table)
 		AnchorPoint = Vector2.new(1, 1),
 		Image = "http://www.roblox.com/asset/?id=8559790237"
 	}):tooltip("settings")
-	
+
 	local creditsTabIcon = profile:object("ImageButton", {
 		BackgroundTransparency = 1,
 		Theme = {ImageColor3 = "WeakText"},
@@ -766,8 +781,8 @@ function Library:create(options: table)
 		PaddingRight = UDim.new(0, 70),
 		PaddingTop = UDim.new(0, 5)
 	})
-	
-	
+
+
 	local mt = setmetatable({
 		core = core,
 		statusText = status,
@@ -798,12 +813,19 @@ function Library:create(options: table)
 		end,
 	}
 	
+	settingsTab:toggle{
+		Name = "Lock Dragging",
+		Callback = function(state)
+			Library.LockDragging = state
+		end,
+	}
+
 	local creditsTab = Library.tab(mt, {
 		Name = "Credits",
 		Internal = creditsTabIcon,
 		Icon = "http://www.roblox.com/asset/?id=8577523456"
 	})
-	
+
 	creditsTab:credit{Name = "Abstract"}
 	creditsTab:credit{Name = "Deity"}
 
@@ -1374,12 +1396,12 @@ function Library:credit(options)
 		Name = "Creditor",
 		Description = nil
 	}, options)
-	
+
 	local creditContainer = self.container:object("Frame", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
 	}):round(7)
-	
+
 	local name = creditContainer:object("TextLabel", {
 		BackgroundTransparency = 1,
 		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
@@ -1775,7 +1797,7 @@ function Library:color_picker(options)
 	local fadeOut;
 
 	local selectedColor = Color3.fromRGB(255, 0, 0);
-
+	
 	local darkener = self.core:object("Frame", {
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundTransparency = 1,
@@ -2101,7 +2123,6 @@ function Library:color_picker(options)
 			end)
 		end)
 	end
-
 end
 
 function Library:colorpicker(options)
