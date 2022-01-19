@@ -434,7 +434,7 @@ function Library:create(options: table)
 					if Key.UserInputType == Enum.UserInputType.MouseButton1 then
 						local ObjectPosition = Vector2.new(Mouse.X - core.AbsolutePosition.X, Mouse.Y - core.AbsolutePosition.Y)
 						while RunService.RenderStepped:wait() and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-							
+
 							if Library.LockDragging then
 								local FrameX, FrameY = math.clamp(Mouse.X - ObjectPosition.X, 0, gui.AbsoluteSize.X - core.AbsoluteSize.X), math.clamp(Mouse.Y - ObjectPosition.Y, 0, gui.AbsoluteSize.Y - core.AbsoluteSize.Y)
 								core:tween{
@@ -511,6 +511,23 @@ function Library:create(options: table)
 		Image = "http://www.roblox.com/asset/?id=8497487650",
 		AnchorPoint = Vector2.new(1)
 	})
+	
+	closeButton.MouseEnter:connect(function()
+		closeButton:tween{ImageColor3 = Color3.fromRGB(255, 124, 142)}
+	end)
+	
+	closeButton.MouseLeave:connect(function()
+		closeButton:tween{ImageColor3 = Library.CurrentTheme.StrongText}
+	end)
+	
+	closeButton.MouseButton1Click:connect(function()
+		core.ClipsDescendants = true
+		core:fade(true)
+		wait(0.1)
+		core:tween({Size = UDim2.new()}, function()
+			gui.AbsoluteObject:Destroy()
+		end)
+	end)
 
 	local urlBar = core:object("Frame", {
 		Size = UDim2.new(1, -10, 0, 25),
@@ -814,7 +831,7 @@ function Library:create(options: table)
 			Library.DragSpeed = (20 - value)/100
 		end,
 	}
-	
+
 	settingsTab:toggle{
 		Name = "Lock Dragging",
 		Callback = function(state)
@@ -1799,7 +1816,7 @@ function Library:color_picker(options)
 	local fadeOut;
 
 	local selectedColor = Color3.fromRGB(255, 0, 0);
-	
+
 	local darkener = self.core:object("Frame", {
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundTransparency = 1,
