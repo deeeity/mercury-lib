@@ -105,6 +105,7 @@ Tab:Keybind{
 ### Prompt
 ```lua
 GUI:Prompt{
+	Followup = false,
 	Title = "Prompt",
 	Text = "Prompts are cool",
 	Buttons = {
@@ -121,7 +122,6 @@ GUI:Prompt{
 ### Color Picker
 ```lua
 GUI:ColorPicker{
-	DefaultColor = Color3.fromHSV(0, 1, 1), -- Red, Can also be done using Color3.fromRGB, .new, etc.
 	Callback = function(color) end
 }
 ```
