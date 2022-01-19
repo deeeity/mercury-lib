@@ -551,9 +551,9 @@ function Library:create(options: table)
 		ZIndex = 0,
 		ImageTransparency = 0.7,
 		Size = UDim2.new(1, 47, 1, 47),
-		Theme = {ImageColor3 = "StrongText"},
 		SliceCenter = Rect.new(49, 49, 450, 450),
-		Image = "rbxassetid://6014261993"
+		Image = "rbxassetid://6014261993",
+		ImageColor3 = Color3.fromRGB()
 	})
 
 	local content = core:object("Frame", {
