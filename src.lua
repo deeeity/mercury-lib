@@ -563,7 +563,7 @@ function Library:create(options: table)
 		ZIndex = 0,
 		Image = "rbxassetid://6015897843",
 		ImageColor3 = Color3.new(0, 0, 0),
-		ImageTransparency = .5,
+		ImageTransparency = .6,
 		SliceCenter = Rect.new(47, 47, 450, 450),
 		ScaleType = Enum.ScaleType.Slice,
 		SliceScale = 1
@@ -966,6 +966,15 @@ function Library:tab(options)
 				tabButton.Visible = true
 				tabButton:fade(false, Library.CurrentTheme.Main, 0.1)			
 				tabButton:tween({Size = UDim2.new(0, 125, tabButton.Size.Y.Scale, tabButton.Size.Y.Offset), Length = 0.1})
+				for _, tabInfo in next, self.Tabs do
+					local page = tabInfo[1]
+					local button = tabInfo[2]
+					page.Visible = false
+				end
+				selectedTab:tween{BackgroundTransparency = ((selectedTab == tabButton) and 0.15) or 1}
+				selectedTab = tabButton
+				tab.Visible = true
+				tabButton.BackgroundTransparency = 0
 			end
 		end)
 	end
@@ -2132,7 +2141,7 @@ function Library:color_picker(options)
 	darkener:tween({BackgroundTransparency = .4, Length = 0.1})
 	arrow:tween({ImageTransparency = 0, Length = 0.1})
 	text:tween({ImageTransparency = 0, Length = 0.1})
-	_cpShadow:tween({ImageTransparency = .5, Length = 0.1})
+	_cpShadow:tween({ImageTransparency = .6, Length = 0.1})
 	btnHolder:tween({BackgroundTransparency = 0, Length = 0.1})
 	button:tween({TextTransparency = 0, Length = 0.1})
 	hueBar:tween({BackgroundTransparency = 0, Length = 0.1})
