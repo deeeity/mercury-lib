@@ -510,15 +510,15 @@ function Library:create(options: table)
 		Image = "http://www.roblox.com/asset/?id=8497487650",
 		AnchorPoint = Vector2.new(1)
 	})
-	
+
 	closeButton.MouseEnter:connect(function()
 		closeButton:tween{ImageColor3 = Color3.fromRGB(255, 124, 142)}
 	end)
-	
+
 	closeButton.MouseLeave:connect(function()
 		closeButton:tween{ImageColor3 = Library.CurrentTheme.StrongText}
 	end)
-	
+
 	closeButton.MouseButton1Click:connect(function()
 		core.ClipsDescendants = true
 		core:fade(true)
@@ -533,7 +533,7 @@ function Library:create(options: table)
 		Position = UDim2.new(0, 5,0, 35),
 		Theme = {BackgroundColor3 = "Secondary"}
 	}):round(5)
-	
+
 	local searchIcon = urlBar:object("ImageLabel", {
 		AnchorPoint = Vector2.new(0, .5),
 		Position = UDim2.new(0, 5,0.5, 0);
@@ -554,7 +554,7 @@ function Library:create(options: table)
 		TextScaled = false,
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
-	
+
 	Library.UrlLabel = link
 	Library.Url = options.Link
 
@@ -825,7 +825,7 @@ function Library:create(options: table)
 	})
 
 	settingsTab:_theme_selector()
-	
+
 	settingsTab:keybind{
 		Name = "Toggle Key",
 		Description = "Key to show/hide the UI.",
@@ -844,7 +844,7 @@ function Library:create(options: table)
 			Library.LockDragging = state
 		end,
 	}
-	
+
 	settingsTab:slider{
 		Name = "UI Drag Speed",
 		Description = "How smooth the dragging looks.",
@@ -985,6 +985,7 @@ function Library:tab(options)
 				selectedTab = tabButton
 				tab.Visible = true
 				tabButton.BackgroundTransparency = 0
+				Library.UrlLabel.Text = Library.Url .. "/" .. options.Name:lower()
 			end
 		end)
 	end
@@ -1086,7 +1087,7 @@ function Library:toggle(options)
 	}, options)
 
 	if options.StartingState then options.Callback(true) end
-	
+
 	local toggleContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
