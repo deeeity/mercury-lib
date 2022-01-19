@@ -564,7 +564,7 @@ function Library:create(options: table)
 		Image = "rbxassetid://6015897843",
 		ImageColor3 = Color3.new(0, 0, 0),
 		ImageTransparency = .5,
-		SliceCenter = Rect.new(49, 49, 450, 450),
+		SliceCenter = Rect.new(47, 47, 450, 450),
 		ScaleType = Enum.ScaleType.Slice,
 		SliceScale = 1
 	})
@@ -820,7 +820,7 @@ function Library:create(options: table)
 	settingsTab:keybind{
 		Name = "Toggle Key",
 		Description = "Key to show/hide the UI.",
-		Keybind = Enum.KeyCode.Insert,
+		Keybind = Enum.KeyCode.Delete,
 		Callback = function()
 			self.Toggled = not self.Toggled
 			Library:show(self.Toggled)
@@ -1062,6 +1062,8 @@ function Library:toggle(options)
 		Description = nil,
 		Callback = function(state) end
 	}, options)
+
+	if options.StartingState then options.Callback(true) end
 	
 	local toggleContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
