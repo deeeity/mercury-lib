@@ -560,10 +560,10 @@ function Library:create(options: table)
 		Centered = true,
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 47,1, 47),
-		ZIndex = 11,
+		ZIndex = 0,
 		Image = "rbxassetid://6015897843",
 		ImageColor3 = Color3.new(0, 0, 0),
-		ImageTransparency = 1,
+		ImageTransparency = .5,
 		SliceCenter = Rect.new(49, 49, 450, 450),
 		ScaleType = Enum.ScaleType.Slice,
 		SliceScale = 1
@@ -819,7 +819,8 @@ function Library:create(options: table)
 	
 	settingsTab:keybind{
 		Name = "Toggle Key",
-		Keybind = Enum.KeyCode.Home,
+		Description = "Key to show/hide the UI.",
+		Keybind = Enum.KeyCode.Insert,
 		Callback = function()
 			self.Toggled = not self.Toggled
 			Library:show(self.Toggled)
@@ -828,13 +829,16 @@ function Library:create(options: table)
 
 	settingsTab:toggle{
 		Name = "Lock Dragging",
+		Description = "Makes sure you can't drag the UI outside of the window.",
+		StartingState = true,
 		Callback = function(state)
 			Library.LockDragging = state
 		end,
 	}
 	
 	settingsTab:slider{
-		Name = "Drag Speed",
+		Name = "UI Drag Speed",
+		Description = "How smooth the dragging looks.",
 		Max = 20,
 		Default = 14,
 		Callback = function(value)
