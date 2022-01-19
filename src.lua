@@ -546,14 +546,16 @@ function Library:create(options: table)
 	})
 
 	local shadow = shadowHolder:object("ImageLabel", {
-		BackgroundTransparency = 1,
 		Centered = true,
-		ZIndex = 0,
-		ImageTransparency = 0.7,
-		Size = UDim2.new(1, 47, 1, 47),
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 47,1, 47),
+		ZIndex = 11,
+		Image = "rbxassetid://6015897843",
+		ImageColor3 = Color3.new(0, 0, 0),
+		ImageTransparency = 1,
 		SliceCenter = Rect.new(49, 49, 450, 450),
-		Image = "rbxassetid://6014261993",
-		ImageColor3 = Color3.fromRGB()
+		ScaleType = Enum.ScaleType.Slice,
+		SliceScale = 1
 	})
 
 	local content = core:object("Frame", {
