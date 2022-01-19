@@ -855,7 +855,7 @@ function Library:tab(options)
 	if not options.Internal then
 		quickAccessButton = self.quickAccess:object("TextButton", {
 			Theme = {BackgroundColor3 = "Secondary"}
-		}):round(5)
+		}):round(5):tooltip(options.Name)
 
 		quickAccessIcon = quickAccessButton:object("ImageLabel", {
 			BackgroundTransparency = 1,
