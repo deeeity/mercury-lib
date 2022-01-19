@@ -88,7 +88,9 @@ local Library = {
 	DisplayName = nil,
 	DragSpeed = 0.06,
 	LockDragging = false,
-	ToggleKey = Enum.KeyCode.Home
+	ToggleKey = Enum.KeyCode.Home,
+	UrlLabel = nil,
+	Url = nil
 
 }
 Library.__index = Library
@@ -404,6 +406,9 @@ function Library:create(options: table)
 		Theme = self.Themes.Dark,
 		Link = "https://github.com/deeeity/mercury-lib"
 	}, options)
+	if options.Link:sub(-1, -1) == "/" then
+		options.Link = options.Link:sub(1, -2)
+	end
 
 	if options.Theme.Light then
 		self.darken, self.lighten = self.lighten, self.darken
@@ -528,7 +533,7 @@ function Library:create(options: table)
 		Position = UDim2.new(0, 5,0, 35),
 		Theme = {BackgroundColor3 = "Secondary"}
 	}):round(5)
-
+	
 	local searchIcon = urlBar:object("ImageLabel", {
 		AnchorPoint = Vector2.new(0, .5),
 		Position = UDim2.new(0, 5,0.5, 0);
@@ -543,12 +548,15 @@ function Library:create(options: table)
 		Position = UDim2.new(0, 26, 0.5, 0),
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, -30, .6, 0),
-		Text = options.Link,
+		Text = options.Link .. "/home",
 		Theme = {TextColor3 = "WeakText"},
 		TextSize = 14,
 		TextScaled = false,
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
+	
+	Library.UrlLabel = link
+	Library.Url = options.Link
 
 	local shadowHolder = core:object("Frame", {
 		BackgroundTransparency = 1,
@@ -678,6 +686,7 @@ function Library:create(options: table)
 			selectedTab = homeButton
 			homePage.Visible = true
 			homeButton.BackgroundTransparency = 0
+			Library.UrlLabel.Text = Library.Url .. "/home"
 		end)
 	end
 
@@ -906,7 +915,7 @@ function Library:tab(options)
 		Visible = false
 	}):round(5)
 
-	self.Tabs[#self.Tabs+1] = {tab, tabButton}
+	self.Tabs[#self.Tabs+1] = {tab, tabButton, options.Name}
 
 	do
 		local down = false
@@ -945,6 +954,7 @@ function Library:tab(options)
 			selectedTab = tabButton
 			tab.Visible = true
 			tabButton.BackgroundTransparency = 0
+			Library.UrlLabel.Text = Library.Url .. "/" .. options.Name:lower()
 		end)
 
 		quickAccessButton.MouseEnter:connect(function()
@@ -1024,17 +1034,20 @@ function Library:tab(options)
 			self.homePage.Visible = true
 			self.homeButton:tween{BackgroundTransparency = 0.15}
 			selectedTab = self.homeButton
+			Library.UrlLabel.Text = Library.Url .. "/home"	
 		elseif tabButton == lastTab[2] then
 			lastTab = visible[#visible-1]
 			tab.Visible = false
 			lastTab[2]:tween{BackgroundTransparency = 0.15}
 			lastTab[1].Visible = true
 			selectedTab = lastTab[2]
+			Library.UrlLabel.Text = Library.Url .. "/" .. lastTab[3]:lower()
 		else
 			tab.Visible = false
 			lastTab[2]:tween{BackgroundTransparency = 0.15}
 			lastTab[1].Visible = true
 			selectedTab = lastTab[2]
+			Library.UrlLabel.Text = Library.Url .. "/" .. lastTab[3]:lower()
 		end
 	end)
 
