@@ -866,7 +866,6 @@ function Library:tab(options)
 		BackgroundTransparency = 1,
 		Position = UDim2.fromScale(0, 1),
 		Size = UDim2.fromScale(1, 1),
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ScrollBarThickness = 0,
 		ScrollingDirection = Enum.ScrollingDirection.Y
 	})
@@ -890,7 +889,7 @@ function Library:tab(options)
 		quickAccessButton = options.Internal
 	end
 
-	tab:object("UIListLayout", {
+	local layout = tab:object("UIListLayout", {
 		Padding = UDim.new(0, 10),
 		HorizontalAlignment = Enum.HorizontalAlignment.Center
 	})
@@ -1043,8 +1042,13 @@ function Library:tab(options)
 		statusText = self.statusText,
 		container = tab,
 		Theme = self.Theme,
-		core = self.core
+		core = self.core,
+		layout = layout
 	}, Library)
+end
+
+function Library:_resize_tab()
+	self.container.CanvasSize = UDim2.fromOffset(0, self.layout.AbsoluteContentSize.Y + 20)
 end
 
 function Library:toggle(options)
@@ -1054,7 +1058,7 @@ function Library:toggle(options)
 		Description = nil,
 		Callback = function(state) end
 	}, options)
-
+	
 	local toggleContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
@@ -1143,6 +1147,7 @@ function Library:toggle(options)
 			options.Callback(toggled)
 		end)
 	end
+	self:_resize_tab()
 end
 
 function Library:dropdown(options)
@@ -1336,6 +1341,7 @@ function Library:dropdown(options)
 			toggle()
 		end)
 	end
+	self:_resize_tab()
 end
 
 function Library:button(options)
@@ -1411,6 +1417,7 @@ function Library:button(options)
 			options.Callback()
 		end)
 	end
+	self:_resize_tab()
 end
 
 function Library:credit(options)
@@ -1433,6 +1440,7 @@ function Library:credit(options)
 		Theme = {TextColor3 = "StrongText"},
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
+	self:_resize_tab()
 end
 
 function Library:_theme_selector()
@@ -1546,6 +1554,7 @@ function Library:_theme_selector()
 			end)
 		end
 	end
+	self:_resize_tab()
 end
 
 
@@ -1647,6 +1656,7 @@ function Library:keybind(options)
 			if not listening then listening = true; keybindDisplay.Text = "..." end
 		end)
 	end
+	self:_resize_tab()
 end
 
 function Library:prompt(options)
@@ -1802,6 +1812,7 @@ function Library:prompt(options)
 			end)
 		end
 	end
+	self:_resize_tab()
 end
 
 function Library:color_picker(options)
@@ -2266,8 +2277,8 @@ function Library:slider(options)
 				options.Callback(value)
 			end
 		end)
-
-	end	
+	end
+	self:_resize_tab()
 end
 
 function Library:textbox(options)
@@ -2366,6 +2377,7 @@ function Library:textbox(options)
 			options.Callback(textBox.Text)
 		end)
 	end
+	self:_resize_tab()
 end
 
 return setmetatable(Library, {
