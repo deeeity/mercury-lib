@@ -75,6 +75,10 @@ local Library = {
 		OperaGX = {},
 		VisualStudio = {}
 	},
+	ColorPickerThemes = {
+		Legacy = 0,
+		Modern = 1
+	}
 	Toggled = true,
 	ThemeObjects = {
 		Main = {},
@@ -94,11 +98,6 @@ local Library = {
 
 }
 Library.__index = Library
-
-Library.ColorPickerStyles = {
-	Legacy = "Legacy",
-	Modern = "Modern"
-}
 
 local selectedTab
 
@@ -1966,7 +1965,7 @@ function Library:color_picker(options)
 	}):round(10)
 
 
-	if options.Style == "Modern" then
+	if options.Style == 1 then
 		do
 			local arrow = darkener:object("ImageLabel", {
 				BackgroundTransparency = 1,
