@@ -122,7 +122,7 @@ GUI:Prompt{
 ### Color Picker
 ```lua
 GUI:ColorPicker{
-	Style = Library.ColorPickerStyles.Simple,
+	Style = Library.ColorPickerStyles.Legacy,
 	Callback = function(color) end
 }
 ```
