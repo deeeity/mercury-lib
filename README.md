@@ -1,7 +1,7 @@
 
 
-<p align="left">
-  <img src="https://cdn.discordapp.com/attachments/929706675022233640/932699962767200327/icons8-moon-15.png"/>
+<p align="center">
+  <img src="https://media.discordapp.net/attachments/929706675022233640/933723518321967144/banner.jpg"/>
 </p>
 
 # Mercury
@@ -9,7 +9,6 @@
 Mercury is a free and open sourced Roblox UI library.
 
 https://discord.com/users/480805591221010456
-
 https://discord.com/users/452466034822217739
 
 ## Loadstring
