@@ -1,6 +1,6 @@
 
 
-<p align="center">
+<p align="center" href="https://discord.gg/jaunk8nhN5">
   <img src="https://media.discordapp.net/attachments/929706675022233640/933723518321967144/banner.jpg"/>
 </p>
 
@@ -8,8 +8,9 @@
 
 Mercury is a free and open sourced Roblox UI library.
 
-https://discord.com/users/480805591221010456
-https://discord.com/users/452466034822217739
+- https://discord.gg/jaunk8nhN5
+- https://discord.com/users/480805591221010456
+- https://discord.com/users/452466034822217739
 
 ## Loadstring
 ```lua
