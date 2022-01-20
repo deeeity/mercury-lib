@@ -9,6 +9,7 @@
 Mercury is a free and open sourced Roblox UI library.
 
 https://discord.com/users/480805591221010456
+
 https://discord.com/users/452466034822217739
 
 ## Loadstring
