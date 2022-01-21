@@ -210,7 +210,7 @@ function Library:object(class, properties)
 		else
 			self.fadeFrame.BackgroundColor3 = colorOverride or self.BackgroundColor3
 		end
-		
+
 		if instant then
 			if state then
 				self.fadeFrame.BackgroundTransparency = 0
@@ -440,10 +440,10 @@ function Library:create(options)
 		Centered = true,
 		ClipsDescendants = true		
 	}):round(10)
-	
+
 	core:fade(true, nil, 0.2, true)
-	
-	
+
+
 	core:fade(false, nil, 0.4)
 	core:tween({Size = options.Size, Length = 0.3}, function()
 		core.ClipsDescendants = false
@@ -882,10 +882,12 @@ function Library:create(options)
 		Internal = creditsTabIcon,
 		Icon = "http://www.roblox.com/asset/?id=8577523456"
 	})
-
+	
+	rawset(mt, "creditsContainer", creditsTab.container)
+	
 	creditsTab:credit{Name = "Abstract", Description = "UI Library Developer", Discord = "Abstract#8007", V3rmillion = "AbstractPoo"}
 	creditsTab:credit{Name = "Deity", Description = "UI Library Developer", Discord = "Deity#0228", V3rmillion = "Deity"}
-
+	
 	return mt
 end
 
@@ -1161,7 +1163,7 @@ function Library:toggle(options)
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
 	end
-	
+
 	local function toggle()
 		toggled = not toggled
 		if toggled then
@@ -1171,7 +1173,7 @@ function Library:toggle(options)
 		end
 		options.Callback(toggled)
 	end
-	
+
 	do
 		local hovered = false
 		local down = false
@@ -1203,13 +1205,13 @@ function Library:toggle(options)
 		end)
 	end
 	self:_resize_tab()
-	
+
 	local methods = {}
-	
+
 	function methods:Toggle()
 		toggle()
 	end
-	
+
 	function methods:SetState(state)
 		toggled = state
 		if toggled then
@@ -1219,7 +1221,7 @@ function Library:toggle(options)
 		end
 		options.callback(toggled)
 	end
-	
+
 	return methods
 end
 
@@ -1419,15 +1421,15 @@ function Library:dropdown(options)
 		end)
 	end
 	self:_resize_tab()
-	
+
 	local methods = {}
-	
+
 	function methods:Set(text)
 		selectedText.Text = text
 		selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
 		options.Callback(text)
 	end
-	
+
 	return methods
 end
 
@@ -1505,14 +1507,886 @@ function Library:button(options)
 		end)
 	end
 	self:_resize_tab()
-	
+
 	local methods = {}
-	
+
 	function methods:Fire()
 		options.Callback()
 	end
-	
+
 	return methods
+end
+
+function Library:color_picker(options)
+	options = self:set_defaults({
+		Name = "Color Picker",
+		Description = nil,
+		Style = Library.ColorPickerStyles.Legacy,
+		Followup = false,
+		Callback = function(color) end
+	}, options)
+
+	if Library._colorPickerExists and not options.Followup then return end
+	Library._colorPickerExists = true
+
+	local buttonContainer = self.container:object("TextButton", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		Size = UDim2.new(1, -20, 0, 52)
+	}):round(7)
+
+	local text = buttonContainer:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(10, (options.Description and 5) or 0),
+		Size = (options.Description and UDim2.new(0.5, -10, 0, 22)) or UDim2.new(0.5, -10, 1, 0),
+		Text = options.Name,
+		TextSize = 22,
+		Theme = {TextColor3 = "StrongText"},
+		TextXAlignment = Enum.TextXAlignment.Left
+	})
+
+	if options.Description then
+		local description = buttonContainer:object("TextLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(10, 27),
+			Size = UDim2.new(0.5, -10, 0, 20),
+			Text = options.Description,
+			TextSize = 18,
+			Theme = {TextColor3 = "WeakText"},
+			TextXAlignment = Enum.TextXAlignment.Left
+		})
+	end
+
+	local icon = buttonContainer:object("ImageLabel", {
+		AnchorPoint = Vector2.new(1, 0.5),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -11, 0.5, 0),
+		Size = UDim2.fromOffset(26, 26),
+		Image = "rbxassetid://8604555937",
+		ImageColor3 = Library.CurrentTheme.Tertiary
+	})
+
+	do
+		local hovered = false
+		local down = false
+
+		buttonContainer.MouseEnter:connect(function()
+			hovered = true
+			buttonContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 10)}
+		end)
+
+		buttonContainer.MouseLeave:connect(function()
+			hovered = false
+			if not down then
+				buttonContainer:tween{BackgroundColor3 = Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		buttonContainer.MouseButton1Down:connect(function()
+			buttonContainer:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Secondary, 20)}
+		end)
+
+		UserInputService.InputEnded:connect(function(key)
+			if key.UserInputType == Enum.UserInputType.MouseButton1 then
+				buttonContainer:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Secondary)) or Library.CurrentTheme.Secondary}
+			end
+		end)
+
+		buttonContainer.MouseButton1Click:connect(function()
+			local hue, sat, val;
+			local updatePicker, updateHue;
+
+			local fadeOut;
+
+			local selectedColor = Color3.fromRGB(255, 0, 0);
+
+			local darkener = self.core:object("Frame", {
+				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+				BackgroundTransparency = 1,
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = 2
+			}):round(10)
+
+
+			if options.Style == 1 then
+				do
+					local arrow = darkener:object("ImageLabel", {
+						BackgroundTransparency = 1,
+						Position = UDim2.new(0, 365,0, 102),
+						Size = UDim2.new(0, 56,0, 48),
+						ZIndex = 10,
+						Image = "rbxassetid://8579148508",
+						ImageColor3 = selectedColor,
+						ImageTransparency = 1,
+						Rotation = 180
+					})
+
+					local text = darkener:object("ImageLabel", {
+						BackgroundTransparency = 1,
+						Position = UDim2.new(0, 364,0, 158),
+						Rotation = -4,
+						Size = UDim2.new(0, 141,0, 37),
+						ZIndex = 10,
+						Image = "rbxassetid://8579166120",
+						ImageColor3 = selectedColor,
+						ImageTransparency = 0
+					})
+
+					local cpHolder = darkener:object("Frame", {
+						AnchorPoint = Vector2.new(.5, .5),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(0.5, -50,0.5, 0),
+						Size = UDim2.fromOffset(160, 240),
+						ZIndex = 12
+					})
+
+					local _cpShadowHolder = cpHolder:object("Frame", {
+						BackgroundTransparency = 1,
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 11
+					})
+
+					local _cpShadow = _cpShadowHolder:object("ImageLabel", {
+						Centered = true,
+						BackgroundTransparency = 1,
+						Size = UDim2.new(1, 47,1, 47),
+						ZIndex = 11,
+						Image = "rbxassetid://6015897843",
+						ImageColor3 = Color3.new(0, 0, 0),
+						ImageTransparency = 1,
+						SliceCenter = Rect.new(49, 49, 450, 450),
+						ScaleType = Enum.ScaleType.Slice,
+						SliceScale = 1
+					})
+
+					local btnHolder = cpHolder:object("Frame", {
+						AnchorPoint = Vector2.new(1, 1),
+						BackgroundColor3 = Color3.new(0, 0, 0),
+						BackgroundTransparency = 1,
+						Position = UDim2.fromScale(1, 1),
+						Size = UDim2.new(1, -5,0, 50),
+						ZIndex = 12
+					})
+
+					local button = btnHolder:object("TextButton", {
+						Centered = true,
+						BackgroundTransparency = 1,
+						TextTransparency = 1,
+						Size = UDim2.fromOffset(80, 20),
+						ZIndex = 12,
+						Text = "SELECT",
+						TextSize = 13,
+						Theme = {TextColor3 = {"Tertiary", -10}, BackgroundColor3 = {"Tertiary", -10}}
+					}):round(8):stroke({"Tertiary", -10})
+
+					do
+						local hovered = false
+						local down = false
+
+						button.MouseEnter:connect(function()
+							hovered = true
+							button:tween{BackgroundTransparency = 0, TextColor3 = self:lighten(Library.CurrentTheme.StrongText, 15)}
+						end)
+
+						button.MouseLeave:connect(function()
+							hovered = false
+							if not down then
+								button:tween{BackgroundTransparency = 1, TextColor3 = self:darken(Library.CurrentTheme.Tertiary, 10)}
+							end
+						end)
+
+						button.MouseButton1Down:connect(function()
+							button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
+						end)
+
+						UserInputService.InputEnded:connect(function(key)
+							if key.UserInputType == Enum.UserInputType.MouseButton1 then
+								button:tween{BackgroundTransparency = (hovered and 0) or 1}
+								if hovered then
+									button:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+								end
+							end
+						end)
+
+						button.MouseButton1Click:connect(function()
+							fadeOut()
+							icon:tween({ImageColor3 = selectedColor})
+							options.Callback(selectedColor)
+						end)
+					end
+
+					local hueBar = cpHolder:object("TextButton", {
+						BackgroundColor3 = Color3.new(255, 255, 255),
+						BorderSizePixel = 0,
+						Text = "",
+						Size = UDim2.new(0, 5, 1, 0),
+						ZIndex = 12,
+						ClipsDescendants = true,
+						BackgroundTransparency = 1
+					})
+
+					local _hueBarGradient = hueBar:object("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+							ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+							ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
+							ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+							ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+							ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+						},
+						Rotation = 90
+					})
+
+					local hueDraggable = hueBar:object("ImageButton", {
+						BackgroundTransparency = 1,
+						ImageTransparency = 1,
+						Position = UDim2.new(-2, 3,0, -10),
+						Size = UDim2.fromOffset(20, 20),
+						ZIndex = 12,
+						Image = "rbxassetid://8579244616"
+					})
+
+					local pickerArea = cpHolder:object("TextButton", {
+						Text = "",
+						AnchorPoint = Vector2.new(1, 0),
+						BackgroundTransparency = 1,
+						Position = UDim2.fromScale(1, 0),
+						Size = UDim2.new(1, -5,1, -50),
+						ZIndex = 12,
+						ClipsDescendants = true
+					})
+
+					local color = pickerArea:object("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 13,
+						BackgroundColor3 = selectedColor,
+						BackgroundTransparency = 1,
+						BorderSizePixel = 0
+					})
+
+					local brightness = pickerArea:object("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 14,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						BorderSizePixel = 0
+					})
+
+					local _brightness = brightness:object("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(255 ,255, 255))
+						},
+						Transparency = NumberSequence.new{
+							NumberSequenceKeypoint.new(0, 0),
+							NumberSequenceKeypoint.new(1, 1),
+						}
+					})
+
+					local black = pickerArea:object("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 16,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						BackgroundTransparency = 1
+					})
+
+					local _black = black:object("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+						},
+						Transparency = NumberSequence.new{
+							NumberSequenceKeypoint.new(0, 0),
+							NumberSequenceKeypoint.new(1, 1),
+						},
+						Rotation = -90
+					})
+
+					local colorPickerDraggable = pickerArea:object("TextButton", {
+						Text = "",
+						AnchorPoint = Vector2.new(.5, .5),
+						BackgroundTransparency = 1,
+						Size = UDim2.fromOffset(6, 6),
+						Position = UDim2.new(0, 152, 0, 3),
+						ZIndex = 20
+					}):round(100)
+
+					local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
+						Color = Color3.fromRGB(255, 255 ,255),
+						Thickness = 1.6,
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Transparency = 1
+					})
+
+					-- HUE
+					do
+						updateHue = function()
+							hue = math.clamp((Mouse.Y - hueBar.AbsolutePosition.Y) / (hueBar.AbsoluteSize.Y), 0, 1)
+							local tempVal = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
+							local newYPos = math.clamp((Mouse.Y - hueBar.AbsolutePosition.Y) / (hueBar.AbsoluteSize.Y) * hueBar.AbsoluteSize.Y, 0, hueBar.AbsoluteSize.Y)
+							selectedColor = Color3.fromHSV(hue, sat, val)
+							color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
+							text:tween({ImageColor3 = selectedColor, Length = 0.05})
+							arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
+							hueDraggable:tween({Length = 0.05, Position = UDim2.new(-2, 3, 0, math.clamp(newYPos - 10, -10, hueBar.AbsoluteSize.Y + 10)), ImageColor3 = Color3.fromHSV(1, 0, -tempVal)})
+						end
+
+
+						local down = false
+
+						hueBar.MouseButton1Down:Connect(function()
+							down = true
+							while RunService.RenderStepped:Wait() and down do
+								updateHue()
+							end
+						end)
+
+						hueDraggable.MouseButton1Down:connect(function()
+							down = true
+							while RunService.RenderStepped:Wait() and down do
+								updateHue()
+							end
+						end)
+
+						UserInputService.InputEnded:Connect(function(key)
+							if key.UserInputType == Enum.UserInputType.MouseButton1 then
+								if down then
+									down = false
+								end
+							end
+						end)
+					end
+					-- END HUE
+
+					-- SAT & VALUE [PICKER]
+					do
+						local down = false
+
+						updatePicker = function()
+							sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
+							val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
+
+							local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
+							local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
+
+							selectedColor = Color3.fromHSV(hue, sat, val)
+
+							colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
+							text:tween({ImageColor3 = selectedColor, Length = 0.05})
+							arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
+						end
+
+						pickerArea.MouseButton1Down:Connect(function()
+							down = true
+							while RunService.RenderStepped:wait() and down do
+								updatePicker()
+							end
+						end)
+
+						UserInputService.InputEnded:Connect(function(key)
+							if key.UserInputType == Enum.UserInputType.MouseButton1 then
+								if down then
+									down = false
+								end
+							end
+						end)
+					end
+					-- END SAT & VALUE
+
+					-- opening (fade in)
+					darkener:tween({BackgroundTransparency = .4, Length = 0.1})
+					arrow:tween({ImageTransparency = 0, Length = 0.1})
+					text:tween({ImageTransparency = 0, Length = 0.1})
+					_cpShadow:tween({ImageTransparency = .6, Length = 0.1})
+					btnHolder:tween({BackgroundTransparency = 0, Length = 0.1})
+					button:tween({TextTransparency = 0, Length = 0.1})
+					hueBar:tween({BackgroundTransparency = 0, Length = 0.1})
+					hueDraggable:tween({ImageTransparency = 0, Length = 0.1})
+					color:tween{BackgroundTransparency = 0, Length = 0.1}
+					brightness:tween{BackgroundTransparency = 0, Length = 0.1}
+					black:tween{BackgroundTransparency = 0, Length = 0.1}
+					_colorPickerDraggableStroke:tween{Transparency = 0, Length = 0.1}
+
+					-- closing fade in
+					fadeOut = function()
+						darkener:tween({BackgroundTransparency = 1, Length = 0.1})
+						arrow:tween({ImageTransparency = 1, Length = 0.1})
+						text:tween({ImageTransparency = 1, Length = 0.1})
+						_cpShadow:tween({ImageTransparency = 1, Length = 0.1})
+						btnHolder:tween({BackgroundTransparency = 1, Length = 0.1})
+						button:tween({TextTransparency = 1, Length = 0.1})
+						hueBar:tween({BackgroundTransparency = 1, Length = 0.1})
+						hueDraggable:tween({ImageTransparency = 1, Length = 0.1})
+						color:tween{BackgroundTransparency = 1, Length = 0.1}
+						brightness:tween{BackgroundTransparency = 1, Length = 0.1}
+						black:tween{BackgroundTransparency = 1, Length = 0.1}
+						_colorPickerDraggableStroke:tween({Transparency = 1, Length = 0.1}, function()
+							darkener.AbsoluteObject:Destroy()
+							task.delay(0.25, function()
+								Library._colorPickerExists = false
+							end)
+						end)
+					end
+				end
+			else
+				do
+					-- legacy
+					local holder = darkener:object("Frame", {
+						Centered = true,
+						Theme = {BackgroundColor3 = "Secondary"},
+						BackgroundTransparency = 1,
+						Size = UDim2.fromOffset(255, 170),
+					}):round(6)
+
+					local _holderStroke = holder:object("UIStroke", {
+						Transparency = 1,
+						Theme = {Color = "Tertiary"},
+						Thickness = 1.6
+					})
+
+					local _padding = holder:object("UIPadding", {
+						PaddingLeft = UDim.new(0, 5),
+						PaddingRight = UDim.new(0, 5),
+						PaddingTop = UDim.new(0, 5),
+						PaddingBottom = UDim.new(0, 5)
+					})
+
+					local pickerArea = holder:object("TextButton", {
+						Text = "",
+						BackgroundTransparency = 1,
+						Size = UDim2.new(0.5, -5,1, -25),
+					}):round(6)
+
+					local _pickerAreaStroke = pickerArea:object("UIStroke", {
+						Transparency = 1,
+						Theme = {Color = "Tertiary"},
+						Thickness = 1.6
+					})
+
+					local color = pickerArea:object("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						BackgroundColor3 = selectedColor,
+						BackgroundTransparency = 1,
+						ZIndex = 10
+					}):round(6)
+
+					local brightness = pickerArea:object("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 11,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						BorderSizePixel = 0
+					}):round(6)
+
+					local _brightness = brightness:object("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(255 ,255, 255))
+						},
+						Transparency = NumberSequence.new{
+							NumberSequenceKeypoint.new(0, 0),
+							NumberSequenceKeypoint.new(1, 1),
+						}
+					})
+
+					local black = pickerArea:object("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 12,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						BackgroundTransparency = 1
+					}):round(6)
+
+					local _black = black:object("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+						},
+						Transparency = NumberSequence.new{
+							NumberSequenceKeypoint.new(0, 0),
+							NumberSequenceKeypoint.new(1, 1),
+						},
+						Rotation = -90
+					})
+
+					local colorPickerDraggable = pickerArea:object("TextButton", {
+						Centered = true,
+						Text = "",
+						AnchorPoint = Vector2.new(.5, .5),
+						BackgroundTransparency = 1,
+						Size = UDim2.fromOffset(6, 6),
+						ZIndex = 20
+					}):round(100)
+
+					local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
+						Transparency = 1,
+						Color = Color3.fromRGB(255, 255, 255),
+						Thickness = 1.6,
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+					})
+
+					local hueArea = holder:object("TextButton", {
+						Text = "",
+						AnchorPoint = Vector2.new(0, 1),
+						Position = UDim2.fromScale(0, 1),
+						Size = UDim2.new(0.5, -5,0, 20),
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						ZIndex = 11
+					}):round(6)
+
+					local _hueAreaStroke = hueArea:object("UIStroke", {
+						Transparency = 1,
+						Theme = {Color = "Tertiary"},
+						Thickness = 1.6
+					})
+
+					local _hueAreaGradient = hueArea:object("UIGradient", {
+						Color = ColorSequence.new{
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+							ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+							ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
+							ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+							ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+							ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+						}
+					})
+
+					local hueDraggable = hueArea:object("TextButton", {
+						Centered = true,
+						Text = "",
+						BackgroundTransparency = 1,
+						Size = UDim2.new(0, 3, 1, 0),
+						ZIndex = 20
+					})
+
+					local _hueDraggableStroke = hueDraggable:object("UIStroke", {
+						Transparency = 1,
+						Color = Color3.fromRGB(255, 255, 255),
+						Thickness = 1.6,
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+					})
+
+					local label = holder:object("TextLabel", {
+						Text = "Color Picker",
+						Font = Enum.Font.SourceSansBold,
+						AnchorPoint = Vector2.new(1,0),
+						BackgroundTransparency = 1,
+						Position = UDim2.fromScale(1, 0),
+						Size = UDim2.new(0.5, 0,0, 20),
+						Theme = {TextColor3 = {"Tertiary", 15}},
+						TextSize = 15,
+						TextTransparency = 1
+					})
+
+					local infos = holder:object("Frame", {
+						AnchorPoint = Vector2.new(1, 0),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(1, 0,0, 25),
+						Size = UDim2.new(0.5, 0,0, 60)
+					})
+
+					local _infosList = infos:object("UIListLayout", {
+						Padding = UDim.new(0, 4),
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+						SortOrder = Enum.SortOrder.Name
+					})
+
+					local r = infos:object("TextLabel", {
+						AnchorPoint = Vector2.new(0.5, 0),
+						Name = "1",
+						Text = tostring(selectedColor.R * 255),
+						Theme = {BackgroundColor3 = {"Secondary", 12}},
+						Size = UDim2.new(1, -10,0, 18),
+						TextColor3 = Color3.fromHSV(0, 0.8, 1),
+						TextSize = 14,
+						BackgroundTransparency = 1,
+						TextTransparency = 1
+					}):round(4)
+
+					local g = infos:object("TextLabel", {
+						AnchorPoint = Vector2.new(0.5, 0),
+						Name = "2",
+						Text = tostring(selectedColor.G * 255),
+						Theme = {BackgroundColor3 = {"Secondary", 12}},
+						Size = UDim2.new(1, -10,0, 18),
+						TextColor3 = Color3.fromHSV(120/360, 0.8, 1),
+						TextSize = 14,
+						BackgroundTransparency = 1,
+						TextTransparency = 1
+					}):round(4)
+
+					local b = infos:object("TextLabel", {
+						AnchorPoint = Vector2.new(0.5, 0),
+						Text = tostring(selectedColor.B * 255),
+						Name = "3",
+						Theme = {BackgroundColor3 = {"Secondary", 12}},
+						Size = UDim2.new(1, -10,0, 18),
+						TextColor3 = Color3.fromHSV(240/360, 0.8, 1),
+						TextSize = 14,
+						BackgroundTransparency = 1,
+						TextTransparency = 1
+					}):round(4)
+
+					local pickBtn = holder:object("ImageButton", {
+						AnchorPoint = Vector2.new(1, 1),
+						Theme = {BackgroundColor3 = "Tertiary"},
+						Position = UDim2.fromScale(1, 1),
+						Size = UDim2.new(0.5, 0,0, 20),
+						Image = "rbxassetid://8593962406",
+						ScaleType = Enum.ScaleType.Fit,
+						BackgroundTransparency = 1,
+						ImageTransparency = 1
+					}):round(6)
+
+					local previewLight = holder:object("Frame", {
+						AnchorPoint = Vector2.new(1, 1),
+						BackgroundColor3 = selectedColor,
+						Position = UDim2.new(1, -65,1, -25),
+						Size = UDim2.fromOffset(40, 40),
+						BackgroundTransparency = 1
+					}):round(5)
+
+					local _previewLightIcon = previewLight:object("ImageLabel", {
+						Centered = true,
+						BackgroundTransparency = 1,
+						Size = UDim2.fromScale(.6, .6),
+						Image = "rbxassetid://8593995344",
+						ImageColor3 = Color3.fromRGB(255, 255, 255),
+						ImageTransparency = 1
+					})
+
+					local previewDark = holder:object("Frame", {
+						AnchorPoint = Vector2.new(1, 1),
+						BackgroundColor3 = selectedColor,
+						Position = UDim2.new(1, -15,1, -25),
+						Size = UDim2.fromOffset(40, 40),
+						BackgroundTransparency = 1
+					}):round(5)
+
+					local _previewDarkIcon = previewDark:object("ImageLabel", {
+						Centered = true,
+						BackgroundTransparency = 1,
+						Size = UDim2.fromScale(.6, .6),
+						Image = "rbxassetid://8593995344",
+						ImageColor3 = Color3.fromRGB(0, 0, 0),
+						ImageTransparency = 1
+					})
+
+
+					-- hacky fix for zindex issue
+					for _, v in next, darkener.AbsoluteObject:GetDescendants() do
+						pcall(function()
+							v.ZIndex += 3
+						end)
+					end
+
+					local function globalUpdate()
+						r.Text = tostring(math.floor(selectedColor.R * 255))
+						g.Text = tostring(math.floor(selectedColor.G * 255))
+						b.Text = tostring(math.floor(selectedColor.B * 255))
+						previewDark:tween({BackgroundColor3 = selectedColor})
+						previewLight:tween({BackgroundColor3 = selectedColor})
+					end
+					-- HUE
+					do
+						updateHue = function()
+							hue = math.clamp((Mouse.X - hueArea.AbsolutePosition.X) / (hueArea.AbsoluteSize.X), 0, 1)
+							local newXPos = math.clamp((Mouse.X - hueArea.AbsolutePosition.X) / (hueArea.AbsoluteSize.X) * hueArea.AbsoluteSize.X, 0, hueArea.AbsoluteSize.X)
+							selectedColor = Color3.fromHSV(hue, sat, val)
+							color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
+							hueDraggable:tween({Length = 0.05, Position = UDim2.new(0, math.clamp(newXPos, 0, hueArea.AbsoluteSize.X), .5, 0)})
+
+							globalUpdate()
+						end
+
+
+						local down = false
+
+						hueArea.MouseButton1Down:Connect(function()
+							down = true
+							while RunService.RenderStepped:Wait() and down do
+								updateHue()
+							end
+						end)
+
+						hueDraggable.MouseButton1Down:connect(function()
+							down = true
+							while RunService.RenderStepped:Wait() and down do
+								updateHue()
+							end
+						end)
+
+						UserInputService.InputEnded:Connect(function(key)
+							if key.UserInputType == Enum.UserInputType.MouseButton1 then
+								if down then
+									down = false
+								end
+							end
+						end)
+					end
+
+
+					-- SAT & VALUE [PICKER]
+					do
+						local down = false
+
+						updatePicker = function()
+							sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
+							val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
+
+							local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
+							local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
+
+							selectedColor = Color3.fromHSV(hue, sat, val)
+
+							globalUpdate()
+
+							colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
+						end
+
+						pickerArea.MouseButton1Down:Connect(function()
+							down = true
+							while RunService.RenderStepped:wait() and down do
+								updatePicker()
+							end
+						end)
+
+						UserInputService.InputEnded:Connect(function(key)
+							if key.UserInputType == Enum.UserInputType.MouseButton1 then
+								if down then
+									down = false
+								end
+							end
+						end)
+					end
+
+					-- input n shit
+					do
+						local down = false
+						local hovered = false
+
+						pickBtn.MouseEnter:connect(function()
+							hovered = true
+							pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
+						end)
+
+						pickBtn.MouseLeave:connect(function()
+							hovered = false
+							if not down then
+								pickBtn:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+							end
+						end)
+
+						pickBtn.MouseButton1Down:connect(function()
+							pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
+						end)
+
+						UserInputService.InputEnded:connect(function(key)
+							if key.UserInputType == Enum.UserInputType.MouseButton1 then
+								pickBtn:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary)) or Library.CurrentTheme.Tertiary}
+							end
+						end)
+
+						pickBtn.MouseButton1Click:connect(function()
+							fadeOut()
+							icon:tween({ImageColor3 = selectedColor})
+							options.Callback(selectedColor)
+						end)
+					end
+
+					--show fade in
+					holder:tween({BackgroundTransparency = 0, Length = 0.1})
+					_holderStroke:tween({Transparency = 0, Length = 0.1})
+					pickerArea:tween({BackgroundTransparency = 0, Length = 0.1})
+					_pickerAreaStroke:tween({Transparency = 0, Length = 0.1})
+					color:tween({BackgroundTransparency = 0, Length = 0.1})
+					brightness:tween({BackgroundTransparency = 0, Length = 0.1})
+					black:tween({BackgroundTransparency = 0, Length = 0.1})
+					_colorPickerDraggableStroke:tween({Transparency = 0, Length = 0.1})
+					hueArea:tween({BackgroundTransparency = 0, Length = 0.1})
+					_hueAreaStroke:tween({Transparency = 0, Length = 0.1})
+					_hueDraggableStroke:tween({Transparency = 0, Length = 0.1})
+					label:tween{TextTransparency = 0, Length = 0.1}
+					r:tween({
+						BackgroundTransparency = 0,
+						TextTransparency = 0,
+						Length = 0.1
+					})
+					g:tween({
+						BackgroundTransparency = 0,
+						TextTransparency = 0,
+						Length = 0.1
+					})
+					b:tween({
+						BackgroundTransparency = 0,
+						TextTransparency = 0,
+						Length = 0.1
+					})
+					pickBtn:tween({
+						BackgroundTransparency = 0,
+						ImageTransparency = 0,
+						Length = 0.1
+					})
+					previewLight:tween({BackgroundTransparency = 0, Length = 0.1})
+					_previewLightIcon:tween({ImageTransparency = 0, Length = 0.1})
+					previewDark:tween({BackgroundTransparency = 0, Length = 0.1})
+					_previewDarkIcon:tween({ImageTransparency = 0, Length = 0.1})
+					darkener:tween({BackgroundTransparency = 0.5, Length = 0.1})
+					-- fade out
+					-- closing fade in
+					fadeOut = function()
+						holder:tween({BackgroundTransparency = 1, Length = 0.1})
+						_holderStroke:tween({Transparency = 1, Length = 0.1})
+						pickerArea:tween({BackgroundTransparency = 1, Length = 0.1})
+						_pickerAreaStroke:tween({Transparency = 1, Length = 0.1})
+						color:tween({BackgroundTransparency = 1, Length = 0.1})
+						brightness:tween({BackgroundTransparency = 1, Length = 0.1})
+						black:tween({BackgroundTransparency = 1, Length = 0.1})
+						_colorPickerDraggableStroke:tween({Transparency = 1, Length = 0.1})
+						hueArea:tween({BackgroundTransparency = 1, Length = 0.1})
+						_hueAreaStroke:tween({Transparency = 1, Length = 0.1})
+						_hueDraggableStroke:tween({Transparency = 1, Length = 0.1})
+						label:tween{TextTransparency = 1, Length = 0.1}
+						r:tween({
+							BackgroundTransparency = 0,
+							TextTransparency = 0,
+							Length = 0.1
+						})
+						g:tween({
+							BackgroundTransparency = 0,
+							TextTransparency = 0,
+							Length = 0.1
+						})
+						b:tween({
+							BackgroundTransparency = 0,
+							TextTransparency = 0,
+							Length = 0.1
+						})
+						pickBtn:tween({
+							BackgroundTransparency = 0,
+							ImageTransparency = 0,
+							Length = 0.1
+						})
+						previewLight:tween({BackgroundTransparency = 1, Length = 0.1})
+						_previewLightIcon:tween({ImageTransparency = 1, Length = 0.1})
+						previewDark:tween({BackgroundTransparency = 1, Length = 0.1})
+						_previewDarkIcon:tween({ImageTransparency = 1, Length = 0.1})
+
+						darkener:tween({BackgroundTransparency = 1, Length = 0.1}, function()
+							darkener.AbsoluteObject:Destroy()
+							task.delay(0.25, function()
+								Library._colorPickerExists = false
+							end)
+						end)
+					end
+				end
+			end
+		end)
+	end
+	self:_resize_tab()
 end
 
 function Library:credit(options)
@@ -1522,7 +2396,7 @@ function Library:credit(options)
 	}, options)
 	options.V3rmillion = options.V3rmillion or options.V3rm
 
-	local creditContainer = self.container:object("Frame", {
+	local creditContainer = (self.creditsContainer or self.container):object("Frame", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
 	}):round(7)
@@ -1629,8 +2503,12 @@ function Library:credit(options)
 			end)
 		end
 	end
-
-	self:_resize_tab()
+	
+	
+	self._resize_tab({
+		container = self.creditsContainer or self.container,
+		layout = (self.creditsContainer and self.creditsContainer.AbsoluteObject.UIListLayout) or self.layout
+	})
 end
 
 function Library:_theme_selector()
@@ -1847,15 +2725,15 @@ function Library:keybind(options)
 		end)
 	end
 	self:_resize_tab()
-	
+
 	local methods = {}
-	
+
 	function methods:Set(keycode)
 		options.Keybind = keycode
 		keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
 		keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
 	end
-	
+
 	return methods
 end
 
@@ -2015,809 +2893,9 @@ function Library:prompt(options)
 	self:_resize_tab()
 end
 
-function Library:color_picker(options)
-	options = self:set_defaults({
-		Style = Library.ColorPickerStyles.Legacy,
-		Followup = false,
-		Callback = function(c ) end
-	}, options)
-
-	if Library._colorPickerExists and not options.Followup then return end
-	Library._colorPickerExists = true
-
-	local hue, sat, val;
-	local updatePicker, updateHue;
-
-	local fadeOut;
-
-	local selectedColor = Color3.fromRGB(255, 0, 0);
-
-	local darkener = self.core:object("Frame", {
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 1,
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 2
-	}):round(10)
-
-
-	if options.Style == 1 then
-		do
-			local arrow = darkener:object("ImageLabel", {
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0, 365,0, 102),
-				Size = UDim2.new(0, 56,0, 48),
-				ZIndex = 10,
-				Image = "rbxassetid://8579148508",
-				ImageColor3 = selectedColor,
-				ImageTransparency = 1,
-				Rotation = 180
-			})
-
-			local text = darkener:object("ImageLabel", {
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0, 364,0, 158),
-				Rotation = -4,
-				Size = UDim2.new(0, 141,0, 37),
-				ZIndex = 10,
-				Image = "rbxassetid://8579166120",
-				ImageColor3 = selectedColor,
-				ImageTransparency = 0
-			})
-
-			local cpHolder = darkener:object("Frame", {
-				AnchorPoint = Vector2.new(.5, .5),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(0.5, -50,0.5, 0),
-				Size = UDim2.fromOffset(160, 240),
-				ZIndex = 12
-			})
-
-			local _cpShadowHolder = cpHolder:object("Frame", {
-				BackgroundTransparency = 1,
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 11
-			})
-
-			local _cpShadow = _cpShadowHolder:object("ImageLabel", {
-				Centered = true,
-				BackgroundTransparency = 1,
-				Size = UDim2.new(1, 47,1, 47),
-				ZIndex = 11,
-				Image = "rbxassetid://6015897843",
-				ImageColor3 = Color3.new(0, 0, 0),
-				ImageTransparency = 1,
-				SliceCenter = Rect.new(49, 49, 450, 450),
-				ScaleType = Enum.ScaleType.Slice,
-				SliceScale = 1
-			})
-
-			local btnHolder = cpHolder:object("Frame", {
-				AnchorPoint = Vector2.new(1, 1),
-				BackgroundColor3 = Color3.new(0, 0, 0),
-				BackgroundTransparency = 1,
-				Position = UDim2.fromScale(1, 1),
-				Size = UDim2.new(1, -5,0, 50),
-				ZIndex = 12
-			})
-
-			local button = btnHolder:object("TextButton", {
-				Centered = true,
-				BackgroundTransparency = 1,
-				TextTransparency = 1,
-				Size = UDim2.fromOffset(80, 20),
-				ZIndex = 12,
-				Text = "SELECT",
-				TextSize = 13,
-				Theme = {TextColor3 = {"Tertiary", -10}, BackgroundColor3 = {"Tertiary", -10}}
-			}):round(8):stroke({"Tertiary", -10})
-
-			do
-				local hovered = false
-				local down = false
-
-				button.MouseEnter:connect(function()
-					hovered = true
-					button:tween{BackgroundTransparency = 0, TextColor3 = self:lighten(Library.CurrentTheme.StrongText, 15)}
-				end)
-
-				button.MouseLeave:connect(function()
-					hovered = false
-					if not down then
-						button:tween{BackgroundTransparency = 1, TextColor3 = self:darken(Library.CurrentTheme.Tertiary, 10)}
-					end
-				end)
-
-				button.MouseButton1Down:connect(function()
-					button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
-				end)
-
-				UserInputService.InputEnded:connect(function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						button:tween{BackgroundTransparency = (hovered and 0) or 1}
-						if hovered then
-							button:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
-						end
-					end
-				end)
-
-				button.MouseButton1Click:connect(function()
-					fadeOut()
-					options.Callback(selectedColor)
-				end)
-			end
-
-			local hueBar = cpHolder:object("TextButton", {
-				BackgroundColor3 = Color3.new(255, 255, 255),
-				BorderSizePixel = 0,
-				Text = "",
-				Size = UDim2.new(0, 5, 1, 0),
-				ZIndex = 12,
-				ClipsDescendants = true,
-				BackgroundTransparency = 1
-			})
-
-			local _hueBarGradient = hueBar:object("UIGradient", {
-				Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-					ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
-					ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-					ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
-					ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-				},
-				Rotation = 90
-			})
-
-			local hueDraggable = hueBar:object("ImageButton", {
-				BackgroundTransparency = 1,
-				ImageTransparency = 1,
-				Position = UDim2.new(-2, 3,0, -10),
-				Size = UDim2.fromOffset(20, 20),
-				ZIndex = 12,
-				Image = "rbxassetid://8579244616"
-			})
-
-			local pickerArea = cpHolder:object("TextButton", {
-				Text = "",
-				AnchorPoint = Vector2.new(1, 0),
-				BackgroundTransparency = 1,
-				Position = UDim2.fromScale(1, 0),
-				Size = UDim2.new(1, -5,1, -50),
-				ZIndex = 12,
-				ClipsDescendants = true
-			})
-
-			local color = pickerArea:object("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 13,
-				BackgroundColor3 = selectedColor,
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0
-			})
-
-			local brightness = pickerArea:object("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 14,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0
-			})
-
-			local _brightness = brightness:object("UIGradient", {
-				Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255 ,255, 255))
-				},
-				Transparency = NumberSequence.new{
-					NumberSequenceKeypoint.new(0, 0),
-					NumberSequenceKeypoint.new(1, 1),
-				}
-			})
-
-			local black = pickerArea:object("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 16,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BorderSizePixel = 0,
-				BackgroundTransparency = 1
-			})
-
-			local _black = black:object("UIGradient", {
-				Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
-				},
-				Transparency = NumberSequence.new{
-					NumberSequenceKeypoint.new(0, 0),
-					NumberSequenceKeypoint.new(1, 1),
-				},
-				Rotation = -90
-			})
-
-			local colorPickerDraggable = pickerArea:object("TextButton", {
-				Text = "",
-				AnchorPoint = Vector2.new(.5, .5),
-				BackgroundTransparency = 1,
-				Size = UDim2.fromOffset(6, 6),
-				Position = UDim2.new(0, 152, 0, 3),
-				ZIndex = 20
-			}):round(100)
-
-			local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
-				Color = Color3.fromRGB(255, 255 ,255),
-				Thickness = 1.6,
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Transparency = 1
-			})
-
-			-- HUE
-			do
-				updateHue = function()
-					hue = math.clamp((Mouse.Y - hueBar.AbsolutePosition.Y) / (hueBar.AbsoluteSize.Y), 0, 1)
-					local tempVal = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
-					local newYPos = math.clamp((Mouse.Y - hueBar.AbsolutePosition.Y) / (hueBar.AbsoluteSize.Y) * hueBar.AbsoluteSize.Y, 0, hueBar.AbsoluteSize.Y)
-					selectedColor = Color3.fromHSV(hue, sat, val)
-					color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
-					text:tween({ImageColor3 = selectedColor, Length = 0.05})
-					arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
-					hueDraggable:tween({Length = 0.05, Position = UDim2.new(-2, 3, 0, math.clamp(newYPos - 10, -10, hueBar.AbsoluteSize.Y + 10)), ImageColor3 = Color3.fromHSV(1, 0, -tempVal)})
-				end
-
-
-				local down = false
-
-				hueBar.MouseButton1Down:Connect(function()
-					down = true
-					while RunService.RenderStepped:Wait() and down do
-						updateHue()
-					end
-				end)
-
-				hueDraggable.MouseButton1Down:connect(function()
-					down = true
-					while RunService.RenderStepped:Wait() and down do
-						updateHue()
-					end
-				end)
-
-				UserInputService.InputEnded:Connect(function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						if down then
-							down = false
-						end
-					end
-				end)
-			end
-			-- END HUE
-
-			-- SAT & VALUE [PICKER]
-			do
-				local down = false
-
-				updatePicker = function()
-					sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
-					val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
-
-					local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
-					local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
-
-					selectedColor = Color3.fromHSV(hue, sat, val)
-
-					colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
-					text:tween({ImageColor3 = selectedColor, Length = 0.05})
-					arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
-				end
-
-				pickerArea.MouseButton1Down:Connect(function()
-					down = true
-					while RunService.RenderStepped:wait() and down do
-						updatePicker()
-					end
-				end)
-
-				UserInputService.InputEnded:Connect(function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						if down then
-							down = false
-						end
-					end
-				end)
-			end
-			-- END SAT & VALUE
-
-			-- opening (fade in)
-			darkener:tween({BackgroundTransparency = .4, Length = 0.1})
-			arrow:tween({ImageTransparency = 0, Length = 0.1})
-			text:tween({ImageTransparency = 0, Length = 0.1})
-			_cpShadow:tween({ImageTransparency = .6, Length = 0.1})
-			btnHolder:tween({BackgroundTransparency = 0, Length = 0.1})
-			button:tween({TextTransparency = 0, Length = 0.1})
-			hueBar:tween({BackgroundTransparency = 0, Length = 0.1})
-			hueDraggable:tween({ImageTransparency = 0, Length = 0.1})
-			color:tween{BackgroundTransparency = 0, Length = 0.1}
-			brightness:tween{BackgroundTransparency = 0, Length = 0.1}
-			black:tween{BackgroundTransparency = 0, Length = 0.1}
-			_colorPickerDraggableStroke:tween{Transparency = 0, Length = 0.1}
-
-			-- closing fade in
-			fadeOut = function()
-				darkener:tween({BackgroundTransparency = 1, Length = 0.1})
-				arrow:tween({ImageTransparency = 1, Length = 0.1})
-				text:tween({ImageTransparency = 1, Length = 0.1})
-				_cpShadow:tween({ImageTransparency = 1, Length = 0.1})
-				btnHolder:tween({BackgroundTransparency = 1, Length = 0.1})
-				button:tween({TextTransparency = 1, Length = 0.1})
-				hueBar:tween({BackgroundTransparency = 1, Length = 0.1})
-				hueDraggable:tween({ImageTransparency = 1, Length = 0.1})
-				color:tween{BackgroundTransparency = 1, Length = 0.1}
-				brightness:tween{BackgroundTransparency = 1, Length = 0.1}
-				black:tween{BackgroundTransparency = 1, Length = 0.1}
-				_colorPickerDraggableStroke:tween({Transparency = 1, Length = 0.1}, function()
-					darkener.AbsoluteObject:Destroy()
-					task.delay(0.25, function()
-						Library._colorPickerExists = false
-					end)
-				end)
-			end
-		end
-	else
-		do
-			-- legacy
-			local holder = darkener:object("Frame", {
-				Centered = true,
-				Theme = {BackgroundColor3 = "Secondary"},
-				BackgroundTransparency = 1,
-				Size = UDim2.fromOffset(255, 170),
-			}):round(6)
-
-			local _holderStroke = holder:object("UIStroke", {
-				Transparency = 1,
-				Theme = {Color = "Tertiary"},
-				Thickness = 1.6
-			})
-
-			local _padding = holder:object("UIPadding", {
-				PaddingLeft = UDim.new(0, 5),
-				PaddingRight = UDim.new(0, 5),
-				PaddingTop = UDim.new(0, 5),
-				PaddingBottom = UDim.new(0, 5)
-			})
-
-			local pickerArea = holder:object("TextButton", {
-				Text = "",
-				BackgroundTransparency = 1,
-				Size = UDim2.new(0.5, -5,1, -25),
-			}):round(6)
-
-			local _pickerAreaStroke = pickerArea:object("UIStroke", {
-				Transparency = 1,
-				Theme = {Color = "Tertiary"},
-				Thickness = 1.6
-			})
-
-			local color = pickerArea:object("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				BackgroundColor3 = selectedColor,
-				BackgroundTransparency = 1,
-				ZIndex = 10
-			}):round(6)
-
-			local brightness = pickerArea:object("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 11,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0
-			}):round(6)
-
-			local _brightness = brightness:object("UIGradient", {
-				Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255 ,255, 255))
-				},
-				Transparency = NumberSequence.new{
-					NumberSequenceKeypoint.new(0, 0),
-					NumberSequenceKeypoint.new(1, 1),
-				}
-			})
-
-			local black = pickerArea:object("Frame", {
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 12,
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BorderSizePixel = 0,
-				BackgroundTransparency = 1
-			}):round(6)
-
-			local _black = black:object("UIGradient", {
-				Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
-				},
-				Transparency = NumberSequence.new{
-					NumberSequenceKeypoint.new(0, 0),
-					NumberSequenceKeypoint.new(1, 1),
-				},
-				Rotation = -90
-			})
-
-			local colorPickerDraggable = pickerArea:object("TextButton", {
-				Centered = true,
-				Text = "",
-				AnchorPoint = Vector2.new(.5, .5),
-				BackgroundTransparency = 1,
-				Size = UDim2.fromOffset(6, 6),
-				ZIndex = 20
-			}):round(100)
-
-			local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
-				Transparency = 1,
-				Color = Color3.fromRGB(255, 255, 255),
-				Thickness = 1.6,
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			})
-
-			local hueArea = holder:object("TextButton", {
-				Text = "",
-				AnchorPoint = Vector2.new(0, 1),
-				Position = UDim2.fromScale(0, 1),
-				Size = UDim2.new(0.5, -5,0, 20),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				ZIndex = 11
-			}):round(6)
-
-			local _hueAreaStroke = hueArea:object("UIStroke", {
-				Transparency = 1,
-				Theme = {Color = "Tertiary"},
-				Thickness = 1.6
-			})
-
-			local _hueAreaGradient = hueArea:object("UIGradient", {
-				Color = ColorSequence.new{
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-					ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
-					ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-					ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
-					ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-				}
-			})
-
-			local hueDraggable = hueArea:object("TextButton", {
-				Centered = true,
-				Text = "",
-				BackgroundTransparency = 1,
-				Size = UDim2.new(0, 3, 1, 0),
-				ZIndex = 20
-			})
-
-			local _hueDraggableStroke = hueDraggable:object("UIStroke", {
-				Transparency = 1,
-				Color = Color3.fromRGB(255, 255, 255),
-				Thickness = 1.6,
-				ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			})
-
-			local label = holder:object("TextLabel", {
-				Text = "Color Picker",
-				Font = Enum.Font.SourceSansBold,
-				AnchorPoint = Vector2.new(1,0),
-				BackgroundTransparency = 1,
-				Position = UDim2.fromScale(1, 0),
-				Size = UDim2.new(0.5, 0,0, 20),
-				Theme = {TextColor3 = {"Tertiary", 15}},
-				TextSize = 15,
-				TextTransparency = 1
-			})
-
-			local infos = holder:object("Frame", {
-				AnchorPoint = Vector2.new(1, 0),
-				BackgroundTransparency = 1,
-				Position = UDim2.new(1, 0,0, 25),
-				Size = UDim2.new(0.5, 0,0, 60)
-			})
-
-			local _infosList = infos:object("UIListLayout", {
-				Padding = UDim.new(0, 4),
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				SortOrder = Enum.SortOrder.Name
-			})
-
-			local r = infos:object("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0),
-				Name = "1",
-				Text = tostring(selectedColor.R * 255),
-				Theme = {BackgroundColor3 = {"Secondary", 12}},
-				Size = UDim2.new(1, -10,0, 18),
-				TextColor3 = Color3.fromHSV(0, 0.8, 1),
-				TextSize = 14,
-				BackgroundTransparency = 1,
-				TextTransparency = 1
-			}):round(4)
-
-			local g = infos:object("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0),
-				Name = "2",
-				Text = tostring(selectedColor.G * 255),
-				Theme = {BackgroundColor3 = {"Secondary", 12}},
-				Size = UDim2.new(1, -10,0, 18),
-				TextColor3 = Color3.fromHSV(120/360, 0.8, 1),
-				TextSize = 14,
-				BackgroundTransparency = 1,
-				TextTransparency = 1
-			}):round(4)
-
-			local b = infos:object("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0),
-				Text = tostring(selectedColor.B * 255),
-				Name = "3",
-				Theme = {BackgroundColor3 = {"Secondary", 12}},
-				Size = UDim2.new(1, -10,0, 18),
-				TextColor3 = Color3.fromHSV(240/360, 0.8, 1),
-				TextSize = 14,
-				BackgroundTransparency = 1,
-				TextTransparency = 1
-			}):round(4)
-
-			local pickBtn = holder:object("ImageButton", {
-				AnchorPoint = Vector2.new(1, 1),
-				Theme = {BackgroundColor3 = "Tertiary"},
-				Position = UDim2.fromScale(1, 1),
-				Size = UDim2.new(0.5, 0,0, 20),
-				Image = "rbxassetid://8593962406",
-				ScaleType = Enum.ScaleType.Fit,
-				BackgroundTransparency = 1,
-				ImageTransparency = 1
-			}):round(6)
-
-			local previewLight = holder:object("Frame", {
-				AnchorPoint = Vector2.new(1, 1),
-				BackgroundColor3 = selectedColor,
-				Position = UDim2.new(1, -65,1, -25),
-				Size = UDim2.fromOffset(40, 40),
-				BackgroundTransparency = 1
-			}):round(5)
-
-			local _previewLightIcon = previewLight:object("ImageLabel", {
-				Centered = true,
-				BackgroundTransparency = 1,
-				Size = UDim2.fromScale(.6, .6),
-				Image = "rbxassetid://8593995344",
-				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				ImageTransparency = 1
-			})
-
-			local previewDark = holder:object("Frame", {
-				AnchorPoint = Vector2.new(1, 1),
-				BackgroundColor3 = selectedColor,
-				Position = UDim2.new(1, -15,1, -25),
-				Size = UDim2.fromOffset(40, 40),
-				BackgroundTransparency = 1
-			}):round(5)
-
-			local _previewDarkIcon = previewDark:object("ImageLabel", {
-				Centered = true,
-				BackgroundTransparency = 1,
-				Size = UDim2.fromScale(.6, .6),
-				Image = "rbxassetid://8593995344",
-				ImageColor3 = Color3.fromRGB(0, 0, 0),
-				ImageTransparency = 1
-			})
-
-
-			-- hacky fix for zindex issue
-			for _, v in next, darkener.AbsoluteObject:GetDescendants() do
-				pcall(function()
-					v.ZIndex += 3
-				end)
-			end
-
-			local function globalUpdate()
-				r.Text = tostring(math.floor(selectedColor.R * 255))
-				g.Text = tostring(math.floor(selectedColor.G * 255))
-				b.Text = tostring(math.floor(selectedColor.B * 255))
-				previewDark:tween({BackgroundColor3 = selectedColor})
-				previewLight:tween({BackgroundColor3 = selectedColor})
-			end
-			-- HUE
-			do
-				updateHue = function()
-					hue = math.clamp((Mouse.X - hueArea.AbsolutePosition.X) / (hueArea.AbsoluteSize.X), 0, 1)
-					local newXPos = math.clamp((Mouse.X - hueArea.AbsolutePosition.X) / (hueArea.AbsoluteSize.X) * hueArea.AbsoluteSize.X, 0, hueArea.AbsoluteSize.X)
-					selectedColor = Color3.fromHSV(hue, sat, val)
-					color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
-					hueDraggable:tween({Length = 0.05, Position = UDim2.new(0, math.clamp(newXPos, 0, hueArea.AbsoluteSize.X), .5, 0)})
-
-					globalUpdate()
-				end
-
-
-				local down = false
-
-				hueArea.MouseButton1Down:Connect(function()
-					down = true
-					while RunService.RenderStepped:Wait() and down do
-						updateHue()
-					end
-				end)
-
-				hueDraggable.MouseButton1Down:connect(function()
-					down = true
-					while RunService.RenderStepped:Wait() and down do
-						updateHue()
-					end
-				end)
-
-				UserInputService.InputEnded:Connect(function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						if down then
-							down = false
-						end
-					end
-				end)
-			end
-
-
-			-- SAT & VALUE [PICKER]
-			do
-				local down = false
-
-				updatePicker = function()
-					sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
-					val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
-
-					local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
-					local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
-
-					selectedColor = Color3.fromHSV(hue, sat, val)
-
-					globalUpdate()
-
-					colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
-				end
-
-				pickerArea.MouseButton1Down:Connect(function()
-					down = true
-					while RunService.RenderStepped:wait() and down do
-						updatePicker()
-					end
-				end)
-
-				UserInputService.InputEnded:Connect(function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						if down then
-							down = false
-						end
-					end
-				end)
-			end
-
-			-- input n shit
-			do
-				local down = false
-				local hovered = false
-
-				pickBtn.MouseEnter:connect(function()
-					hovered = true
-					pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
-				end)
-
-				pickBtn.MouseLeave:connect(function()
-					hovered = false
-					if not down then
-						pickBtn:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
-					end
-				end)
-
-				pickBtn.MouseButton1Down:connect(function()
-					pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
-				end)
-
-				UserInputService.InputEnded:connect(function(key)
-					if key.UserInputType == Enum.UserInputType.MouseButton1 then
-						pickBtn:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary)) or Library.CurrentTheme.Tertiary}
-					end
-				end)
-
-				pickBtn.MouseButton1Click:connect(function()
-					fadeOut()
-					options.Callback(selectedColor)
-				end)
-			end
-
-			--show fade in
-			holder:tween({BackgroundTransparency = 0, Length = 0.1})
-			_holderStroke:tween({Transparency = 0, Length = 0.1})
-			pickerArea:tween({BackgroundTransparency = 0, Length = 0.1})
-			_pickerAreaStroke:tween({Transparency = 0, Length = 0.1})
-			color:tween({BackgroundTransparency = 0, Length = 0.1})
-			brightness:tween({BackgroundTransparency = 0, Length = 0.1})
-			black:tween({BackgroundTransparency = 0, Length = 0.1})
-			_colorPickerDraggableStroke:tween({Transparency = 0, Length = 0.1})
-			hueArea:tween({BackgroundTransparency = 0, Length = 0.1})
-			_hueAreaStroke:tween({Transparency = 0, Length = 0.1})
-			_hueDraggableStroke:tween({Transparency = 0, Length = 0.1})
-			label:tween{TextTransparency = 0, Length = 0.1}
-			r:tween({
-				BackgroundTransparency = 0,
-				TextTransparency = 0,
-				Length = 0.1
-			})
-			g:tween({
-				BackgroundTransparency = 0,
-				TextTransparency = 0,
-				Length = 0.1
-			})
-			b:tween({
-				BackgroundTransparency = 0,
-				TextTransparency = 0,
-				Length = 0.1
-			})
-			pickBtn:tween({
-				BackgroundTransparency = 0,
-				ImageTransparency = 0,
-				Length = 0.1
-			})
-			previewLight:tween({BackgroundTransparency = 0, Length = 0.1})
-			_previewLightIcon:tween({ImageTransparency = 0, Length = 0.1})
-			previewDark:tween({BackgroundTransparency = 0, Length = 0.1})
-			_previewDarkIcon:tween({ImageTransparency = 0, Length = 0.1})
-			darkener:tween({BackgroundTransparency = 0.5, Length = 0.1})
-			-- fade out
-			-- closing fade in
-			fadeOut = function()
-				holder:tween({BackgroundTransparency = 1, Length = 0.1})
-				_holderStroke:tween({Transparency = 1, Length = 0.1})
-				pickerArea:tween({BackgroundTransparency = 1, Length = 0.1})
-				_pickerAreaStroke:tween({Transparency = 1, Length = 0.1})
-				color:tween({BackgroundTransparency = 1, Length = 0.1})
-				brightness:tween({BackgroundTransparency = 1, Length = 0.1})
-				black:tween({BackgroundTransparency = 1, Length = 0.1})
-				_colorPickerDraggableStroke:tween({Transparency = 1, Length = 0.1})
-				hueArea:tween({BackgroundTransparency = 1, Length = 0.1})
-				_hueAreaStroke:tween({Transparency = 1, Length = 0.1})
-				_hueDraggableStroke:tween({Transparency = 1, Length = 0.1})
-				label:tween{TextTransparency = 1, Length = 0.1}
-				r:tween({
-					BackgroundTransparency = 0,
-					TextTransparency = 0,
-					Length = 0.1
-				})
-				g:tween({
-					BackgroundTransparency = 0,
-					TextTransparency = 0,
-					Length = 0.1
-				})
-				b:tween({
-					BackgroundTransparency = 0,
-					TextTransparency = 0,
-					Length = 0.1
-				})
-				pickBtn:tween({
-					BackgroundTransparency = 0,
-					ImageTransparency = 0,
-					Length = 0.1
-				})
-				previewLight:tween({BackgroundTransparency = 1, Length = 0.1})
-				_previewLightIcon:tween({ImageTransparency = 1, Length = 0.1})
-				previewDark:tween({BackgroundTransparency = 1, Length = 0.1})
-				_previewDarkIcon:tween({ImageTransparency = 1, Length = 0.1})
-
-				darkener:tween({BackgroundTransparency = 1, Length = 0.1}, function()
-					darkener.AbsoluteObject:Destroy()
-					task.delay(0.25, function()
-						Library._colorPickerExists = false
-					end)
-				end)
-			end
-
-		end
-	end 
+function Library:cp(options)
+	return Library:color_picker(options)
 end
-
 function Library:colorpicker(options)
 	return Library:color_picker(options)
 end
@@ -2939,13 +3017,13 @@ function Library:slider(options)
 		end)
 	end
 	self:_resize_tab()
-	
+
 	local methods = {}
-	
+
 	function methods:Set(value)
 		sliderLine:tween{Size = UDim2.fromScale(((value - options.Min) / (options.Max - options.Min)), 1)}
 	end
-	
+
 	return methods
 end
 
@@ -3053,13 +3131,13 @@ function Library:textbox(options)
 		end)
 	end
 	self:_resize_tab()
-	
+
 	local methods = {}
-	
+
 	function methods:Set(text)
 		textBox.Text = text
 	end
-	
+
 	return methods
 end
 
