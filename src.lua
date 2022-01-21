@@ -2423,8 +2423,6 @@ function Library:credit(options)
 		})
 	end
 
-	local setclipboard = true
-
 	if setclipboard then
 		if options.Discord then
 			local discordContainer = creditContainer:object("TextButton", {
@@ -2480,7 +2478,7 @@ function Library:credit(options)
 			})
 
 			discordContainer.MouseButton1Click:connect(function()
-				--setclipboard(options.Discord)
+				setclipboard(options.Discord)
 			end)
 		end
 
@@ -2499,7 +2497,7 @@ function Library:credit(options)
 			})
 
 			v3rmillionContainer.MouseButton1Click:connect(function()
-				--setclipboard(options.V3rmillion)
+				setclipboard(options.V3rmillion)
 			end)
 		end
 	end
