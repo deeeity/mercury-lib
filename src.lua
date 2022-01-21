@@ -103,7 +103,7 @@ local selectedTab
 Library._promptExists = false
 Library._colorPickerExists = false
 
-function Library:set_defaults(defaults: table, options: table)
+function Library:set_defaults(defaults, options)
 	defaults = defaults or {}
 	options = options or {}
 	for option, value in next, options do
@@ -132,7 +132,7 @@ function Library:change_theme(toTheme)
 	end
 end
 
-function Library:object(class: string, properties: table)
+function Library:object(class, properties)
 	local localObject = Instance.new(class)
 
 	local forcedProps = {
@@ -152,7 +152,7 @@ function Library:object(class: string, properties: table)
 
 	methods.AbsoluteObject = localObject
 
-	function methods:tween(options: table, callback)
+	function methods:tween(options, callback)
 		local options = Library:set_defaults({
 			Length = 0.2,
 			Style = Enum.EasingStyle.Linear,
@@ -175,7 +175,7 @@ function Library:object(class: string, properties: table)
 		return tween
 	end
 
-	function methods:round(radius: number)
+	function methods:round(radius)
 		radius = radius or 6
 		Library:object("UICorner", {
 			Parent = localObject,
@@ -184,7 +184,7 @@ function Library:object(class: string, properties: table)
 		return methods
 	end
 
-	function methods:object(class: string, properties: table)
+	function methods:object(class, properties)
 		local properties = properties or {}
 		properties.Parent = localObject
 		return Library:object(class, properties)
@@ -196,7 +196,7 @@ function Library:object(class: string, properties: table)
 		p2:tween({ImageTransparency = 0})
 	end
 
-	function methods:fade(state: boolean, colorOverride: Color3, length: number)
+	function methods:fade(state, colorOverride, length)
 		length = length or 0.2
 		if not rawget(self, "fadeFrame") then
 			local frame = self:object("Frame", {
@@ -223,7 +223,7 @@ function Library:object(class: string, properties: table)
 		end
 	end
 
-	function methods:stroke(color: Color3, thickness: number, strokeMode: Enum.ApplyStrokeMode)
+	function methods:stroke(color, thickness, strokeMode)
 
 		thickness = thickness or 1
 		strokeMode = strokeMode or Enum.ApplyStrokeMode.Border
@@ -366,13 +366,13 @@ function Library:show(state)
 	end
 end
 
-function Library:darken(color: Color3, f: number)
+function Library:darken(color, f)
 	local h, s, v = Color3.toHSV(color)
 	f = 1 - ((f or 15) / 80)
 	return Color3.fromHSV(h, math.clamp(s/f, 0, 1), math.clamp(v*f, 0, 1))
 end
 
-function Library:lighten(color: Color3, f: number)
+function Library:lighten(color, f)
 	local h, s, v = Color3.toHSV(color)
 	f = 1 - ((f or 15) / 80)
 	return Color3.fromHSV(h, math.clamp(s*f, 0, 1), math.clamp(v/f, 0, 1))
@@ -380,13 +380,13 @@ end
 
 --[[ old lighten/darken functions, may revert if contrast gets fucked up
 
-	function Library:darken(color: Color3, f: number)
+	function Library:darken(color, f)
 		local h, s, v = Color3.toHSV(color)
 		f = f or 15
 		return Color3.fromHSV(h, s, math.clamp(v - (f/255), 0, 1))
 	end
 
-	function Library:lighten(color: Color3, f: number)
+	function Library:lighten(color, f)
 		local h, s, v = Color3.toHSV(color)
 		f = f or 15
 		return Color3.fromHSV(h, s, math.clamp(v + (f/255), 0, 1))
@@ -398,11 +398,11 @@ function Library:set_status(txt)
 	self.statusText.Text = "Status | " .. txt
 end
 
-function Library:set_button_functions(button: Instance, default: Color3, hover: Color3, down: Color3)
+function Library:set_button_functions(button, default, hover, down)
 
 end
 
-function Library:create(options: table)
+function Library:create(options)
 	options = self:set_defaults({
 		Name = "Mercury",
 		Size = UDim2.fromOffset(600, 400),
@@ -1943,7 +1943,7 @@ function Library:color_picker(options)
 	options = self:set_defaults({
 		Style = Library.ColorPickerStyles.Legacy,
 		Followup = false,
-		Callback = function(c : Color3) end
+		Callback = function(c ) end
 	}, options)
 
 	if Library._colorPickerExists and not options.Followup then return end
