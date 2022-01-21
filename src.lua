@@ -1594,32 +1594,19 @@ function Library:color_picker(options)
 		buttonContainer.MouseButton1Click:connect(function()
 			local hue, sat, val;
 			local updatePicker, updateHue;
-<<<<<<< HEAD
 
 			local fadeOut;
 
 			local selectedColor = Color3.fromRGB(255, 0, 0);
 
-=======
-		
-			local fadeOut;
-		
-			local selectedColor = Color3.fromRGB(255, 0, 0);
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 			local darkener = self.core:object("Frame", {
 				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 				BackgroundTransparency = 1,
 				Size = UDim2.fromScale(1, 1),
 				ZIndex = 2
 			}):round(10)
-<<<<<<< HEAD
 
 
-=======
-		
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 			if options.Style == 1 then
 				do
 					local arrow = darkener:object("ImageLabel", {
@@ -1632,11 +1619,7 @@ function Library:color_picker(options)
 						ImageTransparency = 1,
 						Rotation = 180
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local text = darkener:object("ImageLabel", {
 						BackgroundTransparency = 1,
 						Position = UDim2.new(0, 364,0, 158),
@@ -1647,11 +1630,7 @@ function Library:color_picker(options)
 						ImageColor3 = selectedColor,
 						ImageTransparency = 0
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local cpHolder = darkener:object("Frame", {
 						AnchorPoint = Vector2.new(.5, .5),
 						BackgroundTransparency = 1,
@@ -1659,21 +1638,13 @@ function Library:color_picker(options)
 						Size = UDim2.fromOffset(160, 240),
 						ZIndex = 12
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _cpShadowHolder = cpHolder:object("Frame", {
 						BackgroundTransparency = 1,
 						Size = UDim2.fromScale(1, 1),
 						ZIndex = 11
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _cpShadow = _cpShadowHolder:object("ImageLabel", {
 						Centered = true,
 						BackgroundTransparency = 1,
@@ -1686,11 +1657,7 @@ function Library:color_picker(options)
 						ScaleType = Enum.ScaleType.Slice,
 						SliceScale = 1
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local btnHolder = cpHolder:object("Frame", {
 						AnchorPoint = Vector2.new(1, 1),
 						BackgroundColor3 = Color3.new(0, 0, 0),
@@ -1699,11 +1666,7 @@ function Library:color_picker(options)
 						Size = UDim2.new(1, -5,0, 50),
 						ZIndex = 12
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local button = btnHolder:object("TextButton", {
 						Centered = true,
 						BackgroundTransparency = 1,
@@ -1714,47 +1677,27 @@ function Library:color_picker(options)
 						TextSize = 13,
 						Theme = {TextColor3 = {"Tertiary", -10}, BackgroundColor3 = {"Tertiary", -10}}
 					}):round(8):stroke({"Tertiary", -10})
-<<<<<<< HEAD
 
 					do
 						local hovered = false
 						local down = false
 
-=======
-		
-					do
-						local hovered = false
-						local down = false
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						button.MouseEnter:connect(function()
 							hovered = true
 							button:tween{BackgroundTransparency = 0, TextColor3 = self:lighten(Library.CurrentTheme.StrongText, 15)}
 						end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						button.MouseLeave:connect(function()
 							hovered = false
 							if not down then
 								button:tween{BackgroundTransparency = 1, TextColor3 = self:darken(Library.CurrentTheme.Tertiary, 10)}
 							end
 						end)
-<<<<<<< HEAD
 
 						button.MouseButton1Down:connect(function()
 							button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
 						end)
 
-=======
-		
-						button.MouseButton1Down:connect(function()
-							button:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
-						end)
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						UserInputService.InputEnded:connect(function(key)
 							if key.UserInputType == Enum.UserInputType.MouseButton1 then
 								button:tween{BackgroundTransparency = (hovered and 0) or 1}
@@ -1763,22 +1706,14 @@ function Library:color_picker(options)
 								end
 							end
 						end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						button.MouseButton1Click:connect(function()
 							fadeOut()
 							icon:tween({ImageColor3 = selectedColor})
 							options.Callback(selectedColor)
 						end)
 					end
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local hueBar = cpHolder:object("TextButton", {
 						BackgroundColor3 = Color3.new(255, 255, 255),
 						BorderSizePixel = 0,
@@ -1788,11 +1723,7 @@ function Library:color_picker(options)
 						ClipsDescendants = true,
 						BackgroundTransparency = 1
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _hueBarGradient = hueBar:object("UIGradient", {
 						Color = ColorSequence.new{
 							ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
@@ -1805,11 +1736,7 @@ function Library:color_picker(options)
 						},
 						Rotation = 90
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local hueDraggable = hueBar:object("ImageButton", {
 						BackgroundTransparency = 1,
 						ImageTransparency = 1,
@@ -1818,11 +1745,7 @@ function Library:color_picker(options)
 						ZIndex = 12,
 						Image = "rbxassetid://8579244616"
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local pickerArea = cpHolder:object("TextButton", {
 						Text = "",
 						AnchorPoint = Vector2.new(1, 0),
@@ -1832,11 +1755,7 @@ function Library:color_picker(options)
 						ZIndex = 12,
 						ClipsDescendants = true
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local color = pickerArea:object("Frame", {
 						Size = UDim2.fromScale(1, 1),
 						ZIndex = 13,
@@ -1844,11 +1763,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						BorderSizePixel = 0
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local brightness = pickerArea:object("Frame", {
 						Size = UDim2.fromScale(1, 1),
 						ZIndex = 14,
@@ -1856,11 +1771,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						BorderSizePixel = 0
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _brightness = brightness:object("UIGradient", {
 						Color = ColorSequence.new{
 							ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
@@ -1871,11 +1782,7 @@ function Library:color_picker(options)
 							NumberSequenceKeypoint.new(1, 1),
 						}
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local black = pickerArea:object("Frame", {
 						Size = UDim2.fromScale(1, 1),
 						ZIndex = 16,
@@ -1883,11 +1790,7 @@ function Library:color_picker(options)
 						BorderSizePixel = 0,
 						BackgroundTransparency = 1
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _black = black:object("UIGradient", {
 						Color = ColorSequence.new{
 							ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
@@ -1899,11 +1802,7 @@ function Library:color_picker(options)
 						},
 						Rotation = -90
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local colorPickerDraggable = pickerArea:object("TextButton", {
 						Text = "",
 						AnchorPoint = Vector2.new(.5, .5),
@@ -1912,22 +1811,14 @@ function Library:color_picker(options)
 						Position = UDim2.new(0, 152, 0, 3),
 						ZIndex = 20
 					}):round(100)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
 						Color = Color3.fromRGB(255, 255 ,255),
 						Thickness = 1.6,
 						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 						Transparency = 1
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					-- HUE
 					do
 						updateHue = function()
@@ -1940,39 +1831,24 @@ function Library:color_picker(options)
 							arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
 							hueDraggable:tween({Length = 0.05, Position = UDim2.new(-2, 3, 0, math.clamp(newYPos - 10, -10, hueBar.AbsoluteSize.Y + 10)), ImageColor3 = Color3.fromHSV(1, 0, -tempVal)})
 						end
-<<<<<<< HEAD
 
 
 						local down = false
 
-=======
-		
-		
-						local down = false
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						hueBar.MouseButton1Down:Connect(function()
 							down = true
 							while RunService.RenderStepped:Wait() and down do
 								updateHue()
 							end
 						end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						hueDraggable.MouseButton1Down:connect(function()
 							down = true
 							while RunService.RenderStepped:Wait() and down do
 								updateHue()
 							end
 						end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						UserInputService.InputEnded:Connect(function(key)
 							if key.UserInputType == Enum.UserInputType.MouseButton1 then
 								if down then
@@ -1982,7 +1858,6 @@ function Library:color_picker(options)
 						end)
 					end
 					-- END HUE
-<<<<<<< HEAD
 
 					-- SAT & VALUE [PICKER]
 					do
@@ -1997,42 +1872,18 @@ function Library:color_picker(options)
 
 							selectedColor = Color3.fromHSV(hue, sat, val)
 
-=======
-		
-					-- SAT & VALUE [PICKER]
-					do
-						local down = false
-		
-						updatePicker = function()
-							sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
-							val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
-		
-							local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
-							local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
-		
-							selectedColor = Color3.fromHSV(hue, sat, val)
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 							colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
 							text:tween({ImageColor3 = selectedColor, Length = 0.05})
 							arrow:tween({ImageColor3 = selectedColor, Length = 0.05})
 						end
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						pickerArea.MouseButton1Down:Connect(function()
 							down = true
 							while RunService.RenderStepped:wait() and down do
 								updatePicker()
 							end
 						end)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 						UserInputService.InputEnded:Connect(function(key)
 							if key.UserInputType == Enum.UserInputType.MouseButton1 then
 								if down then
@@ -2042,11 +1893,7 @@ function Library:color_picker(options)
 						end)
 					end
 					-- END SAT & VALUE
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					-- opening (fade in)
 					darkener:tween({BackgroundTransparency = .4, Length = 0.1})
 					arrow:tween({ImageTransparency = 0, Length = 0.1})
@@ -2060,11 +1907,7 @@ function Library:color_picker(options)
 					brightness:tween{BackgroundTransparency = 0, Length = 0.1}
 					black:tween{BackgroundTransparency = 0, Length = 0.1}
 					_colorPickerDraggableStroke:tween{Transparency = 0, Length = 0.1}
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					-- closing fade in
 					fadeOut = function()
 						darkener:tween({BackgroundTransparency = 1, Length = 0.1})
@@ -2095,63 +1938,39 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						Size = UDim2.fromOffset(255, 170),
 					}):round(6)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _holderStroke = holder:object("UIStroke", {
 						Transparency = 1,
 						Theme = {Color = "Tertiary"},
 						Thickness = 1.6
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _padding = holder:object("UIPadding", {
 						PaddingLeft = UDim.new(0, 5),
 						PaddingRight = UDim.new(0, 5),
 						PaddingTop = UDim.new(0, 5),
 						PaddingBottom = UDim.new(0, 5)
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local pickerArea = holder:object("TextButton", {
 						Text = "",
 						BackgroundTransparency = 1,
 						Size = UDim2.new(0.5, -5,1, -25),
 					}):round(6)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _pickerAreaStroke = pickerArea:object("UIStroke", {
 						Transparency = 1,
 						Theme = {Color = "Tertiary"},
 						Thickness = 1.6
 					})
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local color = pickerArea:object("Frame", {
 						Size = UDim2.fromScale(1, 1),
 						BackgroundColor3 = selectedColor,
 						BackgroundTransparency = 1,
 						ZIndex = 10
 					}):round(6)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local brightness = pickerArea:object("Frame", {
 						Size = UDim2.fromScale(1, 1),
 						ZIndex = 11,
@@ -2159,11 +1978,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						BorderSizePixel = 0
 					}):round(6)
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 705f0b3566a4346baec2f908f0c6f7d020abf8c4
 					local _brightness = brightness:object("UIGradient", {
 						Color = ColorSequence.new{
 							ColorSequenceKeypoint.new(0, Color3.fromRGB(255 ,255, 255)),
@@ -2174,7 +1989,7 @@ function Library:color_picker(options)
 							NumberSequenceKeypoint.new(1, 1),
 						}
 					})
-		
+
 					local black = pickerArea:object("Frame", {
 						Size = UDim2.fromScale(1, 1),
 						ZIndex = 12,
@@ -2182,7 +1997,7 @@ function Library:color_picker(options)
 						BorderSizePixel = 0,
 						BackgroundTransparency = 1
 					}):round(6)
-		
+
 					local _black = black:object("UIGradient", {
 						Color = ColorSequence.new{
 							ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
@@ -2194,7 +2009,7 @@ function Library:color_picker(options)
 						},
 						Rotation = -90
 					})
-		
+
 					local colorPickerDraggable = pickerArea:object("TextButton", {
 						Centered = true,
 						Text = "",
@@ -2203,14 +2018,14 @@ function Library:color_picker(options)
 						Size = UDim2.fromOffset(6, 6),
 						ZIndex = 20
 					}):round(100)
-		
+
 					local _colorPickerDraggableStroke = colorPickerDraggable:object("UIStroke", {
 						Transparency = 1,
 						Color = Color3.fromRGB(255, 255, 255),
 						Thickness = 1.6,
 						ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 					})
-		
+
 					local hueArea = holder:object("TextButton", {
 						Text = "",
 						AnchorPoint = Vector2.new(0, 1),
@@ -2220,13 +2035,13 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						ZIndex = 11
 					}):round(6)
-		
+
 					local _hueAreaStroke = hueArea:object("UIStroke", {
 						Transparency = 1,
 						Theme = {Color = "Tertiary"},
 						Thickness = 1.6
 					})
-		
+
 					local _hueAreaGradient = hueArea:object("UIGradient", {
 						Color = ColorSequence.new{
 							ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
@@ -2238,7 +2053,7 @@ function Library:color_picker(options)
 							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
 						}
 					})
-		
+
 					local hueDraggable = hueArea:object("TextButton", {
 						Centered = true,
 						Text = "",
@@ -2246,14 +2061,14 @@ function Library:color_picker(options)
 						Size = UDim2.new(0, 3, 1, 0),
 						ZIndex = 20
 					})
-				
+
 					local _hueDraggableStroke = hueDraggable:object("UIStroke", {
 						Transparency = 1,
 						Color = Color3.fromRGB(255, 255, 255),
 						Thickness = 1.6,
 						ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 					})
-		
+
 					local label = holder:object("TextLabel", {
 						Text = "Color Picker",
 						Font = Enum.Font.SourceSansBold,
@@ -2265,20 +2080,20 @@ function Library:color_picker(options)
 						TextSize = 15,
 						TextTransparency = 1
 					})
-		
+
 					local infos = holder:object("Frame", {
 						AnchorPoint = Vector2.new(1, 0),
 						BackgroundTransparency = 1,
 						Position = UDim2.new(1, 0,0, 25),
 						Size = UDim2.new(0.5, 0,0, 60)
 					})
-		
+
 					local _infosList = infos:object("UIListLayout", {
 						Padding = UDim.new(0, 4),
 						HorizontalAlignment = Enum.HorizontalAlignment.Center,
 						SortOrder = Enum.SortOrder.Name
 					})
-		
+
 					local r = infos:object("TextLabel", {
 						AnchorPoint = Vector2.new(0.5, 0),
 						Name = "1",
@@ -2290,7 +2105,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						TextTransparency = 1
 					}):round(4)
-		
+
 					local g = infos:object("TextLabel", {
 						AnchorPoint = Vector2.new(0.5, 0),
 						Name = "2",
@@ -2302,7 +2117,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						TextTransparency = 1
 					}):round(4)
-		
+
 					local b = infos:object("TextLabel", {
 						AnchorPoint = Vector2.new(0.5, 0),
 						Text = tostring(selectedColor.B * 255),
@@ -2314,7 +2129,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						TextTransparency = 1
 					}):round(4)
-		
+
 					local pickBtn = holder:object("ImageButton", {
 						AnchorPoint = Vector2.new(1, 1),
 						Theme = {BackgroundColor3 = "Tertiary"},
@@ -2325,7 +2140,7 @@ function Library:color_picker(options)
 						BackgroundTransparency = 1,
 						ImageTransparency = 1
 					}):round(6)
-		
+
 					local previewLight = holder:object("Frame", {
 						AnchorPoint = Vector2.new(1, 1),
 						BackgroundColor3 = selectedColor,
@@ -2333,7 +2148,7 @@ function Library:color_picker(options)
 						Size = UDim2.fromOffset(40, 40),
 						BackgroundTransparency = 1
 					}):round(5)
-		
+
 					local _previewLightIcon = previewLight:object("ImageLabel", {
 						Centered = true,
 						BackgroundTransparency = 1,
@@ -2342,7 +2157,7 @@ function Library:color_picker(options)
 						ImageColor3 = Color3.fromRGB(255, 255, 255),
 						ImageTransparency = 1
 					})
-		
+
 					local previewDark = holder:object("Frame", {
 						AnchorPoint = Vector2.new(1, 1),
 						BackgroundColor3 = selectedColor,
@@ -2350,7 +2165,7 @@ function Library:color_picker(options)
 						Size = UDim2.fromOffset(40, 40),
 						BackgroundTransparency = 1
 					}):round(5)
-		
+
 					local _previewDarkIcon = previewDark:object("ImageLabel", {
 						Centered = true,
 						BackgroundTransparency = 1,
@@ -2359,15 +2174,15 @@ function Library:color_picker(options)
 						ImageColor3 = Color3.fromRGB(0, 0, 0),
 						ImageTransparency = 1
 					})
-		
-		
+
+
 					-- hacky fix for zindex issue
 					for _, v in next, darkener.AbsoluteObject:GetDescendants() do
 						pcall(function()
 							v.ZIndex += 3
 						end)
 					end
-		
+
 					local function globalUpdate()
 						r.Text = tostring(math.floor(selectedColor.R * 255))
 						g.Text = tostring(math.floor(selectedColor.G * 255))
@@ -2383,27 +2198,27 @@ function Library:color_picker(options)
 							selectedColor = Color3.fromHSV(hue, sat, val)
 							color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
 							hueDraggable:tween({Length = 0.05, Position = UDim2.new(0, math.clamp(newXPos, 0, hueArea.AbsoluteSize.X), .5, 0)})
-							
+
 							globalUpdate()
 						end
-		
-		
+
+
 						local down = false
-		
+
 						hueArea.MouseButton1Down:Connect(function()
 							down = true
 							while RunService.RenderStepped:Wait() and down do
 								updateHue()
 							end
 						end)
-		
+
 						hueDraggable.MouseButton1Down:connect(function()
 							down = true
 							while RunService.RenderStepped:Wait() and down do
 								updateHue()
 							end
 						end)
-		
+
 						UserInputService.InputEnded:Connect(function(key)
 							if key.UserInputType == Enum.UserInputType.MouseButton1 then
 								if down then
@@ -2412,33 +2227,33 @@ function Library:color_picker(options)
 							end
 						end)
 					end
-		
-		
+
+
 					-- SAT & VALUE [PICKER]
 					do
 						local down = false
-		
+
 						updatePicker = function()
 							sat = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X), 0, 1)
 							val = 1 - math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y), 0, 1)
-		
+
 							local newXPos = math.clamp((Mouse.X - pickerArea.AbsolutePosition.X) / (pickerArea.AbsoluteSize.X) * pickerArea.AbsoluteSize.X, 0, pickerArea.AbsoluteSize.X)
 							local newYPos = math.clamp((Mouse.Y - pickerArea.AbsolutePosition.Y) / (pickerArea.AbsoluteSize.Y) * pickerArea.AbsoluteSize.Y, 0, pickerArea.AbsoluteSize.Y)
-		
+
 							selectedColor = Color3.fromHSV(hue, sat, val)
-		
+
 							globalUpdate()
-		
+
 							colorPickerDraggable:tween({Position = UDim2.fromOffset(newXPos, newYPos), Length = 0.05})
 						end
-		
+
 						pickerArea.MouseButton1Down:Connect(function()
 							down = true
 							while RunService.RenderStepped:wait() and down do
 								updatePicker()
 							end
 						end)
-		
+
 						UserInputService.InputEnded:Connect(function(key)
 							if key.UserInputType == Enum.UserInputType.MouseButton1 then
 								if down then
@@ -2447,41 +2262,41 @@ function Library:color_picker(options)
 							end
 						end)
 					end
-		
+
 					-- input n shit
 					do
 						local down = false
 						local hovered = false
-				
+
 						pickBtn.MouseEnter:connect(function()
 							hovered = true
 							pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
 						end)
-				
+
 						pickBtn.MouseLeave:connect(function()
 							hovered = false
 							if not down then
 								pickBtn:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
 							end
 						end)
-				
+
 						pickBtn.MouseButton1Down:connect(function()
 							pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
 						end)
-				
+
 						UserInputService.InputEnded:connect(function(key)
 							if key.UserInputType == Enum.UserInputType.MouseButton1 then
 								pickBtn:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary)) or Library.CurrentTheme.Tertiary}
 							end
 						end)
-				
+
 						pickBtn.MouseButton1Click:connect(function()
 							fadeOut()
 							icon:tween({ImageColor3 = selectedColor})
 							options.Callback(selectedColor)
 						end)
 					end
-		
+
 					--show fade in
 					holder:tween({BackgroundTransparency = 0, Length = 0.1})
 					_holderStroke:tween({Transparency = 0, Length = 0.1})
@@ -2559,6 +2374,7 @@ function Library:color_picker(options)
 						_previewLightIcon:tween({ImageTransparency = 1, Length = 0.1})
 						previewDark:tween({BackgroundTransparency = 1, Length = 0.1})
 						_previewDarkIcon:tween({ImageTransparency = 1, Length = 0.1})
+
 						darkener:tween({BackgroundTransparency = 1, Length = 0.1}, function()
 							darkener.AbsoluteObject:Destroy()
 							task.delay(0.25, function()
