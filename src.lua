@@ -1161,7 +1161,17 @@ function Library:toggle(options)
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
 	end
-
+	
+	local function toggle()
+		toggled = not toggled
+		if toggled then
+			offIcon:crossfade(onIcon, 0.1)
+		else
+			onIcon:crossfade(offIcon, 0.1)
+		end
+		options.Callback(toggled)
+	end
+	
 	do
 		local hovered = false
 		local down = false
@@ -1189,16 +1199,28 @@ function Library:toggle(options)
 		end)
 
 		toggleContainer.MouseButton1Click:connect(function()
-			toggled = not toggled
-			if toggled then
-				offIcon:crossfade(onIcon, 0.1)
-			else
-				onIcon:crossfade(offIcon, 0.1)
-			end
-			options.Callback(toggled)
+			toggle()
 		end)
 	end
 	self:_resize_tab()
+	
+	local methods = {}
+	
+	function methods:Toggle()
+		toggle()
+	end
+	
+	function methods:SetState(state)
+		toggled = state
+		if toggled then
+			offIcon:crossfade(onIcon, 0.1)
+		else
+			onIcon:crossfade(offIcon, 0.1)
+		end
+		options.callback(toggled)
+	end
+	
+	return methods
 end
 
 function Library:dropdown(options)
@@ -1357,11 +1379,15 @@ function Library:dropdown(options)
 			open = not open
 			if open then
 				itemContainer:tween{Size = UDim2.new(1, -10, 0, newSize)}
-				dropdownContainer:tween{Size = UDim2.new(1, -20, 0, 52 + newSize)}
+				dropdownContainer:tween({Size = UDim2.new(1, -20, 0, 52 + newSize)}, function()
+					self:_resize_tab()
+				end)
 				icon:tween{Rotation = 180, Position = UDim2.new(1, -11, 0, 15)}
 			else
 				itemContainer:tween{Size = UDim2.new(1, -10, 0, 0)}
-				dropdownContainer:tween{Size = UDim2.new(1, -20, 0, 52)}
+				dropdownContainer:tween({Size = UDim2.new(1, -20, 0, 52)}, function()
+					self:_resize_tab()
+				end)
 				icon:tween{Rotation = 0, Position = UDim2.new(1, -11, 0, 12)}
 			end
 		end
@@ -1393,6 +1419,16 @@ function Library:dropdown(options)
 		end)
 	end
 	self:_resize_tab()
+	
+	local methods = {}
+	
+	function methods:Set(text)
+		selectedText.Text = text
+		selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
+		options.Callback(text)
+	end
+	
+	return methods
 end
 
 function Library:button(options)
@@ -1469,6 +1505,14 @@ function Library:button(options)
 		end)
 	end
 	self:_resize_tab()
+	
+	local methods = {}
+	
+	function methods:Fire()
+		options.Callback()
+	end
+	
+	return methods
 end
 
 function Library:credit(options)
@@ -1803,6 +1847,16 @@ function Library:keybind(options)
 		end)
 	end
 	self:_resize_tab()
+	
+	local methods = {}
+	
+	function methods:Set(keycode)
+		options.Keybind = keycode
+		keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
+		keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
+	end
+	
+	return methods
 end
 
 function Library:prompt(options)
@@ -2885,6 +2939,14 @@ function Library:slider(options)
 		end)
 	end
 	self:_resize_tab()
+	
+	local methods = {}
+	
+	function methods:Set(value)
+		sliderLine:tween{Size = UDim2.fromScale(((value - options.Min) / (options.Max - options.Min)), 1)}
+	end
+	
+	return methods
 end
 
 function Library:textbox(options)
@@ -2980,10 +3042,25 @@ function Library:textbox(options)
 
 		textBox.FocusLost:connect(function()
 			focused = false
+			textBox.AbsoluteObject:TweenSize(
+				UDim2.fromOffset(math.clamp(textBox.TextBounds.X + 20, 0, 0.5 * textboxContainer.AbsoluteSize.X), 20),
+				Enum.EasingDirection.InOut,
+				Enum.EasingStyle.Linear,
+				0.1,
+				true
+			)
 			options.Callback(textBox.Text)
 		end)
 	end
 	self:_resize_tab()
+	
+	local methods = {}
+	
+	function methods:Set(text)
+		textBox.Text = text
+	end
+	
+	return methods
 end
 
 return setmetatable(Library, {
