@@ -127,5 +127,13 @@ GUI:ColorPicker{
 }
 ```
 
+### Credit
+```lua
+GUI:Credit{
+	Name = "Creditor's name",
+	Description = "Helped with the script",
+	V3rm = "link/name",
+	Discord = "helo#1234"
+}
 
 **PLEASE NOTE THAT THE LOWER- AND UPPERCASE LETTERS DON'T MATTER WHEN CALLING LIBRARY FUNCTIONS.**
