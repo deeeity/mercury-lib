@@ -196,7 +196,7 @@ function Library:object(class, properties)
 		p2:tween({ImageTransparency = 0})
 	end
 
-	function methods:fade(state, colorOverride, length)
+	function methods:fade(state, colorOverride, length, instant)
 		length = length or 0.2
 		if not rawget(self, "fadeFrame") then
 			local frame = self:object("Frame", {
@@ -210,17 +210,27 @@ function Library:object(class, properties)
 		else
 			self.fadeFrame.BackgroundColor3 = colorOverride or self.BackgroundColor3
 		end
-
-		if state then
-			self.fadeFrame.BackgroundTransparency = 1
-			self.fadeFrame.Visible = true
-			self.fadeFrame:tween{BackgroundTransparency = 0, Length = length}
-		else
-			self.fadeFrame.BackgroundTransparency = 0
-			self.fadeFrame:tween({BackgroundTransparency = 1, Length = length}, function()
+		
+		if instant then
+			if state then
+				self.fadeFrame.BackgroundTransparency = 0
+				self.fadeFrame.Visible = true
+			else
+				self.fadeFrame.BackgroundTransparency = 1
 				self.fadeFrame.Visible = false
-			end)
-		end
+			end
+		else
+			if state then
+				self.fadeFrame.BackgroundTransparency = 1
+				self.fadeFrame.Visible = true
+				self.fadeFrame:tween{BackgroundTransparency = 0, Length = length}
+			else
+				self.fadeFrame.BackgroundTransparency = 0
+				self.fadeFrame:tween({BackgroundTransparency = 1, Length = length}, function()
+					self.fadeFrame.Visible = false
+				end)
+			end
+		end	
 	end
 
 	function methods:stroke(color, thickness, strokeMode)
@@ -425,10 +435,19 @@ function Library:create(options)
 	})
 
 	local core = gui:object("Frame", {
-		Size = options.Size,
+		Size = UDim2.new(),
 		Theme = {BackgroundColor3 = "Main"},
-		Centered = true
+		Centered = true,
+		ClipsDescendants = true		
 	}):round(10)
+	
+	core:fade(true, nil, 0.2, true)
+	
+	
+	core:fade(false, nil, 0.4)
+	core:tween({Size = options.Size, Length = 0.3}, function()
+		core.ClipsDescendants = false
+	end)
 
 	do
 		local S, Event = pcall(function()
@@ -1567,7 +1586,6 @@ function Library:credit(options)
 		end
 	end
 
-	-- discord http://www.roblox.com/asset/?id=8593979304
 	self:_resize_tab()
 end
 
