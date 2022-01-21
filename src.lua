@@ -1485,9 +1485,9 @@ function Library:credit(options)
 			TextXAlignment = Enum.TextXAlignment.Left
 		})
 	end
-	
+
 	local setclipboard = true
-	
+
 	if setclipboard then
 		if options.Discord then
 			local discordContainer = creditContainer:object("TextButton", {
@@ -1501,43 +1501,47 @@ function Library:credit(options)
 				Centered = true,
 				BackgroundTransparency = 1
 			})
-			
+
 			local tr = discord:object("ImageLabel", {
 				BackgroundTransparency = 1,
 				AnchorPoint = Vector2.new(1, 0),
 				Size = UDim2.new(0.5, 0, 0.5, 0),
 				Position = UDim2.new(1, 0, 0, -0),
 				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				Image = "http://www.roblox.com/asset/?id=8594150191"
+				Image = "http://www.roblox.com/asset/?id=8594150191",
+				ScaleType = Enum.ScaleType.Crop
 			})
-			
+
 			local tl = discord:object("ImageLabel", {
 				BackgroundTransparency = 1,
 				AnchorPoint = Vector2.new(0, 0),
 				Size = UDim2.new(0.5, 0, 0.5, 0),
 				Position = UDim2.new(0, 0, 0, -0),
 				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				Image = "http://www.roblox.com/asset/?id=8594187532"
+				Image = "http://www.roblox.com/asset/?id=8594187532",
+				ScaleType = Enum.ScaleType.Crop
 			})
-			
+
 			local bl = discord:object("ImageLabel", {
 				BackgroundTransparency = 1,
 				AnchorPoint = Vector2.new(0, 1),
 				Size = UDim2.new(0.5, 0, 0.5, 0),
 				Position = UDim2.new(0, 0, 1, 0),
 				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				Image = "http://www.roblox.com/asset/?id=8594194954"
+				Image = "http://www.roblox.com/asset/?id=8594194954",
+				ScaleType = Enum.ScaleType.Crop
 			})
-			
+
 			local br = discord:object("ImageLabel", {
 				BackgroundTransparency = 1,
 				AnchorPoint = Vector2.new(1, 1),
 				Size = UDim2.new(0.5, 0, 0.5, 0),
 				Position = UDim2.new(1, 0, 1, 0),
 				ImageColor3 = Color3.fromRGB(255, 255, 255),
-				Image = "http://www.roblox.com/asset/?id=8594206483"
+				Image = "http://www.roblox.com/asset/?id=8594206483",
+				ScaleType = Enum.ScaleType.Crop
 			})
-			
+
 			discordContainer.MouseButton1Click:connect(function()
 				--setclipboard(options.Discord)
 			end)
@@ -1556,13 +1560,13 @@ function Library:credit(options)
 				Centered = true,
 				BackgroundTransparency = 1
 			})
-			
+
 			v3rmillionContainer.MouseButton1Click:connect(function()
 				--setclipboard(options.V3rmillion)
 			end)
 		end
 	end
-	
+
 	-- discord http://www.roblox.com/asset/?id=8593979304
 	self:_resize_tab()
 end
@@ -2417,7 +2421,7 @@ function Library:color_picker(options)
 				Size = UDim2.new(0, 3, 1, 0),
 				ZIndex = 20
 			})
-		
+
 			local _hueDraggableStroke = hueDraggable:object("UIStroke", {
 				Transparency = 1,
 				Color = Color3.fromRGB(255, 255, 255),
@@ -2554,7 +2558,7 @@ function Library:color_picker(options)
 					selectedColor = Color3.fromHSV(hue, sat, val)
 					color:tween({Length = 0.05, BackgroundColor3 = Color3.fromHSV(hue, 1, 1)})
 					hueDraggable:tween({Length = 0.05, Position = UDim2.new(0, math.clamp(newXPos, 0, hueArea.AbsoluteSize.X), .5, 0)})
-					
+
 					globalUpdate()
 				end
 
@@ -2623,29 +2627,29 @@ function Library:color_picker(options)
 			do
 				local down = false
 				local hovered = false
-		
+
 				pickBtn.MouseEnter:connect(function()
 					hovered = true
 					pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 10)}
 				end)
-		
+
 				pickBtn.MouseLeave:connect(function()
 					hovered = false
 					if not down then
 						pickBtn:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
 					end
 				end)
-		
+
 				pickBtn.MouseButton1Down:connect(function()
 					pickBtn:tween{BackgroundColor3 = self:lighten(Library.CurrentTheme.Tertiary, 20)}
 				end)
-		
+
 				UserInputService.InputEnded:connect(function(key)
 					if key.UserInputType == Enum.UserInputType.MouseButton1 then
 						pickBtn:tween{BackgroundColor3 = (hovered and self:lighten(Library.CurrentTheme.Tertiary)) or Library.CurrentTheme.Tertiary}
 					end
 				end)
-		
+
 				pickBtn.MouseButton1Click:connect(function()
 					fadeOut()
 					options.Callback(selectedColor)
