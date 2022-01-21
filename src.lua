@@ -2892,10 +2892,10 @@ function Library:prompt(options)
 end
 
 function Library:cp(options)
-	return Library:color_picker(options)
+	return Library.color_picker(self, options)
 end
 function Library:colorpicker(options)
-	return Library:color_picker(options)
+	return Library.color_picker(self, options)
 end
 
 function Library:slider(options)
