@@ -1219,7 +1219,7 @@ function Library:toggle(options)
 		else
 			onIcon:crossfade(offIcon, 0.1)
 		end
-		options.callback(toggled)
+		options.Callback(toggled)
 	end
 
 	return methods
