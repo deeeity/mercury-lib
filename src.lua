@@ -2888,7 +2888,6 @@ function Library:prompt(options)
 			end)
 		end
 	end
-	self:_resize_tab()
 end
 
 function Library:cp(options)
