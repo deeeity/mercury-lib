@@ -70,6 +70,13 @@ Tab:Toggle{
 }
 ```
 
+### Textboxes
+```lua
+Tab:Textbox{
+	Name = "Textbox",
+	Callback = function(text) end
+}
+
 ### Dropdowns
 ```lua
 local MyDropdown = Tab:Dropdown{
