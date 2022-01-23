@@ -92,6 +92,8 @@ MyDropdown:AddItems({
 MyDropdown:RemoveItems({
 	"NewItem", "Hello"		-- just the names to get removed (upper/lower case ignored)
 })
+
+MyDropdown:Clear()
 ```
 
 ### Sliders
