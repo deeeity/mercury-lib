@@ -1309,8 +1309,10 @@ function Library:dropdown(options)
 	local items = setmetatable({}, {
 		__newindex = function(self, i, v)
 			rawset(self, i, v)
-			newSize = (25 * #self) + 5
-			itemContainer.Size = UDim2.new(1, -10, 0, newSize)
+			if v ~= nil then
+				newSize = (25 * #self) + 5
+				itemContainer.Size = UDim2.new(1, -10, 0, newSize)
+			end
 		end
 	})
 
