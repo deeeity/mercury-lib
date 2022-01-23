@@ -76,6 +76,7 @@ Tab:Textbox{
 	Name = "Textbox",
 	Callback = function(text) end
 }
+```
 
 ### Dropdowns
 ```lua
