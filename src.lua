@@ -3137,6 +3137,7 @@ function Library:textbox(options)
 		Name = "Text Box",
 		Placeholder = "Type something..",
 		Description = nil,
+		Default = "",
 		Callback = function(t) end
 	}, options)
 
@@ -3178,7 +3179,8 @@ function Library:textbox(options)
 		Size = UDim2.new(0, 50,0, 20),
 		TextSize = 12,
 		PlaceholderText = options.Placeholder,
-		ClipsDescendants = true
+		ClipsDescendants = true,
+		Text = options.Default
 	}):round(5):stroke("Tertiary")
 
 	local writeIcon = textboxContainer:object("ImageLabel", {
