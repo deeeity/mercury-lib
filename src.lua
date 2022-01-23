@@ -1235,6 +1235,7 @@ function Library:dropdown(options)
 
 
 	local newSize = 0
+	local open = false
 
 	local dropdownContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
@@ -1300,6 +1301,9 @@ function Library:dropdown(options)
 		HorizontalAlignment = Enum.HorizontalAlignment.Left,
 		VerticalAlignment = Enum.VerticalAlignment.Top
 	})
+
+	local layout = self.layout
+	local container = self.container
 
 
 	local items = setmetatable({}, {
@@ -1370,12 +1374,12 @@ function Library:dropdown(options)
 		items[i] = {{label, value}, newItem} 
 	end
 
-	itemContainer.Size = UDim2.new(1, -10, 0, 0)
-
 	do
 		local hovered = false
 		local down = false
-		local open = false
+
+		newSize = (25 * #items) + 5
+		itemContainer.Size = (not open and UDim2.new(1, -10, 0, 0)) or UDim2.new(1, -10, 0, newSize)
 
 		toggle = function()
 			open = not open
@@ -1428,6 +1432,78 @@ function Library:dropdown(options)
 		selectedText.Text = text
 		selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
 		options.Callback(text)
+	end
+
+	function methods:AddItems(fitems)
+		for i, v in next, fitems do
+			if typeof(v) == "table" then
+				items[#items+1] = v
+			else
+				items[#items+1] = {tostring(v), v}
+			end
+		end
+
+		newSize = (25 * #items) + 5
+		itemContainer:tween{Size = (not open and UDim2.new(1, -10, 0, 0)) or UDim2.new(1, -10, 0, newSize)}
+		dropdownContainer:tween({Size = (not open and UDim2.new(1, -20, 0, 52)) or UDim2.new(1, -20, 0, 52 + newSize)})
+
+		for i, item in next, items do
+			local label = item[1]
+			local value = item[2]
+
+			if type(label) == "table" then continue end
+	
+			local newItem = itemContainer:object("TextButton", {
+				Theme = {
+					BackgroundColor3 = {"Secondary", 25},
+					TextColor3 = {"StrongText", 25}
+				},
+				Text = label,
+				TextSize = 14
+			}):round(5)
+	
+				do
+					local hovered = false
+					local down = false
+		
+					newItem.MouseEnter:connect(function()
+						hovered = true
+						newItem:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+					end)
+		
+					newItem.MouseLeave:connect(function()
+						hovered = false
+						if not down then
+							newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Secondary, 25)}
+						end
+					end)
+		
+					newItem.MouseButton1Down:connect(function()
+						newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Tertiary, 10)}
+					end)
+		
+					UserInputService.InputEnded:connect(function(key)
+						if key.UserInputType == Enum.UserInputType.MouseButton1 then
+							newItem:tween{BackgroundColor3 = (hovered and Library:lighten(Library.CurrentTheme.Tertiary, 5)) or Library:lighten(Library.CurrentTheme.Secondary, 25)}
+						end
+					end)
+		
+					newItem.MouseButton1Click:connect(function()
+						toggle()
+						selectedText.Text = newItem.Text
+						selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
+						options.Callback(value)
+					end)
+	
+					items[i] = {{label, value}, newItem}
+				end
+			
+		end
+
+		Library._resize_tab({
+			container = container,
+			layout = layout
+		})
 	end
 
 	return methods
