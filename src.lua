@@ -3137,7 +3137,7 @@ function Library:textbox(options)
 		Name = "Text Box",
 		Placeholder = "Type something..",
 		Description = nil,
-		Default = "",
+		Default = "Type here",
 		Callback = function(t) end
 	}, options)
 
@@ -3214,7 +3214,7 @@ function Library:textbox(options)
 
 		textBox.Focused:connect(function()
 			focused = true
-			while focused and RunService.RenderStepped:wait() do
+			while RunService.RenderStepped:wait() and focused do
 				textBox.AbsoluteObject:TweenSize(
 					UDim2.fromOffset(math.clamp(textBox.TextBounds.X + 20, 0, 0.5 * textboxContainer.AbsoluteSize.X), 20),
 					Enum.EasingDirection.InOut,
