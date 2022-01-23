@@ -1339,6 +1339,8 @@ function Library:dropdown(options)
 			TextSize = 14
 		}):round(5)
 
+		items[i] = {{label, value}, newItem} 
+
 		do
 			local hovered = false
 			local down = false
@@ -1372,8 +1374,6 @@ function Library:dropdown(options)
 				options.Callback(value)
 			end)
 		end
-
-		items[i] = {{label, value}, newItem} 
 	end
 
 	do
@@ -1384,6 +1384,7 @@ function Library:dropdown(options)
 		itemContainer.Size = (not open and UDim2.new(1, -10, 0, 0)) or UDim2.new(1, -10, 0, newSize)
 
 		toggle = function()
+			newSize = (25 * #items) + 5
 			open = not open
 			if open then
 				itemContainer:tween{Size = UDim2.new(1, -10, 0, newSize)}
@@ -1452,6 +1453,19 @@ function Library:dropdown(options)
 		end
 	end
 
+	function methods:Clear()
+		table.clear(items)
+		itemContainer:tween{Size = UDim2.new(1, -10, 0, 0)}
+		dropdownContainer:tween({Size = UDim2.new(1, -20, 0, 52)}, function()
+			for i, v in next, itemContainer.AbsoluteObject:GetChildren() do
+				if v.ClassName == "TextButton" then
+					v:Destroy()
+				end
+			end
+		end)
+		if open then toggle() end
+	end
+
 	function methods:AddItems(fitems)
 		for i, v in next, fitems do
 			if typeof(v) == "table" then
@@ -1479,43 +1493,42 @@ function Library:dropdown(options)
 				Text = label,
 				TextSize = 14
 			}):round(5)
+
+			items[i] = {{label, value}, newItem}
 	
-				do
-					local hovered = false
-					local down = false
+			do
+				local hovered = false
+				local down = false
 		
-					newItem.MouseEnter:connect(function()
-						hovered = true
-						newItem:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
-					end)
+				newItem.MouseEnter:connect(function()
+					hovered = true
+					newItem:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
+				end)
 		
-					newItem.MouseLeave:connect(function()
-						hovered = false
-						if not down then
-							newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Secondary, 25)}
-						end
-					end)
+				newItem.MouseLeave:connect(function()
+					hovered = false
+					if not down then
+						newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Secondary, 25)}
+					end
+				end)
 		
-					newItem.MouseButton1Down:connect(function()
-						newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Tertiary, 10)}
-					end)
+				newItem.MouseButton1Down:connect(function()
+					newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Tertiary, 10)}
+				end)
 		
-					UserInputService.InputEnded:connect(function(key)
-						if key.UserInputType == Enum.UserInputType.MouseButton1 then
-							newItem:tween{BackgroundColor3 = (hovered and Library:lighten(Library.CurrentTheme.Tertiary, 5)) or Library:lighten(Library.CurrentTheme.Secondary, 25)}
-						end
-					end)
+				UserInputService.InputEnded:connect(function(key)
+					if key.UserInputType == Enum.UserInputType.MouseButton1 then
+						newItem:tween{BackgroundColor3 = (hovered and Library:lighten(Library.CurrentTheme.Tertiary, 5)) or Library:lighten(Library.CurrentTheme.Secondary, 25)}
+					end
+				end)
 		
-					newItem.MouseButton1Click:connect(function()
-						toggle()
-						selectedText.Text = newItem.Text
-						selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
-						options.Callback(value)
-					end)
-	
-					items[i] = {{label, value}, newItem}
-				end
-			
+				newItem.MouseButton1Click:connect(function()
+					toggle()
+					selectedText.Text = newItem.Text
+					selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
+					options.Callback(value)
+				end)
+			end		
 		end
 
 		Library._resize_tab({
