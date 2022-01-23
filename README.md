@@ -133,8 +133,8 @@ GUI:Prompt{
 
 ### Color Picker
 ```lua
-GUI:ColorPicker{
-	Style = Library.ColorPickerStyles.Legacy,
+Tab:ColorPicker{
+	Style = Mercury.ColorPickerStyles.Legacy,
 	Callback = function(color) end
 }
 ```
