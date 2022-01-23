@@ -1434,6 +1434,22 @@ function Library:dropdown(options)
 		options.Callback(text)
 	end
 
+	function methods:RemoveItems(fitems)
+		for _, v in next, fitems do
+			for _2, v2 in next, items do
+				local label = v2[1][1]
+				if label:lower() == tostring(v):lower() then
+					v2[2].AbsoluteObject:Destroy()
+					items[_2] = nil
+					table.remove(items, _2)
+					newSize = (25 * #items) + 5
+					itemContainer:tween{Size = (not open and UDim2.new(1, -10, 0, 0)) or UDim2.new(1, -10, 0, newSize)}
+					dropdownContainer:tween({Size = (not open and UDim2.new(1, -20, 0, 52)) or UDim2.new(1, -20, 0, 52 + newSize)})
+				end
+			end
+		end
+	end
+
 	function methods:AddItems(fitems)
 		for i, v in next, fitems do
 			if typeof(v) == "table" then
