@@ -72,13 +72,26 @@ Tab:Toggle{
 
 ### Dropdowns
 ```lua
-Tab:Dropdown{
+local MyDropdown = Tab:Dropdown{
 	Name = "Dropdown",
 	StartingText = "Select...",
 	Description = nil,
-	Items = {},
+	Items = {
+		{"Hello", 1}, 		-- {name, value}
+		12,			-- or just value, which is also automatically taken as name
+		{"Test", "bump the thread pls"}
+	},
 	Callback = function(item) return end
 }
+
+MyDropdown:AddItems({
+	{"NewItem", 12},		-- {name, value}
+	400				-- or just value, which is also automatically taken as name
+})
+
+MyDropdown:RemoveItems({
+	"NewItem", "Hello"		-- just the names to get removed (upper/lower case ignored)
+})
 ```
 
 ### Sliders
