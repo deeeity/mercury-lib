@@ -14,10 +14,8 @@
 █░░░░░░██████████░░░░░░█░░░░░░░░░░░░░░█░░░░░░██░░░░░░░░░░█░░░░░░░░░░░░░░█░░░░░░░░░░░░░░█░░░░░░██░░░░░░░░░░███████░░░░░░███████
 ██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-edited: 1/23
-
+edited: 1/26
 developers:
----------------------------------------------
 v3rm AbstractPoo	discord Abstract#8007
 v3rm 0xDEITY		discord Deity#0228
 
@@ -436,6 +434,18 @@ function Library:create(options)
 		ZIndexBehavior = Enum.ZIndexBehavior.Global
 	})
 
+	local notificationHolder = gui:object("Frame", {
+		AnchorPoint = Vector2.new(1, 1),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -30,1, -30),
+		Size = UDim2.new(0, 300, 1, -60)
+	})
+
+	local _notiHolderList = notificationHolder:object("UIListLayout", {
+		Padding = UDim.new(0, 20),
+		VerticalAlignment = Enum.VerticalAlignment.Bottom
+	})
+
 	local core = gui:object("Frame", {
 		Size = UDim2.new(),
 		Theme = {BackgroundColor3 = "Main"},
@@ -656,19 +666,6 @@ function Library:create(options)
 	})
 
 	local tabs = {}
-
-	-- size handling lol 
---[[ 	setmetatable(tabs, {
-		__newindex = function(self, i, v)
-			rawset(self, i, v)
-			local absoluteSize = tabButtons.AbsoluteSize.X
-			local newSize = #self + 1
-			for _, t in next, self do
-				local tab = t[2]
-				tab.Size = UDim2.new(0, absoluteSize/newSize, 1, 0)
-			end
-		end
-	}) ]]
 	selectedTab = homeButton
 
 	tabs[#tabs+1] = {homePage, homeButton}
@@ -831,6 +828,7 @@ function Library:create(options)
 
 	local mt = setmetatable({
 		core = core,
+		notifs = notificationHolder,
 		statusText = status,
 		container = content,
 		navigation = tabButtons,
@@ -839,7 +837,7 @@ function Library:create(options)
 		quickAccess = quickAccess,
 		homeButton = homeButton,
 		homePage = homePage,
-		nilFolder = core:object("Folder")
+		nilFolder = core:object("Folder"),
 	}, Library)
 
 	local settingsTab = Library.tab(mt, {
@@ -884,13 +882,114 @@ function Library:create(options)
 		Internal = creditsTabIcon,
 		Icon = "http://www.roblox.com/asset/?id=8577523456"
 	})
-	
+
 	rawset(mt, "creditsContainer", creditsTab.container)
-	
+
 	creditsTab:credit{Name = "Abstract", Description = "UI Library Developer", Discord = "Abstract#8007", V3rmillion = "AbstractPoo"}
 	creditsTab:credit{Name = "Deity", Description = "UI Library Developer", Discord = "Deity#0228", V3rmillion = "0xDEITY"}
-	
+
 	return mt
+end
+
+function Library:notification(options)
+	options = self:set_defaults({
+		Title = "Notification",
+		Text = "Your character has been reset."
+	}, options)
+
+	local noti = self.notifs:object("Frame", {
+		Theme = {BackgroundColor3 = "Main"},
+		Size = UDim2.new(0, 300,0, 90)
+	}):round(10)
+
+	local _notiPadding = noti:object("UIPadding", {
+		PaddingBottom = UDim.new(0, 11),
+		PaddingTop = UDim.new(0, 11),
+		PaddingLeft = UDim.new(0, 11),
+		PaddingRight = UDim.new(0, 11)
+	})
+
+	local dropShadow = noti:object("Frame", {
+		ZIndex = 0,
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 1)
+	})
+
+	local _shadow = dropShadow:object("ImageLabel", {
+		Centered = true,
+		Position = UDim2.fromScale(.5, .5),
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 70,1, 70),
+		ZIndex = 0,
+		Image = "rbxassetid://6014261993",
+		ImageColor3 = Color3.fromRGB(0,0,0),
+		ImageTransparency = .5,
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(49, 49, 450, 450)
+	})
+
+	local durationHolder = noti:object("Frame", {
+		Theme = {BackgroundColor3 = "Secondary"},
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.fromScale(0, 1),
+		Size = UDim2.new(1, 0,0, 4)
+	}):round(100)
+
+	local length = durationHolder:object("Frame", {
+		Theme = {BackgroundColor3 = "Tertiary"},
+		Size = UDim2.fromScale(0, 1)
+	}):round(100)
+
+	local icon = noti:object("ImageLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(1, 1),
+		Size = UDim2.fromOffset(18, 18),
+		Image = "rbxassetid://8628681683",
+		Theme = {ImageColor3 = "Tertiary"}
+	})
+
+	local exit = noti:object("ImageButton", {
+		Image = "http://www.roblox.com/asset/?id=8497487650",
+		ImageColor3 = Color3.fromRGB(255, 255, 255),
+		Position = UDim2.new(1, -3,0, 3),
+		Size = UDim2.fromOffset(14, 14),
+		BackgroundTransparency = 1
+	})
+
+	exit.MouseButton1Click:Connect(function()
+		noti:fade(false)
+		noti.AbsoluteObject:Destroy()
+	end)
+
+	local text = noti:object("TextLabel", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0, 1),
+		Text = options.Text,
+		Position = UDim2.new(0, 0,1, -5),
+		Size = UDim2.new(1, 0,1, -24),
+		TextSize = 16,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top
+	})
+
+	local title = noti:object("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(0, 23),
+		Size = UDim2.new(1, -60,0, 20),
+		Font = Enum.Font.SourceSansBold,
+		Text = options.Title,
+		Theme = {TextColor3 = "Tertiary"},
+		TextSize = 17,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.AtEnd
+	})
+
+	noti:fade(true)
+	noti:tween({Size = UDim2.new(0, 300, 0, 90 + text.TextBounds.Y)})
 end
 
 function Library:tab(options)
@@ -1436,6 +1535,7 @@ function Library:dropdown(options)
 	function methods:Set(text)
 		selectedText.Text = text
 		selectedText:tween{Size = UDim2.fromOffset(selectedText.TextBounds.X + 20, 20), Length = 0.05}
+		options.Callback(text)
 	end
 
 	function methods:RemoveItems(fitems)
@@ -1485,7 +1585,7 @@ function Library:dropdown(options)
 			local value = item[2]
 
 			if type(label) == "table" then continue end
-	
+
 			local newItem = itemContainer:object("TextButton", {
 				Theme = {
 					BackgroundColor3 = {"Secondary", 25},
@@ -1496,33 +1596,33 @@ function Library:dropdown(options)
 			}):round(5)
 
 			items[i] = {{label, value}, newItem}
-	
+
 			do
 				local hovered = false
 				local down = false
-		
+
 				newItem.MouseEnter:connect(function()
 					hovered = true
 					newItem:tween{BackgroundColor3 = Library.CurrentTheme.Tertiary}
 				end)
-		
+
 				newItem.MouseLeave:connect(function()
 					hovered = false
 					if not down then
 						newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Secondary, 25)}
 					end
 				end)
-		
+
 				newItem.MouseButton1Down:connect(function()
 					newItem:tween{BackgroundColor3 = Library:lighten(Library.CurrentTheme.Tertiary, 10)}
 				end)
-		
+
 				UserInputService.InputEnded:connect(function(key)
 					if key.UserInputType == Enum.UserInputType.MouseButton1 then
 						newItem:tween{BackgroundColor3 = (hovered and Library:lighten(Library.CurrentTheme.Tertiary, 5)) or Library:lighten(Library.CurrentTheme.Secondary, 25)}
 					end
 				end)
-		
+
 				newItem.MouseButton1Click:connect(function()
 					toggle()
 					selectedText.Text = newItem.Text
@@ -2609,8 +2709,8 @@ function Library:credit(options)
 			end)
 		end
 	end
-	
-	
+
+
 	self._resize_tab({
 		container = self.creditsContainer or self.container,
 		layout = (self.creditsContainer and self.creditsContainer.AbsoluteObject.UIListLayout) or self.layout
@@ -3137,7 +3237,6 @@ function Library:textbox(options)
 		Name = "Text Box",
 		Placeholder = "Type something..",
 		Description = nil,
-		Default = "Type here",
 		Callback = function(t) end
 	}, options)
 
@@ -3179,8 +3278,7 @@ function Library:textbox(options)
 		Size = UDim2.new(0, 50,0, 20),
 		TextSize = 12,
 		PlaceholderText = options.Placeholder,
-		ClipsDescendants = true,
-		Text = options.Default
+		ClipsDescendants = true
 	}):round(5):stroke("Tertiary")
 
 	local writeIcon = textboxContainer:object("ImageLabel", {
@@ -3214,7 +3312,7 @@ function Library:textbox(options)
 
 		textBox.Focused:connect(function()
 			focused = true
-			while RunService.RenderStepped:wait() and focused do
+			while focused and RunService.RenderStepped:wait() do
 				textBox.AbsoluteObject:TweenSize(
 					UDim2.fromOffset(math.clamp(textBox.TextBounds.X + 20, 0, 0.5 * textboxContainer.AbsoluteSize.X), 20),
 					Enum.EasingDirection.InOut,
