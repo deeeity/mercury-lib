@@ -103,6 +103,8 @@ local selectedTab
 Library._promptExists = false
 Library._colorPickerExists = false
 
+local GlobalTweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+
 function Library:set_defaults(defaults, options)
 	defaults = defaults or {}
 	options = options or {}
@@ -405,11 +407,7 @@ end
 ]]
 
 function Library:set_status(txt)
-	self.statusText.Text = "Status | " .. txt
-end
-
-function Library:set_button_functions(button, default, hover, down)
-
+	self.statusText.Text = txt
 end
 
 function Library:create(options)
@@ -894,12 +892,17 @@ end
 function Library:notification(options)
 	options = self:set_defaults({
 		Title = "Notification",
-		Text = "Your character has been reset."
+		Text = "Your character has been reset.",
+		Duration = 3,
+		Callback = function() end
 	}, options)
 
+	local fadeOut;
+
 	local noti = self.notifs:object("Frame", {
+		BackgroundTransparency = 1,
 		Theme = {BackgroundColor3 = "Main"},
-		Size = UDim2.new(0, 300,0, 90)
+		Size = UDim2.new(0, 300,0, 0)
 	}):round(10)
 
 	local _notiPadding = noti:object("UIPadding", {
@@ -923,25 +926,28 @@ function Library:notification(options)
 		ZIndex = 0,
 		Image = "rbxassetid://6014261993",
 		ImageColor3 = Color3.fromRGB(0,0,0),
-		ImageTransparency = .5,
+		ImageTransparency = 1,
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(49, 49, 450, 450)
 	})
 
 	local durationHolder = noti:object("Frame", {
+		BackgroundTransparency = 1,
 		Theme = {BackgroundColor3 = "Secondary"},
-		AnchorPoint = Vector2.new(1, 0),
+		AnchorPoint = Vector2.new(0, 1),
 		Position = UDim2.fromScale(0, 1),
 		Size = UDim2.new(1, 0,0, 4)
 	}):round(100)
 
 	local length = durationHolder:object("Frame", {
+		BackgroundTransparency = 1,
 		Theme = {BackgroundColor3 = "Tertiary"},
-		Size = UDim2.fromScale(0, 1)
+		Size = UDim2.fromScale(1, 1)
 	}):round(100)
 
 	local icon = noti:object("ImageLabel", {
 		BackgroundTransparency = 1,
+		ImageTransparency = 1,
 		Position = UDim2.fromOffset(1, 1),
 		Size = UDim2.fromOffset(18, 18),
 		Image = "rbxassetid://8628681683",
@@ -950,34 +956,37 @@ function Library:notification(options)
 
 	local exit = noti:object("ImageButton", {
 		Image = "http://www.roblox.com/asset/?id=8497487650",
+		AnchorPoint = Vector2.new(1, 0),
 		ImageColor3 = Color3.fromRGB(255, 255, 255),
 		Position = UDim2.new(1, -3,0, 3),
 		Size = UDim2.fromOffset(14, 14),
-		BackgroundTransparency = 1
+		BackgroundTransparency = 1,
+		ImageTransparency = 1
 	})
 
 	exit.MouseButton1Click:Connect(function()
-		noti:fade(false)
-		noti.AbsoluteObject:Destroy()
+		fadeOut()
 	end)
 
 	local text = noti:object("TextLabel", {
 		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(0, 1),
 		Text = options.Text,
-		Position = UDim2.new(0, 0,1, -5),
-		Size = UDim2.new(1, 0,1, -24),
+		Position = UDim2.new(0, 0,0, 23),
+		Size = UDim2.new(1, 0, 100, 0),
 		TextSize = 16,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextTransparency = 1,
 		TextWrapped = true,
-		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextTransparency = 1
 	})
+
+	text:tween({Size = UDim2.new(1, 0, 0, text.TextBounds.Y)})
 
 	local title = noti:object("TextLabel", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(0, 23),
+		Position = UDim2.fromOffset(23, 0),
 		Size = UDim2.new(1, -60,0, 20),
 		Font = Enum.Font.SourceSansBold,
 		Text = options.Title,
@@ -985,11 +994,41 @@ function Library:notification(options)
 		TextSize = 17,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextWrapped = true,
-		TextTruncate = Enum.TextTruncate.AtEnd
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextTransparency = 1
 	})
+	
+	fadeOut = function()
+		task.delay(0.3, function()
+			noti.AbsoluteObject:Destroy()
+			options.Callback()
+		end)
 
-	noti:fade(true)
-	noti:tween({Size = UDim2.new(0, 300, 0, 90 + text.TextBounds.Y)})
+		icon:tween({ImageTransparency = 1, Length = 0.2})
+		exit:tween({ImageTransparency = 1, Length = 0.2})
+		durationHolder:tween({BackgroundTransparency = 1, Length = 0.2})
+		length:tween({BackgroundTransparency = 1, Length = 0.2})
+		text:tween({TextTransparency = 1, Length = 0.2})
+		title:tween({TextTransparency = 1, Length = 0.2}, function()
+			_shadow:tween({ImageTransparency = 1, Length = 0.2})
+			noti:tween({BackgroundTransparency = 1, Length = 0.2, Size = UDim2.fromOffset(300, 0)})
+		end)
+
+	end
+	
+	_shadow:tween({ImageTransparency = .6, Length = 0.2})
+	noti:tween({BackgroundTransparency = 0, Length = 0.2, Size = UDim2.fromOffset(300, text.TextBounds.Y + 63)}, function()
+		icon:tween({ImageTransparency = 0, Length = 0.2})
+		exit:tween({ImageTransparency = 0, Length = 0.2})
+		durationHolder:tween({BackgroundTransparency = 0, Length = 0.2})
+		length:tween({BackgroundTransparency = 0, Length = 0.2})
+		text:tween({TextTransparency = 0, Length = 0.2})
+		title:tween({TextTransparency = 0, Length = 0.2})
+	end)
+
+	length:tween({Size = UDim2.fromScale(0, 1), Length = options.Duration}, function()
+		fadeOut()
+	end)
 end
 
 function Library:tab(options)
