@@ -416,6 +416,12 @@ function Library:create(options)
 		Theme = self.Themes.Dark,
 		Link = "https://github.com/deeeity/mercury-lib"
 	}, options)
+	
+	if getgenv and getgenv().MercuryUI then
+		getgenv():MercuryUI()
+		getgenv().MercuryUI = nil
+	end
+	
 	if options.Link:sub(-1, -1) == "/" then
 		options.Link = options.Link:sub(1, -2)
 	end
@@ -549,14 +555,22 @@ function Library:create(options)
 	closeButton.MouseLeave:connect(function()
 		closeButton:tween{ImageColor3 = Library.CurrentTheme.StrongText}
 	end)
-
-	closeButton.MouseButton1Click:connect(function()
+	
+	local function closeUI()
 		core.ClipsDescendants = true
 		core:fade(true)
 		wait(0.1)
 		core:tween({Size = UDim2.new()}, function()
 			gui.AbsoluteObject:Destroy()
 		end)
+	end
+	
+	if getgenv then
+		getgenv().MercuryUI = closeUI
+	end
+		
+	closeButton.MouseButton1Click:connect(function()
+		closeUI()
 	end)
 
 	local urlBar = core:object("Frame", {
@@ -996,7 +1010,7 @@ function Library:notification(options)
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		TextTransparency = 1
 	})
-	
+
 	fadeOut = function()
 		task.delay(0.3, function()
 			noti.AbsoluteObject:Destroy()
@@ -1014,7 +1028,7 @@ function Library:notification(options)
 		end)
 
 	end
-	
+
 	_shadow:tween({ImageTransparency = .6, Length = 0.2})
 	noti:tween({BackgroundTransparency = 0, Length = 0.2, Size = UDim2.fromOffset(300, text.TextBounds.Y + 63)}, function()
 		icon:tween({ImageTransparency = 0, Length = 0.2})
