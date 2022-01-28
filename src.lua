@@ -101,6 +101,7 @@ Library.__index = Library
 local selectedTab
 
 Library._promptExists = false
+Library._colorPickerExists = false
 
 local GlobalTweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
 
@@ -1835,6 +1836,8 @@ function Library:color_picker(options)
 		end)
 
 		buttonContainer.MouseButton1Click:connect(function()
+			if Library._colorPickerExists then return end
+			Library._colorPickerExists = true
 			local hue, sat, val;
 			local updatePicker, updateHue;
 
@@ -1954,6 +1957,9 @@ function Library:color_picker(options)
 							fadeOut()
 							icon:tween({ImageColor3 = selectedColor})
 							options.Callback(selectedColor)
+							task.delay(0.35, function()
+								Library._colorPickerExists = false
+							end)
 						end)
 					end
 
@@ -2536,6 +2542,9 @@ function Library:color_picker(options)
 							fadeOut()
 							icon:tween({ImageColor3 = selectedColor})
 							options.Callback(selectedColor)
+							task.delay(0.35, function()
+								Library._colorPickerExists = false
+							end)
 						end)
 					end
 
@@ -2593,23 +2602,23 @@ function Library:color_picker(options)
 						_hueDraggableStroke:tween({Transparency = 1, Length = 0.1})
 						label:tween{TextTransparency = 1, Length = 0.1}
 						r:tween({
-							BackgroundTransparency = 0,
-							TextTransparency = 0,
+							BackgroundTransparency = 1,
+							TextTransparency = 1,
 							Length = 0.1
 						})
 						g:tween({
-							BackgroundTransparency = 0,
-							TextTransparency = 0,
+							BackgroundTransparency = 1,
+							TextTransparency = 1,
 							Length = 0.1
 						})
 						b:tween({
-							BackgroundTransparency = 0,
-							TextTransparency = 0,
+							BackgroundTransparency = 1,
+							TextTransparency = 1,
 							Length = 0.1
 						})
 						pickBtn:tween({
-							BackgroundTransparency = 0,
-							ImageTransparency = 0,
+							BackgroundTransparency = 1,
+							ImageTransparency = 1,
 							Length = 0.1
 						})
 						previewLight:tween({BackgroundTransparency = 1, Length = 0.1})
