@@ -21,6 +21,8 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/m
 - Dropdowns
 - Inputs
 - Color Picker
+- Notifications
+- Prompts
 
 ... more to be added.
 
@@ -138,6 +140,16 @@ GUI:Prompt{
 			return false
 		end
 	}
+}
+```
+
+### Notification
+```lua
+GUI:Notification{
+	Title = "Alert",
+	Text = "You shall bump the thread on V3rmillion!",
+	Duration = 3,
+	Callback = function() end
 }
 ```
 
