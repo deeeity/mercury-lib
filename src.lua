@@ -101,7 +101,6 @@ Library.__index = Library
 local selectedTab
 
 Library._promptExists = false
-Library._colorPickerExists = false
 
 local GlobalTweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
 
@@ -1773,9 +1772,6 @@ function Library:color_picker(options)
 		Callback = function(color) end
 	}, options)
 
-	if Library._colorPickerExists and not options.Followup then return end
-	Library._colorPickerExists = true
-
 	local buttonContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
@@ -2169,9 +2165,8 @@ function Library:color_picker(options)
 						brightness:tween{BackgroundTransparency = 1, Length = 0.1}
 						black:tween{BackgroundTransparency = 1, Length = 0.1}
 						_colorPickerDraggableStroke:tween({Transparency = 1, Length = 0.1}, function()
-							darkener.AbsoluteObject:Destroy()
 							task.delay(0.25, function()
-								Library._colorPickerExists = false
+								darkener.AbsoluteObject:Destroy()
 							end)
 						end)
 					end
@@ -2623,9 +2618,8 @@ function Library:color_picker(options)
 						_previewDarkIcon:tween({ImageTransparency = 1, Length = 0.1})
 
 						darkener:tween({BackgroundTransparency = 1, Length = 0.1}, function()
-							darkener.AbsoluteObject:Destroy()
 							task.delay(0.25, function()
-								Library._colorPickerExists = false
+								darkener.AbsoluteObject:Destroy()
 							end)
 						end)
 					end
