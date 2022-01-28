@@ -27,6 +27,7 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
+local HTTPService = game:GetService("HttpService")
 
 local Library = {
 	Themes = {
@@ -406,15 +407,34 @@ end
 	
 ]]
 
+local updateSettings = function() end
+
 function Library:set_status(txt)
 	self.statusText.Text = txt
 end
 
 function Library:create(options)
+
+	local settings = {
+		Theme = "Dark"
+	}
+
+	if readfile and writefile and isfile then
+		if not isfile("MercurySettings.json") then
+			writefile("MercurySettings.json", HTTPService:JSONEncode(settings))
+		end
+		settings = HTTPService:JSONDecode(readfile("MercurySettings.json"))
+		Library.CurrentTheme = Library.Themes[settings.Theme]
+		updateSettings = function(property, value)
+			settings[property] = value
+			writefile("MercurySettings.json", HTTPService:JSONEncode(settings))
+		end
+	end
+
 	options = self:set_defaults({
 		Name = "Mercury",
 		Size = UDim2.fromOffset(600, 400),
-		Theme = self.Themes.Dark,
+		Theme = self.Themes[settings.Theme],
 		Link = "https://github.com/deeeity/mercury-lib"
 	}, options)
 	
@@ -422,6 +442,8 @@ function Library:create(options)
 		getgenv():MercuryUI()
 		getgenv().MercuryUI = nil
 	end
+
+	
 	
 	if options.Link:sub(-1, -1) == "/" then
 		options.Link = options.Link:sub(1, -2)
@@ -2881,6 +2903,7 @@ function Library:_theme_selector()
 
 			theme.MouseButton1Click:connect(function()
 				Library:change_theme(Library.Themes[themeName])
+				updateSettings("Theme", themeName)
 			end)
 		end
 	end
@@ -3401,7 +3424,6 @@ function Library:textbox(options)
 
 	return methods
 end
-
 
 return setmetatable(Library, {
 	__index = function(_, i)
