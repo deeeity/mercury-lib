@@ -1796,6 +1796,10 @@ function Library:button(options)
 		options.Callback()
 	end
 
+	function methods:SetText(txt)
+		text.Text = txt
+	end
+
 	return methods
 end
 
