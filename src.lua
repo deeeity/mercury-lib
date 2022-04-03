@@ -1278,7 +1278,7 @@ function Library:_resize_tab()
 	if self.container.ClassName == "ScrollingFrame" then
 		self.container.CanvasSize = UDim2.fromOffset(0, self.layout.AbsoluteContentSize.Y + 20)
 	else
-		self.sectionContainer.Size = UDim2.new(1, -20, 0, self.layout.AbsoluteContentSize.Y + 20)
+		self.sectionContainer.Size = UDim2.new(1, -24, 0, self.layout.AbsoluteContentSize.Y + 20)
 		self.parentContainer.CanvasSize = UDim2.fromOffset(0, self.parentLayout.AbsoluteContentSize.Y + 20)
 	end
 end
@@ -1727,7 +1727,7 @@ function Library:section(options)
 
 	local sectionContainer = self.container:object("TextButton", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, -20, 0, 52)
+		Size = UDim2.new(1, -24, 0, 52)
 	}):round(7):stroke("Secondary", 2)
 	
 	local text = sectionContainer:object("TextLabel", {
