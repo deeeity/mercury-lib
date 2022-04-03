@@ -1279,6 +1279,7 @@ function Library:_resize_tab()
 		self.container.CanvasSize = UDim2.fromOffset(0, self.layout.AbsoluteContentSize.Y + 20)
 	else
 		self.sectionContainer.Size = UDim2.new(1, -20, 0, self.layout.AbsoluteContentSize.Y + 20)
+		self.parentContainer.CanvasSize = UDim2.fromOffset(0, self.parentLayout.AbsoluteContentSize.Y + 20)
 	end
 end
 
@@ -1762,8 +1763,10 @@ function Library:section(options)
 		statusText = self.statusText,
 		container = functionContainer,
 		sectionContainer = sectionContainer,
+		parentContainer = self.container,
 		Theme = self.Theme,
 		core = self.core,
+		parentLayout = self.layout,
 		layout = layout
 	}, Library)
 end
