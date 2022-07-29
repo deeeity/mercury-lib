@@ -413,21 +413,82 @@ function Library:set_status(txt)
 	self.statusText.Text = txt
 end
 
+local SaveSystem = {}
+
+local function tableIndex(table)
+    local length = 0
+    for i, v in pairs(table) do
+        length = length + 1
+    end
+    return length
+end
+
+local function EncodeJson(x)
+    return game:GetService("HttpService"):JSONEncode(x)
+end
+
+local function DecodeJson(x)
+    return game:GetService("HttpService"):JSONDecode(x)
+end
+
+local function GlobalImport(SettingsName, ProfileName, DefaultSettings)
+    local Settings
+    local FileName = SettingsName .. "_" .. ProfileName .. ".json" -- must include a .json, change the 'ScriptNameSettings' to what you want
+    if writefile and readfile then
+        local ExistingFile = pcall(readfile, FileName)
+        if not ExistingFile then
+            writefile(FileName, EncodeJson(DefaultSettings))
+            Settings = DefaultSettings
+        else
+            Settings = DecodeJson(readfile(FileName))
+        end
+    end
+    return Settings
+end
+
+function SaveSystem:Import(SettingsName, ProfileName, DefaultSettings)
+    local Settings
+    Settings = GlobalImport(SettingsName, ProfileName, DefaultSettings)
+    if (tableIndex(Settings) == 0) then
+        return DefaultSettings
+    end
+    return Settings
+end
+local function GlobalEdit(SettingsName, ProfileName, Settings)
+    return writefile(SettingsName .. "_" .. ProfileName .. ".json", EncodeJson(Settings))
+end
+
+function SaveSystem:Edit(SettingsName, ProfileName, Settings)
+    return GlobalEdit(SettingsName, ProfileName, Settings)
+end
+
+function SaveSystem:Delete(SettingsName, ProfileName)
+    return delfile(SettingsName .. "_" .. ProfileName .. ".json")
+end
+
+local settings = {
+    Theme = "Dark",
+    Keybind = Enum.KeyCode.Delete
+}
+
+local function saveSettings()
+    return SaveSystem:Edit("MercuryUI", "Config", settings)
+end
+
+
 function Library:create(options)
 
-	local settings = {
-		Theme = "Dark"
-	}
-
 	if readfile and writefile and isfile then
-		if not isfile("MercurySettings.json") then
-			writefile("MercurySettings.json", HTTPService:JSONEncode(settings))
-		end
-		settings = HTTPService:JSONDecode(readfile("MercurySettings.json"))
+        settings = SaveSystem:Import("MercuryUI", "Config", {
+            Theme = "Dark",
+            Keybind = Enum.KeyCode.Delete
+        })
+
+
 		Library.CurrentTheme = Library.Themes[settings.Theme]
 		updateSettings = function(property, value)
 			settings[property] = value
-			writefile("MercurySettings.json", HTTPService:JSONEncode(settings))
+			saveSettings()
 		end
 	end
 
@@ -882,11 +943,13 @@ function Library:create(options)
 
 	settingsTab:_theme_selector()
 
-	settingsTab:keybind{
+	local hideKeyBind = settingsTab:keybind{
 		Name = "Toggle Key",
 		Description = "Key to show/hide the UI.",
-		Keybind = Enum.KeyCode.Delete,
+		Keybind = settings.Keybind,
 		Callback = function()
+            pcall(function() updateSettings("Keybind", hideKeyBind:Get()) end)
+
 			self.Toggled = not self.Toggled
 			Library:show(self.Toggled)
 		end,
@@ -3047,21 +3110,23 @@ function Library:keybind(options)
 			end
 		end)
 
-		UserInputService.InputBegan:Connect(function(key, gameProcessed)
-			if listening and not UserInputService:GetFocusedTextBox() then
-				if key.UserInputType == Enum.UserInputType.Keyboard then
-					if key.KeyCode ~= Enum.KeyCode.Escape then
-						options.Keybind = key.KeyCode
-					end
-					keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
-					keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
-					listening = false
-				end
-			else
-				if key.KeyCode == options.Keybind then
-					options.Callback()
-				end
-			end
+		UserInputService.InputBegan:Connect(function(key)
+            if not UserInputService:GetFocusedTextBox() then 
+                if listening then
+                    if key.UserInputType == Enum.UserInputType.Keyboard then
+                        if key.KeyCode ~= Enum.KeyCode.Escape then
+                            options.Keybind = key.KeyCode
+                        end
+                        keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
+                        keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
+                        listening = false
+                    end
+                else
+                    if key.KeyCode == options.Keybind then
+                        options.Callback()
+                    end
+                end
+            end
 		end)
 
 		keybindContainer.MouseButton1Click:connect(function()
@@ -3077,6 +3142,10 @@ function Library:keybind(options)
 		keybindDisplay.Text = (options.Keybind and tostring(options.Keybind.Name):upper()) or "?"
 		keybindDisplay:tween{Size = UDim2.fromOffset(keybindDisplay.TextBounds.X + 20, 20), Length = 0.05}
 	end
+
+    function methods:Get()
+        return options.Keybind
+    end
 
 	return methods
 end
