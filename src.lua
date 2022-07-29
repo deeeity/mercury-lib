@@ -3047,8 +3047,8 @@ function Library:keybind(options)
 			end
 		end)
 
-		UserInputService.InputBegan:Connect(function(key)
-			if listening then
+		UserInputService.InputBegan:Connect(function(key, gameProcessed)
+			if listening and gameProcessed then
 				if key.UserInputType == Enum.UserInputType.Keyboard then
 					if key.KeyCode ~= Enum.KeyCode.Escape then
 						options.Keybind = key.KeyCode
