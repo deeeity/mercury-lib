@@ -1291,8 +1291,6 @@ function Library:toggle(options)
 		Callback = function(state) end
 	}, options)
 
-	if options.StartingState then options.Callback(true) end
-
 	local toggleContainer = self.container:object("TextButton", {
 		Theme = {BackgroundColor3 = "Secondary"},
 		Size = UDim2.new(1, -20, 0, 52)
@@ -1388,6 +1386,8 @@ function Library:toggle(options)
 	self:_resize_tab()
 
 	local methods = {}
+	
+	if options.StartingState then methods:SetState(true) end
 
 	function methods:Toggle()
 		toggle()
