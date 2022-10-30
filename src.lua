@@ -1386,8 +1386,6 @@ function Library:toggle(options)
 	self:_resize_tab()
 
 	local methods = {}
-	
-	if options.StartingState then methods:SetState(true) end
 
 	function methods:Toggle()
 		toggle()
@@ -1400,8 +1398,10 @@ function Library:toggle(options)
 		else
 			onIcon:crossfade(offIcon, 0.1)
 		end
-		options.Callback(toggled)
+		task.spawn(function() options.Callback(toggled) end)
 	end
+	
+	if options.StartingState then methods:SetState(true) end
 
 	return methods
 end
