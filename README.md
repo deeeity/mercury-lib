@@ -12,7 +12,7 @@ Forked By TheKidThatCodes
 
 ## Loadstring
 ```lua
-local potassium = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheKidThatCodes/potassium-lib/master/src.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/TheKidThatCodes/potassium-lib/master/src.lua"))()
 ```
 
 ## Features:
