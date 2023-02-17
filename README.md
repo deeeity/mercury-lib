@@ -1,16 +1,18 @@
-[![discord server](https://media.discordapp.net/attachments/929706675022233640/933723518321967144/banner.jpg)](https://discord.gg/jaunk8nhN5)
+<!-- [![discord server](https://media.discordapp.net/attachments/929706675022233640/933723518321967144/banner.jpg)](https://discord.gg/jaunk8nhN5) -->
 
-# Mercury
+# Potassium
 
-Mercury is a free and open sourced Roblox UI library.
+Potassium is a free and open sourced Roblox UI library forked from MercuryLib.
 
-- https://discord.gg/jaunk8nhN5
+Forked By TheKidThatCodes
+
+<!-- - https://discord.gg/jaunk8nhN5
 - https://discord.com/users/480805591221010456
-- https://discord.com/users/452466034822217739
+- https://discord.com/users/452466034822217739 -->
 
 ## Loadstring
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+local potassium = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheKidThatCodes/potassium-lib/master/src.lua"))()
 ```
 
 ## Features:
@@ -23,25 +25,28 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/m
 - Color Picker
 - Notifications
 - Prompts
+## Todo Features
+- custom settings for your script
+- more stuff is configureable
 
 ... more to be added.
 
-Created by [Deity#0228] and [Abstract#8007]
+see original repo for original creators
 
 ## Documentation
 
 ### Get the Library
 ```lua
-local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+local Potassium = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheKidThatCodes/potassium-lib/master/src.lua"))()
 ```
 
 ### Create the GUI
 ```lua
-local GUI = Mercury:Create{
-    Name = "Mercury",
+local GUI = Potassium:Create{
+    Name = "Potassium",
     Size = UDim2.fromOffset(600, 400),
-    Theme = Mercury.Themes.Dark,
-    Link = "https://github.com/deeeity/mercury-lib"
+    Theme = Potassium.Themes.Dark,
+    Link = "https://github.com/TheKidThatCodes/potassium-lib"
 }
 ```
 
@@ -156,7 +161,7 @@ GUI:Notification{
 ### Color Picker
 ```lua
 Tab:ColorPicker{
-	Style = Mercury.ColorPickerStyles.Legacy,
+	Style = Potassium.ColorPickerStyles.Legacy,
 	Callback = function(color) end
 }
 ```
