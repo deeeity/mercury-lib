@@ -140,7 +140,7 @@ GUI:Prompt{
 	Buttons = {
 		ok = function()
 			return true
-		end
+		end,
 		no = function()
 			return false
 		end
