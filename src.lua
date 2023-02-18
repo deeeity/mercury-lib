@@ -389,7 +389,7 @@ function Library:lighten(color, f)
 	return Color3.fromHSV(h, math.clamp(s*f, 0, 1), math.clamp(v/f, 0, 1))
 end
 
---[[ old lighten/darken functions, may revert if contrast gets fucked up
+--[[ old lighten/darken functions, may revert if contrast gets ####ed up
 
 	function Library:darken(color, f)
 		local h, s, v = Color3.toHSV(color)
@@ -418,27 +418,27 @@ function Library:create(options)
 	}
 
 	if readfile and writefile and isfile then
-		if not isfile("MercurySettings.json") then
-			writefile("MercurySettings.json", HTTPService:JSONEncode(settings))
+		if not isfile("PotassiumSettings.json") then
+			writefile("PotassiumSettings.json", HTTPService:JSONEncode(settings))
 		end
-		settings = HTTPService:JSONDecode(readfile("MercurySettings.json"))
+		settings = HTTPService:JSONDecode(readfile("PotassiumSettings.json"))
 		Library.CurrentTheme = Library.Themes[settings.Theme]
 		updateSettings = function(property, value)
 			settings[property] = value
-			writefile("MercurySettings.json", HTTPService:JSONEncode(settings))
+			writefile("PotassiumSettings.json", HTTPService:JSONEncode(settings))
 		end
 	end
 
 	options = self:set_defaults({
-		Name = "Mercury",
+		Name = "Potassium",
 		Size = UDim2.fromOffset(600, 400),
 		Theme = self.Themes[settings.Theme],
 		Link = "https://github.com/TheKidThatCodes/potassium-lib"
 	}, options)
 
-	if getgenv and getgenv().MercuryUI then
-		getgenv():MercuryUI()
-		getgenv().MercuryUI = nil
+	if getgenv and getgenv().PotassiumUI then
+		getgenv():PotassiumUI()
+		getgenv().PotassiumUI = nil
 	end
 
 
@@ -544,7 +544,7 @@ function Library:create(options)
 	self.mainFrame = core
 
 	local tabButtons = core:object("ScrollingFrame", {
-		Size = UDim2.new(1, -40, 0, 25),
+		Size = UDim2.new(1, -55, 0, 25),
 		Position = UDim2.fromOffset(5, 5),
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
@@ -565,9 +565,18 @@ function Library:create(options)
 		Size = UDim2.fromOffset(14, 14),
 		Position = UDim2.new(1, -11, 0, 11),
 		Theme = {ImageColor3 = "StrongText"},
-		Image = "http://www.roblox.com/asset/?id=8497487650",
+		Image = "https://www.roblox.com/asset/?id=8497487650",
 		AnchorPoint = Vector2.new(1)
 	})
+
+	local uiSettingsTabButton = core:object("ImageButton", {
+		BackgroundTransparency = 1,
+		Theme = {ImageColor3 = "StrongText"},
+		Size = UDim2.fromOffset(14, 14),
+		Position = UDim2.new(1, -30, 0, 11),
+		AnchorPoint = Vector2.new(1),
+		Image = "http://www.roblox.com/asset/?id=8559790237"
+	}):tooltip("ui settings")
 
 	closeButton.MouseEnter:connect(function()
 		closeButton:tween{ImageColor3 = Color3.fromRGB(255, 124, 142)}
@@ -587,7 +596,7 @@ function Library:create(options)
 	end
 
 	if getgenv then
-		getgenv().MercuryUI = closeUI
+		getgenv().PotassiumUI = closeUI
 	end
 
 	closeButton.MouseButton1Click:connect(function()
@@ -820,15 +829,6 @@ function Library:create(options)
 		end)
 	end
 
-	local settingsTabIcon = profile:object("ImageButton", {
-		BackgroundTransparency = 1,
-		Theme = {ImageColor3 = "WeakText"},
-		Size = UDim2.fromOffset(24, 24),
-		Position = UDim2.new(1, -10, 1, -10),
-		AnchorPoint = Vector2.new(1, 1),
-		Image = "http://www.roblox.com/asset/?id=8559790237"
-	}):tooltip("settings")
-
 	local creditsTabIcon = profile:object("ImageButton", {
 		BackgroundTransparency = 1,
 		Theme = {ImageColor3 = "WeakText"},
@@ -872,15 +872,15 @@ function Library:create(options)
 		nilFolder = core:object("Folder"),
 	}, Library)
 
-	local settingsTab = Library.tab(mt, {
+	local uiSettingsTab = Library.tab(mt, {
 		Name = "Settings",
-		Internal = settingsTabIcon,
+		Internal = uiSettingsTabButton,
 		Icon = "rbxassetid://8559790237"
 	})
 
-	settingsTab:_theme_selector()
+	uiSettingsTab:_theme_selector()
 
-	settingsTab:keybind{
+	uiSettingsTab:keybind{
 		Name = "Toggle Key",
 		Description = "Key to show/hide the UI.",
 		Keybind = Enum.KeyCode.Delete,
@@ -890,7 +890,7 @@ function Library:create(options)
 		end,
 	}
 
-	settingsTab:toggle{
+	uiSettingsTab:toggle{
 		Name = "Lock Dragging",
 		Description = "Makes sure you can't drag the UI outside of the window.",
 		StartingState = true,
@@ -899,7 +899,7 @@ function Library:create(options)
 		end,
 	}
 
-	settingsTab:slider{
+	uiSettingsTab:slider{
 		Name = "UI Drag Speed",
 		Description = "How smooth the dragging looks.",
 		Max = 20,
@@ -3260,6 +3260,7 @@ end
 function Library:cp(options)
 	return Library.color_picker(self, options)
 end
+
 function Library:colorpicker(options)
 	return Library.color_picker(self, options)
 end

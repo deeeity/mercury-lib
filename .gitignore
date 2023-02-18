@@ -1,3 +1,6 @@
 .venv/
 *.DS_Store
 idkfonts.txt
+serve.py
+__pycache__/
+.vscode/

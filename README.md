@@ -2,7 +2,7 @@
 
 # Potassium
 
-Potassium is a free and open sourced Roblox UI library forked from MercuryLib.
+Potassium is a free and open sourced Roblox UI library forked from PotassiumLib.
 
 Forked By TheKidThatCodes
 
