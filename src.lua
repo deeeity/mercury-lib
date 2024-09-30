@@ -16,8 +16,8 @@
 
 edited: 1/26
 developers:
-v3rm AbstractPoo	discord Abstract#8007
-v3rm 0xDEITY		discord Deity#0228
+discord Abstract#8007
+discord Deity#0228
 
 ]]
 
